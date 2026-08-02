@@ -10,4 +10,5 @@ worklogs/
 current/
 /tests/**/new-*.png
 /tests/**/current-*.png
+/tests/**/wpt-*.png
 /tests/**/current.json

@@ -25,6 +25,9 @@ tests/css/css-backgrounds/example-1.html/
   approved-olive.png
   approved-chrome.png
   approved-olive-vs-chrome.png
+  wpt-source.png
+  wpt-reference-0.png
+  wpt-source-vs-reference-0.png
   new-olive.png
   current-chrome.png
   new-olive-vs-approved.png
@@ -66,6 +69,9 @@ are not the Olive pass/fail oracle.
 
 The current run overwrites, without committing:
 
+- `wpt-source.png`
+- `wpt-reference-<index>.png`
+- `wpt-source-vs-reference-<index>.png`
 - `new-olive.png`
 - `current-chrome.png`
 - `new-olive-vs-approved.png`
