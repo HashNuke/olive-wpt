@@ -29,6 +29,10 @@ this application.
 - Use `uv sync` to install dependencies and `bin/dev` to run the local app.
 - Make small commits with a clear description. Validate the application and
   inspect the Git diff before committing.
+- Run `bin/install-hooks` once per checkout. Its pre-commit hook runs `bin/lint`
+  and prevents staged `metadata.json` files from being committed unless their
+  JSON `status` is exactly `approved`. The check reads staged contents, so it
+  applies only to metadata files added or updated by the attempted commit.
 
 ## Labnotes
 

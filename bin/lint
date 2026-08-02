@@ -1,0 +1,51 @@
+#!/bin/sh
+
+set -eu
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+
+staged_metadata=$(git diff --cached --name-only --diff-filter=ACMR)
+failed=0
+
+while IFS= read -r path; do
+  case "$path" in
+    metadata.json|*/metadata.json)
+      ;;
+    *)
+      continue
+      ;;
+  esac
+
+  if ! git show ":$path" | WPT_METADATA_PATH="$path" python3 -c '
+import json
+import os
+import sys
+
+path = os.environ["WPT_METADATA_PATH"]
+
+try:
+    metadata = json.load(sys.stdin)
+except json.JSONDecodeError as error:
+    print(f"pre-commit: {path}: invalid JSON: {error}", file=sys.stderr)
+    raise SystemExit(1)
+
+if not isinstance(metadata, dict) or metadata.get("status") != "approved":
+    status = metadata.get("status") if isinstance(metadata, dict) else None
+    print(
+        f"pre-commit: {path}: status must be approved (found {status!r})",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
+'
+  then
+    failed=1
+  fi
+done <<EOF
+$staged_metadata
+EOF
+
+if [ "$failed" -ne 0 ]; then
+  echo "Commit rejected: every staged metadata.json must have status=approved." >&2
+  exit 1
+fi
