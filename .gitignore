@@ -8,6 +8,12 @@ worklogs/
 
 # Current WPT output is regenerated and overwritten by the Olive harness.
 current/
+/outputs/**/new-*.png
+/outputs/**/current-*.png
+/outputs/**/wpt-*.png
+/outputs/**/current.json
+
+# Ignore artifacts from the pre-outputs directory layout during migration.
 /tests/**/new-*.png
 /tests/**/current-*.png
 /tests/**/wpt-*.png

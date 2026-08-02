@@ -4,12 +4,14 @@ The application creates one directory for every WPT test that Olive actually
 discovers and runs. It does not create directories for arbitrary files in the
 shared WPT checkout or for tests classified as non-applicable.
 
-The directory preserves the complete WPT-relative path. The final `.html`,
-`.xhtml`, or other test filename becomes a directory name:
+The directory preserves the complete WPT-relative path under `outputs/`. The
+final `.html`, `.xhtml`, `.xht`, or other test filename becomes a directory
+name ending in `-<extension>-test`:
 
 ```text
-tests/css/css-backgrounds/example-1.html/
-tests/css/css-images/example-1.html/
+outputs/css/css-backgrounds/example-1-html-test/
+outputs/css/css-images/example-1-html-test/
+outputs/css/CSS2/floats-clear/float-applies-to-008a-xht-test/
 ```
 
 This prevents collisions between equal filenames in different WPT
@@ -20,7 +22,7 @@ directories.
 Each test directory contains:
 
 ```text
-tests/css/css-backgrounds/example-1.html/
+outputs/css/css-backgrounds/example-1-html-test/
   metadata.json
   approved-olive.png
   approved-chrome.png

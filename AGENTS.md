@@ -14,7 +14,7 @@ this application.
 
 ## Repository hygiene
 
-- Keep approved artifacts and their metadata under `tests/` following
+- Keep approved artifacts and their metadata under `outputs/` following
   `STRUCTURE.md`.
 - Commit only reviewed approved renders, approval-time Chromium evidence, and
   stable metadata. Current-run renders and reports are ignored.
