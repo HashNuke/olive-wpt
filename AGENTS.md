@@ -16,8 +16,8 @@ this application.
 
 - Keep approved artifacts and their metadata under `outputs/` following
   `STRUCTURE.md`.
-- Commit only reviewed approved renders, approval-time Chromium evidence, and
-  stable metadata. Current-run renders and reports are ignored.
+- Commit only reviewed `result.png`, `reference.png`, and stable approved
+  `metadata.json` files. Generated `result-vs-reference.png` files are ignored.
 - Preserve the WPT-relative path in every test directory; do not flatten test
   names or use absolute checkout paths.
 - Never silently replace an approved render. Approval is an explicit reviewed

@@ -1,12 +1,11 @@
 # WPT output structure
 
-The application creates one directory for every WPT test that Olive actually
-discovers and runs. It does not create directories for arbitrary files in the
-shared WPT checkout or for tests classified as non-applicable.
+The Olive WPT runner creates one directory for every WPT test it discovers and
+runs. It does not copy WPT source files into this repository. The source remains
+in the shared external WPT checkout, and the directory preserves the complete
+WPT-relative path under `outputs/`.
 
-The directory preserves the complete WPT-relative path under `outputs/`. The
-final `.html`, `.xhtml`, `.xht`, or other test filename becomes a directory
-name ending in `-<extension>-test`:
+The test filename becomes a directory name with its extension spelled out:
 
 ```text
 outputs/css/css-backgrounds/example-1-html-test/
@@ -14,77 +13,58 @@ outputs/css/css-images/example-1-html-test/
 outputs/css/CSS2/floats-clear/float-applies-to-008a-xht-test/
 ```
 
-This prevents collisions between equal filenames in different WPT
-directories.
+This prevents collisions between equal filenames in different WPT directories
+and makes the directory visibly distinct from a source-test directory.
 
 ## Per-test files
 
-Each test directory contains:
+Each test directory uses this four-file contract:
 
 ```text
 outputs/css/css-backgrounds/example-1-html-test/
+  result.png
+  reference.png
+  result-vs-reference.png
   metadata.json
-  approved-olive.png
-  approved-chrome.png
-  approved-olive-vs-chrome.png
-  wpt-source.png
-  wpt-reference-0.png
-  wpt-source-vs-reference-0.png
-  new-olive.png
-  current-chrome.png
-  new-olive-vs-approved.png
-  new-olive-vs-chrome.png
-  current.json
 ```
 
-`metadata.json` is committed and contains stable test identity and approval
-metadata:
+`result.png` is Olive's render and `reference.png` is the capture from the
+reference browser. The browser name and exact version belong in `metadata.json`,
+not in the image filename. `result-vs-reference.png` is a generated comparison
+image for local review and is ignored by Git.
+
+The approved Git state contains only:
+
+- `result.png`
+- `reference.png`
+- `metadata.json`
+
+The committed `result.png` is the approved Olive baseline. A later run
+overwrites the worktree copy at the same path; Git then exposes a binary change
+against the approved baseline. No separate approved-render diff is needed.
+
+`metadata.json` contains stable test identity and approval metadata:
 
 ```json
 {
   "schema_version": 1,
+  "status": "approved",
   "olive_version": "0.1.0+<git-sha>",
   "reference_browser": "chromium",
   "reference_browser_version": "<exact-version>",
   "wpt_url": "https://wpt.live/css/css-backgrounds/example-1.html",
-  "wpt_local_path": "css/css-backgrounds/example-1.html",
-  "capture": {
-    "viewport_width": 800,
-    "viewport_height": 600,
-    "device_scale_factor": 1
-  }
+  "wpt_local_path": "css/css-backgrounds/example-1.html"
 }
 ```
 
 `wpt_local_path` is relative to the WPT repository root. It must not contain
 `external/wpt/` or an absolute checkout path.
 
-When the test is approved, commit:
+If no committed `result.png` and approved `metadata.json` exist, the test is
+pending approval. If they exist and the current `result.png` differs from the
+committed version, the test is a deviation. The application can derive these
+states from Git plus the current output files; the generated reference diff is
+review evidence, not an approval artifact.
 
-- `approved-olive.png`
-- `approved-chrome.png`
-- `approved-olive-vs-chrome.png`
-- the updated `metadata.json`
-
-The approved Chromium image and its diff are the approval-time evidence. They
-are not the Olive pass/fail oracle.
-
-The current run overwrites, without committing:
-
-- `wpt-source.png`
-- `wpt-reference-<index>.png`
-- `wpt-source-vs-reference-<index>.png`
-- `new-olive.png`
-- `current-chrome.png`
-- `new-olive-vs-approved.png`
-- `new-olive-vs-chrome.png`
-- `current.json`
-
-If no approved Olive render exists, the test is pending approval. If an
-approved render exists and `new-olive-vs-approved.png` is an exact match, the
-test is approved. If it differs, the test is a deviation. Renderer and
-infrastructure errors are separate failure states.
-
-The root-level `current/result.json` may contain the aggregate report for the
-latest overwrite, while each `current.json` contains the latest per-test
-status and artifact information.
+Renderer and infrastructure errors are reported separately from pending,
+approved, and deviation states.

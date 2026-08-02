@@ -11,6 +11,7 @@ current/
 /outputs/**/new-*.png
 /outputs/**/current-*.png
 /outputs/**/wpt-*.png
+/outputs/**/result-vs-reference.png
 /outputs/**/current.json
 
 # Ignore artifacts from the pre-outputs directory layout during migration.
