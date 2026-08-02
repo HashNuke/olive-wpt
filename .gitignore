@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local labnotes are intentionally not published from this repository.
+worklogs/
+
+# Current WPT output is regenerated and overwritten by the Olive harness.
+current/
+/tests/**/new-*.png
+/tests/**/current-*.png
+/tests/**/current.json

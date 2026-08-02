@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  bin/create-labnotes 2-4-word-hyphenated-task-name
+
+Creates an empty markdown labnotes file in worklogs/.
+
+The input must be a 2-4 word hyphenated string, for example:
+  bin/create-labnotes test-crawl-resume
+
+If spaces are provided, they will be converted to hyphens:
+  bin/create-labnotes "test crawl resume"
+USAGE
+}
+
+if [[ $# -eq 0 ]]; then
+  usage
+  exit 0
+fi
+
+input="$*"
+slug="$(printf '%s' "$input" \
+  | tr '[:upper:]' '[:lower:]' \
+  | sed -E 's/[[:space:]]+/-/g; s/[^a-z0-9-]+/-/g; s/-+/-/g; s/^-//; s/-$//')"
+
+if [[ -z "$slug" ]]; then
+  echo "Error: task name must contain letters or numbers." >&2
+  echo >&2
+  usage >&2
+  exit 1
+fi
+
+word_count="$(awk -F- '{ print NF }' <<<"$slug")"
+if (( word_count < 2 || word_count > 4 )); then
+  echo "Error: input must be a 2-4 word hyphenated string." >&2
+  echo >&2
+  usage >&2
+  exit 1
+fi
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+worklogs_dir="$repo_root/worklogs"
+mkdir -p "$worklogs_dir"
+
+timestamp="$(date '+%Y%m%d-%H%M')"
+filename="$timestamp-$slug.md"
+path="$worklogs_dir/$filename"
+
+if [[ -e "$path" ]]; then
+  echo "Error: worklogs/$filename already exists." >&2
+  exit 1
+fi
+
+touch "$path"
+
+echo "Created worklogs/$filename"
