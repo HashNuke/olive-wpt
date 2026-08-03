@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}{{ test.path }}{% endblock %}
+{% block body_class %}test-review{% endblock %}
+
+{% block content %}
+<p><a href="/">Directory listing for /</a></p>
+<h1>{{ test.path }}</h1>
+<p><a href="{{ test.url }}">Open original test on wpt.live</a></p>
+
+<section class="render-comparison" aria-label="Render comparison">
+  <figure class="render-panel">
+    <figcaption>Olive render</figcaption>
+    {% if olive_available %}
+    <img src="/test-assets/{{ test.path }}/result.png" alt="Olive render of {{ test.path }}">
+    {% else %}
+    <p class="missing-render">Olive render is not available.</p>
+    {% endif %}
+  </figure>
+  <figure class="render-panel">
+    <figcaption>Chrome render</figcaption>
+    {% if chrome_available %}
+    <img src="/test-assets/{{ test.path }}/reference.png" alt="Chrome render of {{ test.path }}">
+    {% else %}
+    <p class="missing-render">Chrome render is not available.</p>
+    {% endif %}
+  </figure>
+</section>
+{% endblock %}

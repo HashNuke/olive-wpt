@@ -16,3 +16,37 @@ body.directory-index {
   color: #000;
   font-family: serif;
 }
+
+body.test-review {
+  margin: 2rem;
+}
+
+.render-comparison {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.render-panel {
+  margin: 0;
+}
+
+.render-panel figcaption {
+  margin-bottom: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.render-panel img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #c8ced6;
+}
+
+.missing-render {
+  padding: 2rem;
+  border: 1px dashed #c8ced6;
+  color: #586574;
+}

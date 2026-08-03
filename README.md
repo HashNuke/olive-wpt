@@ -26,4 +26,5 @@ added in a later checkpoint.
 The curated WPT inventory is maintained in [`wpt_paths.txt`](wpt_paths.txt),
 at the repository root so the Olive submodule and the review application share
 one source of truth. The home page reads this file and links each entry to its
-corresponding `wpt.live` test; it does not enumerate Git or output files.
+review page, where the Olive and Chrome renders are shown when available. It
+does not enumerate Git or output files.
