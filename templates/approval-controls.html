@@ -1,0 +1,19 @@
+<p>
+  Olive render status:
+  {% if approval_status == "approved" %}
+  <strong class="approval-approved">Approved</strong>
+  {% else %}
+  <strong class="approval-pending">Not approved</strong>
+  {% endif %}
+</p>
+{% if metadata_available and olive_available %}
+  {% if approval_status == "approved" %}
+  <button hx-post="{{ test.approval_url(false) }}" hx-target="#approval-controls" hx-swap="outerHTML">Unapprove Olive render</button>
+  {% else %}
+  <button hx-post="{{ test.approval_url(true) }}" hx-target="#approval-controls" hx-swap="outerHTML">Approve Olive render</button>
+  {% endif %}
+{% elif not metadata_available %}
+<p class="missing-render">Approval is unavailable because metadata is missing.</p>
+{% else %}
+<p class="missing-render">Approval is unavailable because the Olive render is missing.</p>
+{% endif %}

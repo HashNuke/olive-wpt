@@ -45,6 +45,32 @@ body.test-review {
   border: 1px solid #c8ced6;
 }
 
+.test-source code {
+  overflow-wrap: anywhere;
+}
+
+.approval-controls {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border: 1px solid #c8ced6;
+  background: #f6f7f9;
+}
+
+.approval-approved {
+  color: #176b3a;
+}
+
+.approval-pending {
+  color: #8a4b08;
+}
+
+.render-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
 .missing-render {
   padding: 2rem;
   border: 1px dashed #c8ced6;

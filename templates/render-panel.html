@@ -1,0 +1,8 @@
+<figure class="render-panel">
+  <figcaption>{{ render_label }}</figcaption>
+  {% if render_available %}
+  <img src="{{ image_url }}" alt="{{ render_label }} of {{ test.path }}">
+  {% else %}
+  <p class="missing-render">{{ render_label }} is not available.</p>
+  {% endif %}
+</figure>
