@@ -10,11 +10,44 @@ body {
   color: #1f2933;
 }
 
-body.directory-index {
-  margin: 8px;
-  background: #fff;
-  color: #000;
-  font-family: serif;
+body.wpt-index {
+  margin: 2rem;
+  background: #f6f7f9;
+  color: #1f2933;
+}
+
+.wpt-test-list {
+  display: grid;
+  gap: 0.35rem;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wpt-test-entry {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  padding: 0.35rem 0;
+}
+
+.wpt-status {
+  flex: 0 0 4rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.wpt-status-pass {
+  color: #176b3a;
+}
+
+.wpt-status-fail {
+  color: #a12828;
+}
+
+.wpt-status-unkn {
+  color: #8a4b08;
 }
 
 body.test-review {

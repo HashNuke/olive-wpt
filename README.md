@@ -31,7 +31,8 @@ does not enumerate Git or output files. Review pages use
 `/test-report/view?path=<wpt-test-path>` and provide HTMX controls for switching
 between renders and approving or unapproving the Olive result.
 
-Each run writes current comparison metrics to ignored `current.json`. Approval
-stores the approved result hash and diff baseline in `metadata.json`; the review
-page reports unchanged, improved, equal, and regressed results without treating
-metadata-only changes as render changes.
+Each run writes current comparison metrics to ignored `current.json`. The home
+page prefixes each test with `PASS`, `FAIL`, or `UNKN`: only an exact match with
+an approved result is `PASS`, a changed approved result is `FAIL`, and a test
+without an approved baseline is `UNKN`. Approval stores the approved result hash
+and diff baseline in `metadata.json`.

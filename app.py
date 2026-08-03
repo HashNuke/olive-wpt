@@ -173,6 +173,9 @@ def report_context(test: WptTest) -> dict[str, object]:
         "approval_status": "approved" if metadata and metadata.get("status") == "approved" else "pending",
         "metadata_available": metadata is not None,
         "olive_available": (output_directory / "result.png").is_file(),
+        "current_result_sha256": current_hash,
+        "approved_result_sha256": approved_hash,
+        "approved_baseline_available": approved_hash is not None and approved_diff_percent is not None,
         "current_comparison_available": current_diff_percent is not None,
         "current_diff_percent": current_diff_percent,
         "approved_diff_percent": approved_diff_percent,
@@ -182,6 +185,17 @@ def report_context(test: WptTest) -> dict[str, object]:
             "pass" if comparison_passed is True else "fail" if comparison_passed is False else "pending"
         ),
     }
+
+
+def home_status(test: WptTest) -> str:
+    context = report_context(test)
+    if context["approval_status"] != "approved" or not context["approved_baseline_available"]:
+        return "UNKN"
+    current_hash = context["current_result_sha256"]
+    approved_hash = context["approved_result_sha256"]
+    if not current_hash or not approved_hash:
+        return "UNKN"
+    return "PASS" if current_hash == approved_hash else "FAIL"
 
 
 def render_context(test: WptTest, render_name: str) -> dict[str, object]:
@@ -247,10 +261,11 @@ app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request) -> HTMLResponse:
+    tests = [{"test": test, "status": home_status(test)} for test in load_wpt_tests()]
     return templates.TemplateResponse(
         request=request,
         name="home.html",
-        context={"tests": load_wpt_tests()},
+        context={"tests": tests},
     )
 
 

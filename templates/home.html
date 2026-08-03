@@ -1,13 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Directory listing for /{% endblock %}
-{% block body_class %}directory-index{% endblock %}
+{% block title %}Olive WPT Output Review{% endblock %}
+{% block body_class %}wpt-index{% endblock %}
 
 {% block content %}
-<h1>Directory listing for /</h1>
-<ul>
-  {% for test in tests %}
-  <li class="file"><a href="{{ test.review_url }}">{{ test.path }}</a></li>
+<h1>Olive WPT Tests</h1>
+<ul class="wpt-test-list">
+  {% for item in tests %}
+  <li class="wpt-test-entry">
+    <span class="wpt-status wpt-status-{{ item.status|lower }}">{{ item.status }}</span>
+    <a href="{{ item.test.review_url }}">{{ item.test.path }}</a>
+  </li>
   {% endfor %}
 </ul>
 {% endblock %}
