@@ -1,7 +1,7 @@
 <figure class="render-panel">
   <figcaption>{{ render_label }}</figcaption>
   {% if render_available %}
-  <img src="{{ image_url }}" alt="{{ render_label }} of {{ test.path }}">
+  <a href="{{ image_url }}" target="_blank" rel="noopener noreferrer"><img src="{{ image_url }}" alt="{{ render_label }} of {{ test.path }}"></a>
   {% else %}
   <p class="missing-render">{{ render_label }} is not available.</p>
   {% endif %}

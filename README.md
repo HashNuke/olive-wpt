@@ -31,7 +31,9 @@ does not enumerate Git or output files. Review pages use
 `/test-report/view?path=<wpt-test-path>` and provide HTMX controls for switching
 between renders and approving or unapproving the Olive result.
 
-Each run writes current comparison metrics to ignored `current.json`. The home
+Each run writes current comparison metrics to ignored `current.json` and a
+`current/result.csv` status index. The CSV has `status,path` columns and uses
+`PASS`, `FAIL`, or `UNKN` for each WPT-relative test path. The home
 page prefixes each test with `PASS`, `FAIL`, or `UNKN`: only an exact match with
 an approved result is `PASS`, a changed approved result is `FAIL`, and a test
 without an approved baseline is `UNKN`. Approval stores the approved result hash

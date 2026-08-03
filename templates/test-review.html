@@ -6,6 +6,7 @@
 {% block content %}
 <p><a href="/">Back to test index</a></p>
 <h1>{{ test.path }}</h1>
+<p class="test-result">Test result: <span class="wpt-status wpt-status-{{ result_status|lower }}">{{ result_status }}</span></p>
 <p class="test-source">Original WPT test: <code>{{ test.path }}</code> · <a href="{{ test.url }}">Open on wpt.live</a></p>
 
 <section id="approval-controls" class="approval-controls" aria-label="Olive render approval">

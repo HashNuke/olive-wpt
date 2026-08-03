@@ -89,6 +89,22 @@ body.test-review {
   background: #f6f7f9;
 }
 
+.approval-controls button {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #586574;
+  border-radius: 0.25rem;
+  background: #ffffff;
+  color: #1f2933;
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  cursor: pointer;
+}
+
+.approval-controls button:hover {
+  background: #e8edf2;
+}
+
 .approval-approved {
   color: #176b3a;
 }

@@ -43,6 +43,10 @@ records the latest run's exact comparison metrics:
 }
 ```
 
+The ignored `current/result.csv` file is the home-page status index. It has
+`status,path` columns, with one `PASS`, `FAIL`, or `UNKN` row per WPT-relative
+test path.
+
 The approved Git state contains only:
 
 - `result.png`

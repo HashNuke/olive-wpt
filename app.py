@@ -1,8 +1,9 @@
 """FastAPI application for Olive WPT output review."""
 
-from dataclasses import dataclass
+import csv
 import hashlib
 import json
+from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from urllib.parse import quote, urlencode
 
@@ -19,6 +20,7 @@ OUTPUTS_ROOT = PROJECT_ROOT / "outputs"
 WPT_PATHS_FILE = PROJECT_ROOT / "wpt_paths.txt"
 WPT_LIVE_ROOT = "https://wpt.live"
 CURRENT_COMPARISON_FILENAME = "current.json"
+WPT_RESULTS_FILE = PROJECT_ROOT / "current" / "result.csv"
 RENDER_ASSETS = {
     "olive": ("result.png", "Olive render"),
     "reference": ("reference.png", "Chrome render"),
@@ -198,6 +200,45 @@ def home_status(test: WptTest) -> str:
     return "PASS" if current_hash == approved_hash else "FAIL"
 
 
+def load_result_statuses(path: Path = WPT_RESULTS_FILE) -> dict[str, str]:
+    if not path.is_file():
+        return {}
+    try:
+        with path.open(newline="", encoding="utf-8") as handle:
+            rows = csv.DictReader(handle)
+            if rows.fieldnames != ["status", "path"]:
+                raise ValueError("result CSV must have status,path columns")
+            statuses: dict[str, str] = {}
+            for row in rows:
+                status = row.get("status")
+                wpt_path = row.get("path")
+                if status not in {"PASS", "FAIL", "UNKN"} or not wpt_path:
+                    raise ValueError("result CSV contains an invalid row")
+                statuses[wpt_path] = status
+            return statuses
+    except (OSError, csv.Error, ValueError) as error:
+        raise HTTPException(status_code=500, detail="WPT result CSV is invalid") from error
+
+
+def write_result_statuses(tests: tuple[WptTest, ...]) -> None:
+    WPT_RESULTS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path = WPT_RESULTS_FILE.with_name(f".{WPT_RESULTS_FILE.name}.tmp")
+    try:
+        with temporary_path.open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.writer(handle)
+            writer.writerow(("status", "path"))
+            for test in tests:
+                writer.writerow((home_status(test), test.path))
+        temporary_path.replace(WPT_RESULTS_FILE)
+    finally:
+        if temporary_path.exists():
+            temporary_path.unlink()
+
+
+def result_status(test: WptTest) -> str:
+    return load_result_statuses().get(test.path, home_status(test))
+
+
 def render_context(test: WptTest, render_name: str) -> dict[str, object]:
     try:
         asset_name, render_label = RENDER_ASSETS[render_name]
@@ -261,7 +302,9 @@ app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request) -> HTMLResponse:
-    tests = [{"test": test, "status": home_status(test)} for test in load_wpt_tests()]
+    wpt_tests = load_wpt_tests()
+    statuses = load_result_statuses()
+    tests = [{"test": test, "status": statuses.get(test.path, "UNKN")} for test in wpt_tests]
     return templates.TemplateResponse(
         request=request,
         name="home.html",
@@ -277,6 +320,7 @@ def test_review(request: Request, path: str) -> HTMLResponse:
         name="test-review.html",
         context={
             "test": test,
+            "result_status": result_status(test),
             **report_context(test),
             **render_context(test, "olive"),
         },
@@ -309,7 +353,7 @@ def approval_response(request: Request, path: str) -> HTMLResponse:
     return templates.TemplateResponse(
         request=request,
         name="approval-controls.html",
-        context={"test": test, **report_context(test)},
+        context={"test": test, "result_status": result_status(test), **report_context(test)},
     )
 
 
@@ -317,6 +361,7 @@ def approval_response(request: Request, path: str) -> HTMLResponse:
 def approve_test(request: Request, path: str) -> HTMLResponse:
     test = get_wpt_test(path)
     write_approval_status(test, "approved")
+    write_result_statuses(load_wpt_tests())
     return approval_response(request, path)
 
 
@@ -324,6 +369,7 @@ def approve_test(request: Request, path: str) -> HTMLResponse:
 def unapprove_test(request: Request, path: str) -> HTMLResponse:
     test = get_wpt_test(path)
     write_approval_status(test, "pending")
+    write_result_statuses(load_wpt_tests())
     return approval_response(request, path)
 
 
