@@ -24,6 +24,7 @@ WPT_PATHS_FILE = PROJECT_ROOT / "wpt_paths.txt"
 WPT_LIVE_ROOT = "https://wpt.live"
 CURRENT_COMPARISON_FILENAME = "current.json"
 WPT_RESULTS_FILE = PROJECT_ROOT / "current" / "result.csv"
+REJECTIONS_FILE = PROJECT_ROOT / "current" / "rejections.txt"
 RENDER_LABELS = {
     "olive": "Olive render",
     "reference": "Reference",
@@ -48,6 +49,10 @@ class WptTest:
 
     def approval_url(self, approved: bool) -> str:
         endpoint = "approve" if approved else "unapprove"
+        return f"/test-report/{endpoint}?{urlencode({'path': self.path})}"
+
+    def rejection_url(self, rejected: bool) -> str:
+        endpoint = "reject" if rejected else "unreject"
         return f"/test-report/{endpoint}?{urlencode({'path': self.path})}"
 
 
@@ -218,6 +223,7 @@ def report_context(test: WptTest) -> dict[str, object]:
     elif current_diff_percent is not None:
         comparison_status = "awaiting approval"
     return {
+        "rejected": test.path in load_rejections(),
         "approval_status": "approved" if metadata and metadata.get("status") == "approved" else "pending",
         "metadata_available": metadata is not None,
         "olive_available": (output_directory / "result.png").is_file(),
@@ -236,6 +242,8 @@ def report_context(test: WptTest) -> dict[str, object]:
 
 
 def home_status(test: WptTest) -> str:
+    if test.path in load_rejections():
+        return "FAIL"
     context = report_context(test)
     if context["approval_status"] != "approved" or not context["approved_baseline_available"]:
         return "UNKN"
@@ -261,6 +269,8 @@ def load_result_statuses(path: Path = WPT_RESULTS_FILE) -> dict[str, str]:
                 if status not in {"PASS", "FAIL", "UNKN"} or not wpt_path:
                     raise ValueError("result CSV contains an invalid row")
                 statuses[wpt_path] = status
+            for rejected_path in load_rejections():
+                statuses[rejected_path] = "FAIL"
             return statuses
     except (OSError, csv.Error, ValueError) as error:
         raise HTTPException(status_code=500, detail="WPT result CSV is invalid") from error
@@ -283,6 +293,41 @@ def write_result_statuses(tests: tuple[WptTest, ...]) -> None:
 
 def result_status(test: WptTest) -> str:
     return load_result_statuses().get(test.path, home_status(test))
+
+
+def load_rejections(path: Path | None = None) -> set[str]:
+    path = REJECTIONS_FILE if path is None else path
+    if not path.is_file():
+        return set()
+    try:
+        return {
+            line.strip()
+            for line in path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        }
+    except OSError as error:
+        raise HTTPException(status_code=500, detail="WPT rejection list is unreadable") from error
+
+
+def write_rejections(paths: set[str]) -> None:
+    REJECTIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path = REJECTIONS_FILE.with_name(f".{REJECTIONS_FILE.name}.tmp")
+    try:
+        contents = "".join(f"{path}\n" for path in sorted(paths))
+        temporary_path.write_text(contents, encoding="utf-8")
+        temporary_path.replace(REJECTIONS_FILE)
+    finally:
+        if temporary_path.exists():
+            temporary_path.unlink()
+
+
+def set_rejection(test: WptTest, rejected: bool) -> None:
+    paths = load_rejections()
+    if rejected:
+        paths.add(test.path)
+    else:
+        paths.discard(test.path)
+    write_rejections(paths)
 
 
 def render_context(test: WptTest, render_name: str) -> dict[str, object]:
@@ -384,7 +429,7 @@ app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
 def home(request: Request) -> HTMLResponse:
     wpt_tests = load_wpt_tests()
     statuses = load_result_statuses()
-    tests = [{"test": test, "status": statuses.get(test.path, "UNKN")} for test in wpt_tests]
+    tests = [{"test": test, "status": statuses.get(test.path, home_status(test))} for test in wpt_tests]
     return templates.TemplateResponse(
         request=request,
         name="home.html",
@@ -450,6 +495,24 @@ def approve_test(request: Request, path: str) -> HTMLResponse:
 def unapprove_test(request: Request, path: str) -> HTMLResponse:
     test = get_wpt_test(path)
     write_approval_status(test, "pending")
+    write_result_statuses(load_wpt_tests())
+    return approval_response(request, path)
+
+
+@app.post("/test-report/reject", response_class=HTMLResponse)
+def reject_test(request: Request, path: str) -> HTMLResponse:
+    test = get_wpt_test(path)
+    if not result_sha256(test):
+        raise HTTPException(status_code=409, detail="Current Olive render is not available")
+    set_rejection(test, True)
+    write_result_statuses(load_wpt_tests())
+    return approval_response(request, path)
+
+
+@app.post("/test-report/unreject", response_class=HTMLResponse)
+def unreject_test(request: Request, path: str) -> HTMLResponse:
+    test = get_wpt_test(path)
+    set_rejection(test, False)
     write_result_statuses(load_wpt_tests())
     return approval_response(request, path)
 

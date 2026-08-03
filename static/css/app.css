@@ -108,10 +108,48 @@ body.test-review {
 }
 
 .approval-controls {
-  margin: 1.5rem 0;
-  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
   border: 1px solid #c8ced6;
   background: #f6f7f9;
+}
+
+.approval-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.25rem;
+  align-items: baseline;
+}
+
+.approval-item {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: baseline;
+  white-space: nowrap;
+}
+
+.approval-label {
+  color: #586574;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.approval-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+}
+
+.approval-help {
+  color: #586574;
+  font-size: 0.875rem;
 }
 
 .approval-controls button {
@@ -136,6 +174,19 @@ body.test-review {
 
 .approval-pending {
   color: #8a4b08;
+}
+
+.approval-rejected {
+  color: #a12828;
+}
+
+.approval-open {
+  color: #586574;
+}
+
+.approval-controls .approval-reject {
+  border-color: #a12828;
+  color: #a12828;
 }
 
 .comparison-improved {
@@ -193,4 +244,11 @@ body.test-review {
   padding: 2rem;
   border: 1px dashed #c8ced6;
   color: #586574;
+}
+
+@media (max-width: 48rem) {
+  .approval-controls {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }

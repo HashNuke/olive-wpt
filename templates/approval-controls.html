@@ -1,34 +1,54 @@
-<p>
-  Olive render status:
-  {% if approval_status == "approved" %}
-  <strong class="approval-approved">Approved</strong>
-  {% else %}
-  <strong class="approval-pending">Not approved</strong>
+<div class="approval-summary">
+  <div class="approval-item">
+    <span class="approval-label">Result</span>
+    <strong class="wpt-status wpt-status-{{ result_status|lower }}">{{ result_status }}</strong>
+  </div>
+  <div class="approval-item">
+    <span class="approval-label">Approval</span>
+    {% if approval_status == "approved" %}
+    <strong class="approval-approved">Approved</strong>
+    {% else %}
+    <strong class="approval-pending">Pending</strong>
+    {% endif %}
+  </div>
+  <div class="approval-item">
+    <span class="approval-label">Review</span>
+    {% if rejected %}
+    <strong class="approval-rejected">Rejected</strong>
+    {% else %}
+    <strong class="approval-open">Open</strong>
+    {% endif %}
+  </div>
+  <div class="approval-item">
+    <span class="approval-label">Current diff</span>
+    <strong>{% if current_diff_percent is not none %}{{ "%.4f"|format(current_diff_percent) }}%{% else %}—{% endif %}</strong>
+  </div>
+  <div class="approval-item">
+    <span class="approval-label">Approved diff</span>
+    <strong>{% if approved_diff_percent is not none %}{{ "%.4f"|format(approved_diff_percent) }}%{% else %}—{% endif %}</strong>
+  </div>
+  <div class="approval-item">
+    <span class="approval-label">Comparison</span>
+    <strong class="comparison-{{ comparison_status|replace(' ', '-') }}">{{ comparison_status|capitalize }}</strong>
+  </div>
+</div>
+
+<div class="approval-actions">
+  {% if rejected %}
+  <button type="button" class="approval-reject" hx-post="{{ test.rejection_url(false) }}" hx-target="#approval-controls" hx-swap="innerHTML">Clear rejection</button>
+  {% elif olive_available %}
+  <button type="button" class="approval-reject" hx-post="{{ test.rejection_url(true) }}" hx-target="#approval-controls" hx-swap="innerHTML">Reject current result</button>
   {% endif %}
-</p>
-{% if comparison_status != "unavailable" %}
-<p>
-  Current result:
-  <strong class="comparison-{{ comparison_status|replace(' ', '-') }}">{{ comparison_status|capitalize }}</strong>
-  {% if comparison_passed is not none %}
-  — <strong class="comparison-{{ comparison_outcome }}">{{ comparison_outcome|capitalize }}</strong>
+  {% if metadata_available and olive_available and current_comparison_available and approval_status == "approved" %}
+  <button type="button" hx-post="{{ test.approval_url(false) }}" hx-target="#approval-controls" hx-swap="innerHTML">Unapprove</button>
+  {% elif not rejected and metadata_available and olive_available and current_comparison_available %}
+  <button type="button" hx-post="{{ test.approval_url(true) }}" hx-target="#approval-controls" hx-swap="innerHTML">Approve Olive render</button>
   {% endif %}
-  {% if current_diff_percent is not none %}({{ "%.4f"|format(current_diff_percent) }}% different){% endif %}
-</p>
-{% if approved_diff_percent is not none %}
-<p>Approved baseline diff: {{ "%.4f"|format(approved_diff_percent) }}%</p>
-{% endif %}
-{% endif %}
-{% if metadata_available and olive_available and current_comparison_available %}
-  {% if approval_status == "approved" %}
-  <button hx-post="{{ test.approval_url(false) }}" hx-target="#approval-controls" hx-swap="outerHTML">Unapprove Olive render</button>
-  {% else %}
-  <button hx-post="{{ test.approval_url(true) }}" hx-target="#approval-controls" hx-swap="outerHTML">Approve Olive render</button>
+  {% if not metadata_available %}
+  <span class="approval-help">Approval metadata missing</span>
+  {% elif not olive_available %}
+  <span class="approval-help">Olive render missing</span>
+  {% elif not current_comparison_available %}
+  <span class="approval-help">Current diff unavailable</span>
   {% endif %}
-{% elif not metadata_available %}
-<p class="missing-render">Approval is unavailable because metadata is missing.</p>
-{% elif not current_comparison_available %}
-<p class="missing-render">Approval is unavailable because the current comparison is missing.</p>
-{% else %}
-<p class="missing-render">Approval is unavailable because the Olive render is missing.</p>
-{% endif %}
+</div>

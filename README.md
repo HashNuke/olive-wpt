@@ -39,4 +39,7 @@ Each run writes current comparison metrics to ignored `current.json` and a
 page prefixes each test with `PASS`, `FAIL`, or `UNKN`: only an exact match with
 an approved result is `PASS`, a changed approved result is `FAIL`, and a test
 without an approved baseline is `UNKN`. Approval stores the approved result hash
-and diff baseline in `metadata.json`.
+and diff baseline in `metadata.json`. Local review rejections are stored in the
+ignored `current/rejections.txt` path list, so agents can work from the list
+without adding rejection state to the repository. A locally rejected test is
+shown as `FAIL` even when it has no previously approved render.
