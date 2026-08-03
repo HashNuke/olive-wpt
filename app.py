@@ -4,13 +4,16 @@ import csv
 import hashlib
 import json
 from dataclasses import dataclass
+from io import BytesIO
 from pathlib import Path, PurePosixPath
+import subprocess
 from urllib.parse import quote, urlencode
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from PIL import Image, ImageChops, UnidentifiedImageError
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -21,10 +24,11 @@ WPT_PATHS_FILE = PROJECT_ROOT / "wpt_paths.txt"
 WPT_LIVE_ROOT = "https://wpt.live"
 CURRENT_COMPARISON_FILENAME = "current.json"
 WPT_RESULTS_FILE = PROJECT_ROOT / "current" / "result.csv"
-RENDER_ASSETS = {
-    "olive": ("result.png", "Olive render"),
-    "reference": ("reference.png", "Chrome render"),
-    "diff": ("result-vs-reference.png", "Olive vs Chrome diff"),
+RENDER_LABELS = {
+    "olive": "Olive render",
+    "reference": "Reference",
+    "approved-diff": "Result vs Approved",
+    "diff": "Result vs Ref",
 }
 
 templates = Jinja2Templates(directory=str(TEMPLATES_ROOT))
@@ -139,6 +143,45 @@ def result_sha256(test: WptTest) -> str | None:
     return hashlib.sha256(result_path.read_bytes()).hexdigest()
 
 
+def approved_result_bytes(test: WptTest) -> bytes | None:
+    metadata = load_metadata(test)
+    if metadata is None or metadata.get("status") != "approved":
+        return None
+    relative_path = output_directory_for_wpt_path(test.path).relative_to(PROJECT_ROOT)
+    try:
+        result = subprocess.run(
+            ["git", "show", f"HEAD:{relative_path.as_posix()}/result.png"],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            check=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    return result.stdout
+
+
+def image_diff_bytes(left: bytes, right: bytes) -> bytes:
+    try:
+        left_image = Image.open(BytesIO(left)).convert("RGBA")
+        right_image = Image.open(BytesIO(right)).convert("RGBA")
+    except UnidentifiedImageError as error:
+        raise HTTPException(status_code=500, detail="Render image is invalid") from error
+    width = max(left_image.width, right_image.width)
+    height = max(left_image.height, right_image.height)
+    if left_image.size != (width, height):
+        canvas = Image.new("RGBA", (width, height))
+        canvas.paste(left_image, (0, 0))
+        left_image = canvas
+    if right_image.size != (width, height):
+        canvas = Image.new("RGBA", (width, height))
+        canvas.paste(right_image, (0, 0))
+        right_image = canvas
+    diff = ImageChops.difference(left_image, right_image)
+    output = BytesIO()
+    diff.save(output, format="PNG")
+    return output.getvalue()
+
+
 def comparison_number(comparison: dict[str, object] | None, key: str) -> float | None:
     if comparison is None:
         return None
@@ -241,17 +284,51 @@ def result_status(test: WptTest) -> str:
 
 def render_context(test: WptTest, render_name: str) -> dict[str, object]:
     try:
-        asset_name, render_label = RENDER_ASSETS[render_name]
+        render_label = RENDER_LABELS[render_name]
     except KeyError as error:
         raise HTTPException(status_code=404, detail="Unknown render") from error
-    asset = output_directory_for_wpt_path(test.path) / asset_name
+    directory = output_directory_for_wpt_path(test.path)
+    asset = directory / "result.png"
+    if render_name in {"reference", "diff"}:
+        asset = directory / "reference.png"
+    render_available = asset.is_file()
+    if render_name == "approved-diff":
+        render_available = render_available and approved_result_bytes(test) is not None
     return {
         "test": test,
         "render_label": render_label,
         "render_name": render_name,
-        "render_available": asset.is_file(),
+        "render_available": render_available,
         "image_url": test.asset_url(render_name),
     }
+
+
+def render_availability(test: WptTest) -> dict[str, bool]:
+    return {
+        name: bool(render_context(test, name)["render_available"])
+        for name in RENDER_LABELS
+    }
+
+
+def render_image_bytes(test: WptTest, render_name: str) -> bytes | None:
+    directory = output_directory_for_wpt_path(test.path)
+    if render_name == "approved-diff":
+        current_path = directory / "result.png"
+        approved = approved_result_bytes(test)
+        if not current_path.is_file() or approved is None:
+            return None
+        return image_diff_bytes(current_path.read_bytes(), approved)
+    if render_name == "diff":
+        result_path = directory / "result.png"
+        reference_path = directory / "reference.png"
+        if not result_path.is_file() or not reference_path.is_file():
+            return None
+        return image_diff_bytes(result_path.read_bytes(), reference_path.read_bytes())
+    asset_name = {"olive": "result.png", "reference": "reference.png"}.get(render_name)
+    if asset_name is None:
+        return None
+    asset = directory / asset_name
+    return asset.read_bytes() if asset.is_file() else None
 
 
 def write_approval_status(test: WptTest, status: str) -> None:
@@ -321,6 +398,8 @@ def test_review(request: Request, path: str) -> HTMLResponse:
         context={
             "test": test,
             "result_status": result_status(test),
+            "render_labels": RENDER_LABELS,
+            "render_availability": render_availability(test),
             **report_context(test),
             **render_context(test, "olive"),
         },
@@ -338,14 +417,13 @@ def test_render(request: Request, path: str, render: str = "olive") -> HTMLRespo
 
 
 @app.get("/test-report/image")
-def test_image(path: str, render: str = "olive") -> FileResponse:
+def test_image(path: str, render: str = "olive") -> Response:
     test = get_wpt_test(path)
     render_context(test, render)
-    asset_name, _ = RENDER_ASSETS[render]
-    asset = output_directory_for_wpt_path(test.path) / asset_name
-    if not asset.is_file():
+    image = render_image_bytes(test, render)
+    if image is None:
         raise HTTPException(status_code=404, detail="Test asset not found")
-    return FileResponse(asset, media_type="image/png")
+    return Response(content=image, media_type="image/png")
 
 
 def approval_response(request: Request, path: str) -> HTMLResponse:

@@ -54,6 +54,28 @@ body.test-review {
   margin: 2rem;
 }
 
+.review-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.copy-path {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #c8ced6;
+  border-radius: 0.25rem;
+  background: #ffffff;
+  color: #1f2933;
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  cursor: pointer;
+}
+
+.copy-path:hover {
+  background: #e8edf2;
+}
+
 .render-comparison {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
@@ -139,6 +161,29 @@ body.test-review {
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 1rem;
+}
+
+.render-tab {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #c8ced6;
+  border-radius: 0.25rem;
+  background: #ffffff;
+  color: #1f2933;
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  cursor: pointer;
+}
+
+.render-tab:hover,
+.render-tab.active {
+  border-color: #315b8a;
+  background: #e8edf2;
+}
+
+.render-tab:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .missing-render {

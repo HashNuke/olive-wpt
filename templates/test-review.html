@@ -4,7 +4,10 @@
 {% block body_class %}test-review{% endblock %}
 
 {% block content %}
-<p><a href="/">Back to test index</a></p>
+<p class="review-nav">
+  <a href="/">Back to test index</a>
+  <button class="copy-path" type="button" data-copy-path="{{ test.path }}">Copy WPT path</button>
+</p>
 <h1>{{ test.path }}</h1>
 <p class="test-result">Test result: <span class="wpt-status wpt-status-{{ result_status|lower }}">{{ result_status }}</span></p>
 <p class="test-source">Original WPT test: <code>{{ test.path }}</code> · <a href="{{ test.url }}">Open on wpt.live</a></p>
@@ -13,10 +16,10 @@
   {% include "approval-controls.html" %}
 </section>
 
-<nav class="render-switcher" aria-label="Render view">
-  <button hx-get="{{ test.render_url('olive') }}" hx-target="#render-panel" hx-swap="innerHTML">Olive render</button>
-  <button hx-get="{{ test.render_url('reference') }}" hx-target="#render-panel" hx-swap="innerHTML">Chrome render</button>
-  <button hx-get="{{ test.render_url('diff') }}" hx-target="#render-panel" hx-swap="innerHTML">Olive vs Chrome diff</button>
+<nav class="render-switcher" aria-label="Render view" role="tablist">
+  {% for name in ("olive", "reference", "approved-diff", "diff") %}
+  <button class="render-tab{% if render_name == name %} active{% endif %}" data-render-tab role="tab" aria-selected="{{ 'true' if render_name == name else 'false' }}" {% if not render_availability[name] %}disabled aria-disabled="true"{% endif %} hx-get="{{ test.render_url(name) }}" hx-target="#render-panel" hx-swap="innerHTML">{{ render_labels[name] }}</button>
+  {% endfor %}
 </nav>
 
 <section id="render-panel" class="render-comparison" aria-label="Render comparison">

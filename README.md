@@ -29,7 +29,9 @@ one source of truth. The home page reads this file and links each entry to its
 review page, where the Olive and Chrome renders are shown when available. It
 does not enumerate Git or output files. Review pages use
 `/test-report/view?path=<wpt-test-path>` and provide HTMX controls for switching
-between renders and approving or unapproving the Olive result.
+between Olive, reference, and in-memory comparison tabs, with links that open
+the images independently and controls for approving or unapproving the Olive
+result.
 
 Each run writes current comparison metrics to ignored `current.json` and a
 `current/result.csv` status index. The CSV has `status,path` columns and uses
