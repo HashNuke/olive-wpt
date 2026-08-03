@@ -18,7 +18,7 @@
 
 <nav class="render-switcher" aria-label="Render view" role="tablist">
   {% for name in ("olive", "reference", "approved-diff", "diff") %}
-  <button class="render-tab{% if render_name == name %} active{% endif %}" data-render-tab role="tab" aria-selected="{{ 'true' if render_name == name else 'false' }}" {% if not render_availability[name] %}disabled aria-disabled="true"{% endif %} hx-get="{{ test.render_url(name) }}" hx-target="#render-panel" hx-swap="innerHTML">{{ render_labels[name] }}</button>
+  <button class="render-tab{% if render_name == name %} active{% endif %}" data-render-tab role="tab" aria-selected="{{ 'true' if render_name == name else 'false' }}" {% if not render_availability[name] %}disabled aria-disabled="true"{% endif %} hx-on:click='this.parentElement.querySelectorAll("[data-render-tab]").forEach((tab) => { tab.classList.remove("active"); tab.setAttribute("aria-selected", "false"); }); this.classList.add("active"); this.setAttribute("aria-selected", "true");' hx-get="{{ test.render_url(name) }}" hx-target="#render-panel" hx-swap="innerHTML">{{ render_labels[name] }}</button>
   {% endfor %}
 </nav>
 
