@@ -23,11 +23,13 @@ The application currently provides its FastAPI/static-asset scaffold and a
 directory-style home page. Pending, Approved, and Deviations routes will be
 added in a later checkpoint.
 
-The curated WPT inventory is maintained in [`wpt_paths.txt`](wpt_paths.txt),
+The WPT reftest inventory is maintained in [`wpt_paths.txt`](wpt_paths.txt),
 at the repository root so the Olive submodule and the review application share
-one source of truth. The home page reads this file and links each entry to its
-review page, where the Olive and Chrome renders are shown when available. It
-does not enumerate Git or output files. Review pages use
+one source of truth. It contains WPT-relative source files with literal
+`<link>` elements declaring `rel="match"` or `rel="mismatch"`; filename suffixes
+do not determine inclusion. The home page reads this file and links each entry
+to its review page, where the Olive and Chrome renders are shown when
+available. It does not enumerate Git or output files. Review pages use
 `/test-report/view?path=<wpt-test-path>` and provide HTMX controls for switching
 between Olive, reference, and in-memory comparison tabs, with links that open
 the images independently and controls for approving or unapproving the Olive
