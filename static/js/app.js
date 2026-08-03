@@ -1,15 +1,15 @@
-document.body.addEventListener("htmx:afterRequest", (event) => {
-  const tab = event.detail.elt;
-  if (!tab.matches("[data-render-tab]")) return;
-
+function activateRenderTab(tab) {
   document.querySelectorAll("[data-render-tab]").forEach((candidate) => {
     const active = candidate === tab;
     candidate.classList.toggle("active", active);
     candidate.setAttribute("aria-selected", active ? "true" : "false");
   });
-});
+}
 
 document.body.addEventListener("click", async (event) => {
+  const tab = event.target.closest("[data-render-tab]");
+  if (tab && !tab.disabled) activateRenderTab(tab);
+
   const button = event.target.closest("[data-copy-path]");
   if (!button) return;
 
