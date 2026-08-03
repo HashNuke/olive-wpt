@@ -1,0 +1,37 @@
+# One WPT source path per line, relative to the WPT repository root.
+# Blank lines and comments are ignored. Keep only tests currently in Olive's
+# supported static-rendering scope; the generic runner discovers references.
+
+css/CSS2/syntax/declaration-003.xht
+css/css-conditional/css-supports-024.xht
+css/css-sizing/box-sizing-border-box-001.xht
+css/css-style-attr/style-attr-cascade-001.xht
+css/css-color/background-color-rgb-001.html
+css/css-backgrounds/background-clip/clip-text-multiline-background-image.html
+css/css-backgrounds/background-image-001.html
+css/css-backgrounds/background-image-002.html
+css/css-backgrounds/background-repeat-round-1c.html
+css/css-backgrounds/background-size-002.html
+css/css-backgrounds/background-size-030.html
+css/css-content/quotes-001.html
+css/css-fonts/font-face-unicode-range-2.html
+css/css-fonts/font-synthesis-03.html
+css/css-fonts/font-synthesis-weight.html
+css/css-fonts/font-variant-numeric-01.html
+css/css-fonts/font-variant-numeric-02.html
+css/css-fonts/font-variant-numeric-03.html
+css/css-fonts/font-variant-numeric-04.html
+css/css-fonts/font-variant-numeric-05.html
+css/css-fonts/font-variant-numeric-06.html
+css/css-fonts/font-variant-numeric-07.html
+css/css-fonts/font-variant-numeric-08.html
+css/css-fonts/font-variant-numeric-09.html
+css/css-images/tiled-radial-gradients.html
+html/semantics/embedded-content/the-img-element/svg-img-with-external-stylesheet.html
+css/css-inline/br-font-size.html
+css/css-backgrounds/background-size/vector/background-size-vector-004.html
+css/css-backgrounds/background-size/vector/wide--contain--height.html
+css/css-ui/outline-style-013.html
+css/css-writing-modes/writing-mode-initial.html
+css/CSS2/floats-clear/float-applies-to-008a.xht
+css/css-syntax/missing-semicolon.html

@@ -9,3 +9,10 @@ body {
   background: #f6f7f9;
   color: #1f2933;
 }
+
+body.directory-index {
+  margin: 8px;
+  background: #fff;
+  color: #000;
+  font-family: serif;
+}

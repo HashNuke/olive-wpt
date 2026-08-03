@@ -3,13 +3,14 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Olive WPT Output Review</title>
+    <title>{% block title %}Olive WPT Output Review{% endblock %}</title>
     <link rel="stylesheet" href="/static/css/app.css">
   </head>
-  <body>
+  <body class="{% block body_class %}{% endblock %}">
     <main id="app">
-      <!-- Page routes and review UI are added in a later checkpoint. -->
+      {% block content %}{% endblock %}
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js" integrity="sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V" crossorigin="anonymous"></script>
     <script src="/static/js/app.js" defer></script>
   </body>
 </html>
