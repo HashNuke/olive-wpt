@@ -60,7 +60,8 @@ body.test-review {
   gap: 0.75rem;
 }
 
-.copy-path {
+.copy-path,
+.open-wpt {
   padding: 0.25rem 0.5rem;
   border: 1px solid #c8ced6;
   border-radius: 0.25rem;
@@ -70,9 +71,11 @@ body.test-review {
   font-size: 0.875rem;
   line-height: 1.25rem;
   cursor: pointer;
+  text-decoration: none;
 }
 
-.copy-path:hover {
+.copy-path:hover,
+.open-wpt:hover {
   background: #e8edf2;
 }
 

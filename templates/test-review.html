@@ -7,10 +7,10 @@
 <p class="review-nav">
   <a href="/">Back to test index</a>
   <button class="copy-path" type="button" data-copy-path="{{ test.path }}">Copy WPT path</button>
+  <a class="open-wpt" href="{{ test.url }}" target="_blank" rel="noopener noreferrer">Open wpt.live</a>
 </p>
 <h1>{{ test.path }}</h1>
 <p class="test-result">Test result: <span class="wpt-status wpt-status-{{ result_status|lower }}">{{ result_status }}</span></p>
-<p class="test-source">Original WPT test: <code>{{ test.path }}</code> · <a href="{{ test.url }}">Open on wpt.live</a></p>
 
 <section id="approval-controls" class="approval-controls" aria-label="Olive render approval">
   {% include "approval-controls.html" %}
