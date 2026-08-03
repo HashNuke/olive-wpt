@@ -176,7 +176,10 @@ def image_diff_bytes(left: bytes, right: bytes) -> bytes:
         canvas = Image.new("RGBA", (width, height))
         canvas.paste(right_image, (0, 0))
         right_image = canvas
-    diff = ImageChops.difference(left_image, right_image)
+    difference = ImageChops.difference(left_image.convert("RGB"), right_image.convert("RGB"))
+    mask = difference.convert("L").point(lambda value: 255 if value else 0)
+    diff = Image.new("RGBA", (width, height), (255, 0, 0, 0))
+    diff.putalpha(mask)
     output = BytesIO()
     diff.save(output, format="PNG")
     return output.getvalue()
