@@ -31,7 +31,17 @@ outputs/css/css-backgrounds/example-1-html-test/
 `result.png` is Olive's render and `reference.png` is the capture from the
 reference browser. The browser name and exact version belong in `metadata.json`,
 not in the image filename. `result-vs-reference.png` is a generated comparison
-image for local review and is ignored by Git.
+image for local review and is ignored by Git. The ignored `current.json` file
+records the latest run's exact comparison metrics:
+
+```json
+{
+  "schema_version": 1,
+  "current_different_pixels": 123,
+  "current_total_pixels": 480000,
+  "current_diff_percent": 0.025625
+}
+```
 
 The approved Git state contains only:
 
@@ -56,6 +66,13 @@ against the approved baseline. No separate approved-render diff is needed.
   "wpt_local_path": "css/css-backgrounds/example-1.html"
 }
 ```
+
+When a result is approved, metadata also records the approved result hash and
+comparison baseline: `approved_result_sha256`, `approved_diff_percent`,
+`approved_different_pixels`, and `approved_total_pixels`. A later run is a pass
+when its current diff is equal to or lower than the approved diff, and a fail
+when it is higher. The review app also detects an unchanged result by comparing
+the current `result.png` hash with the approved hash.
 
 `wpt_local_path` is relative to the WPT repository root. It must not contain
 `external/wpt/` or an absolute checkout path.

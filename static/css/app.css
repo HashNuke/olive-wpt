@@ -64,6 +64,27 @@ body.test-review {
   color: #8a4b08;
 }
 
+.comparison-improved {
+  color: #176b3a;
+}
+
+.comparison-equal,
+.comparison-unchanged {
+  color: #315b8a;
+}
+
+.comparison-regressed {
+  color: #a12828;
+}
+
+.comparison-pass {
+  color: #176b3a;
+}
+
+.comparison-fail {
+  color: #a12828;
+}
+
 .render-switcher {
   display: flex;
   flex-wrap: wrap;

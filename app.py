@@ -1,6 +1,7 @@
 """FastAPI application for Olive WPT output review."""
 
 from dataclasses import dataclass
+import hashlib
 import json
 from pathlib import Path, PurePosixPath
 from urllib.parse import quote, urlencode
@@ -17,6 +18,7 @@ TEMPLATES_ROOT = PROJECT_ROOT / "templates"
 OUTPUTS_ROOT = PROJECT_ROOT / "outputs"
 WPT_PATHS_FILE = PROJECT_ROOT / "wpt_paths.txt"
 WPT_LIVE_ROOT = "https://wpt.live"
+CURRENT_COMPARISON_FILENAME = "current.json"
 RENDER_ASSETS = {
     "olive": ("result.png", "Olive render"),
     "reference": ("reference.png", "Chrome render"),
@@ -98,6 +100,10 @@ def metadata_path_for_wpt_path(wpt_path: str) -> Path:
     return output_directory_for_wpt_path(wpt_path) / "metadata.json"
 
 
+def current_comparison_path_for_wpt_path(wpt_path: str) -> Path:
+    return output_directory_for_wpt_path(wpt_path) / CURRENT_COMPARISON_FILENAME
+
+
 def load_metadata(test: WptTest) -> dict[str, object] | None:
     metadata_path = metadata_path_for_wpt_path(test.path)
     if not metadata_path.is_file():
@@ -111,13 +117,70 @@ def load_metadata(test: WptTest) -> dict[str, object] | None:
     return metadata
 
 
-def approval_context(test: WptTest) -> dict[str, object]:
+def load_current_comparison(test: WptTest) -> dict[str, object] | None:
+    current_path = current_comparison_path_for_wpt_path(test.path)
+    if not current_path.is_file():
+        return None
+    try:
+        current = json.loads(current_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        raise HTTPException(status_code=500, detail="Current comparison is invalid JSON") from error
+    if not isinstance(current, dict):
+        raise HTTPException(status_code=500, detail="Current comparison must be a JSON object")
+    return current
+
+
+def result_sha256(test: WptTest) -> str | None:
+    result_path = output_directory_for_wpt_path(test.path) / "result.png"
+    if not result_path.is_file():
+        return None
+    return hashlib.sha256(result_path.read_bytes()).hexdigest()
+
+
+def comparison_number(comparison: dict[str, object] | None, key: str) -> float | None:
+    if comparison is None:
+        return None
+    value = comparison.get(key)
+    return value if isinstance(value, (int, float)) and not isinstance(value, bool) else None
+
+
+def report_context(test: WptTest) -> dict[str, object]:
     metadata = load_metadata(test)
+    current = load_current_comparison(test)
     output_directory = output_directory_for_wpt_path(test.path)
+    current_diff_percent = comparison_number(current, "current_diff_percent")
+    approved_diff_percent = comparison_number(metadata, "approved_diff_percent")
+    current_hash = result_sha256(test)
+    approved_hash = metadata.get("approved_result_sha256") if metadata else None
+    comparison_status = "unavailable"
+    comparison_passed: bool | None = None
+    if current_diff_percent is not None and approved_diff_percent is not None:
+        if current_hash and current_hash == approved_hash:
+            comparison_status = "unchanged"
+            comparison_passed = True
+        elif current_diff_percent < approved_diff_percent:
+            comparison_status = "improved"
+            comparison_passed = True
+        elif current_diff_percent == approved_diff_percent:
+            comparison_status = "equal"
+            comparison_passed = True
+        else:
+            comparison_status = "regressed"
+            comparison_passed = False
+    elif current_diff_percent is not None:
+        comparison_status = "awaiting approval"
     return {
         "approval_status": "approved" if metadata and metadata.get("status") == "approved" else "pending",
         "metadata_available": metadata is not None,
         "olive_available": (output_directory / "result.png").is_file(),
+        "current_comparison_available": current_diff_percent is not None,
+        "current_diff_percent": current_diff_percent,
+        "approved_diff_percent": approved_diff_percent,
+        "comparison_status": comparison_status,
+        "comparison_passed": comparison_passed,
+        "comparison_outcome": (
+            "pass" if comparison_passed is True else "fail" if comparison_passed is False else "pending"
+        ),
     }
 
 
@@ -141,8 +204,20 @@ def write_approval_status(test: WptTest, status: str) -> None:
     metadata = load_metadata(test)
     if metadata is None:
         raise HTTPException(status_code=404, detail="Test metadata not found")
-    if not (output_directory_for_wpt_path(test.path) / "result.png").is_file():
-        raise HTTPException(status_code=409, detail="Olive render is not available")
+    if status == "approved":
+        current = load_current_comparison(test)
+        current_diff_percent = comparison_number(current, "current_diff_percent")
+        current_different_pixels = comparison_number(current, "current_different_pixels")
+        current_total_pixels = comparison_number(current, "current_total_pixels")
+        current_hash = result_sha256(test)
+        if current_diff_percent is None or current_hash is None:
+            raise HTTPException(status_code=409, detail="Current comparison is not available")
+        metadata["approved_result_sha256"] = current_hash
+        metadata["approved_diff_percent"] = current_diff_percent
+        if current_different_pixels is not None:
+            metadata["approved_different_pixels"] = int(current_different_pixels)
+        if current_total_pixels is not None:
+            metadata["approved_total_pixels"] = int(current_total_pixels)
 
     metadata["status"] = status
     temporary_path = metadata_path.with_name(f".{metadata_path.name}.tmp")
@@ -187,7 +262,7 @@ def test_review(request: Request, path: str) -> HTMLResponse:
         name="test-review.html",
         context={
             "test": test,
-            **approval_context(test),
+            **report_context(test),
             **render_context(test, "olive"),
         },
     )
@@ -219,7 +294,7 @@ def approval_response(request: Request, path: str) -> HTMLResponse:
     return templates.TemplateResponse(
         request=request,
         name="approval-controls.html",
-        context={"test": test, **approval_context(test)},
+        context={"test": test, **report_context(test)},
     )
 
 

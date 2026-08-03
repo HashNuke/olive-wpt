@@ -6,7 +6,20 @@
   <strong class="approval-pending">Not approved</strong>
   {% endif %}
 </p>
-{% if metadata_available and olive_available %}
+{% if comparison_status != "unavailable" %}
+<p>
+  Current result:
+  <strong class="comparison-{{ comparison_status|replace(' ', '-') }}">{{ comparison_status|capitalize }}</strong>
+  {% if comparison_passed is not none %}
+  — <strong class="comparison-{{ comparison_outcome }}">{{ comparison_outcome|capitalize }}</strong>
+  {% endif %}
+  {% if current_diff_percent is not none %}({{ "%.4f"|format(current_diff_percent) }}% different){% endif %}
+</p>
+{% if approved_diff_percent is not none %}
+<p>Approved baseline diff: {{ "%.4f"|format(approved_diff_percent) }}%</p>
+{% endif %}
+{% endif %}
+{% if metadata_available and olive_available and current_comparison_available %}
   {% if approval_status == "approved" %}
   <button hx-post="{{ test.approval_url(false) }}" hx-target="#approval-controls" hx-swap="outerHTML">Unapprove Olive render</button>
   {% else %}
@@ -14,6 +27,8 @@
   {% endif %}
 {% elif not metadata_available %}
 <p class="missing-render">Approval is unavailable because metadata is missing.</p>
+{% elif not current_comparison_available %}
+<p class="missing-render">Approval is unavailable because the current comparison is missing.</p>
 {% else %}
 <p class="missing-render">Approval is unavailable because the Olive render is missing.</p>
 {% endif %}

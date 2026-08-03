@@ -30,3 +30,8 @@ review page, where the Olive and Chrome renders are shown when available. It
 does not enumerate Git or output files. Review pages use
 `/test-report/view?path=<wpt-test-path>` and provide HTMX controls for switching
 between renders and approving or unapproving the Olive result.
+
+Each run writes current comparison metrics to ignored `current.json`. Approval
+stores the approved result hash and diff baseline in `metadata.json`; the review
+page reports unchanged, improved, equal, and regressed results without treating
+metadata-only changes as render changes.
