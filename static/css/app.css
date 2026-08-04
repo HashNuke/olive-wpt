@@ -466,11 +466,6 @@ body.test-review {
   .approval-body {
     display: block;
   }
-
-  .review-actions-row {
-    align-items: stretch;
-    flex-direction: column;
-  }
 }
 
 @media (max-width: 38rem) {
@@ -490,5 +485,10 @@ body.test-review {
 
   .rejection-actions {
     grid-column: 1 / -1;
+  }
+
+  .review-actions-row {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
