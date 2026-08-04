@@ -35,6 +35,12 @@ between Olive, reference, and in-memory comparison tabs, with links that open
 the images independently and controls for approving or unapproving the Olive
 result.
 
+The source checkout tag is recorded in [`WPT_REVISION`](WPT_REVISION). Run
+[`bin/update-wpt`](bin/update-wpt) from this repository to fetch the newest
+`merge_pr_*` tag, keep the shared checkout at that tag in a one-commit shallow
+detached state, regenerate `wpt_paths.txt`, prune output directories for paths
+that no longer exist, and generate missing Chromium `reference.png` files.
+
 Each run writes current comparison metrics to ignored `current.json` and a
 `current/result.csv` status index. The CSV has `status,path` columns and uses
 `PASS`, `FAIL`, or `UNKN` for each WPT-relative test path. The home

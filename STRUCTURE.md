@@ -5,6 +5,10 @@ each WPT path. They do not copy WPT source files into this repository. The sourc
 remains in the shared external WPT checkout, and the directory preserves the
 complete WPT-relative path under `outputs/`.
 
+The source checkout tag used for the inventory is recorded in `WPT_REVISION`.
+`bin/update-wpt` refreshes that tag, the inventory, and missing Chromium
+references as one repeatable operation.
+
 The test filename becomes a directory name with its extension spelled out:
 
 ```text
