@@ -157,6 +157,27 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.assertIn('data-status-tab="NONE"', html)
         self.assertIn('data-status-item="NONE"', html)
         self.assertIn("No tests have this status.", html)
+        self.assertIn("Reconcile results", html)
+
+    def test_reconcile_results_rebuilds_the_status_index_on_demand(self):
+        with patch.object(app, "load_wpt_tests", return_value=(self.test,)) as load_tests:
+            with patch.object(app, "write_result_statuses") as write_statuses:
+                response = app.reconcile_results()
+
+        self.assertEqual(response.status_code, 204)
+        load_tests.assert_called_once_with()
+        write_statuses.assert_called_once_with((self.test,))
+
+    def test_approval_does_not_rebuild_the_full_status_index(self):
+        with patch.object(app, "get_wpt_test", return_value=self.test):
+            with patch.object(app, "write_approval_status"):
+                with patch.object(app, "delete_review_state"):
+                    with patch.object(app, "write_result_statuses") as write_statuses:
+                        with patch.object(app, "approval_response", return_value="updated"):
+                            response = app.approve_test(None, self.test.path)
+
+        self.assertEqual(response, "updated")
+        write_statuses.assert_not_called()
 
     def test_review_title_has_wrapping_class_for_long_wpt_paths(self):
         html = app.templates.get_template("test-review.html").render(

@@ -659,7 +659,6 @@ def approve_test(request: Request, path: str) -> HTMLResponse:
     test = get_wpt_test(path)
     write_approval_status(test, "approved")
     delete_review_state(test)
-    write_result_statuses(load_wpt_tests())
     return approval_response(request, path)
 
 
@@ -667,7 +666,6 @@ def approve_test(request: Request, path: str) -> HTMLResponse:
 def unapprove_test(request: Request, path: str) -> HTMLResponse:
     test = get_wpt_test(path)
     write_approval_status(test, "pending")
-    write_result_statuses(load_wpt_tests())
     return approval_response(request, path)
 
 
@@ -681,7 +679,6 @@ async def reject_test(request: Request, path: str) -> HTMLResponse:
     if not reason:
         raise HTTPException(status_code=400, detail="A rejection reason is required")
     write_review_state(test, reason)
-    write_result_statuses(load_wpt_tests())
     return approval_response(request, path)
 
 
@@ -689,8 +686,13 @@ async def reject_test(request: Request, path: str) -> HTMLResponse:
 def unreject_test(request: Request, path: str) -> HTMLResponse:
     test = get_wpt_test(path)
     delete_review_state(test)
-    write_result_statuses(load_wpt_tests())
     return approval_response(request, path)
+
+
+@app.post("/test-report/reconcile", status_code=204)
+def reconcile_results() -> Response:
+    write_result_statuses(load_wpt_tests())
+    return Response(status_code=204)
 
 
 __all__ = ["app"]

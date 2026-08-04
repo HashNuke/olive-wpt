@@ -5,6 +5,11 @@
 
 {% block content %}
 <h1>Olive WPT Outputs</h1>
+<div class="wpt-home-actions">
+  <form hx-post="/test-report/reconcile" hx-swap="none">
+    <button type="submit">Reconcile results</button>
+  </form>
+</div>
 <nav class="wpt-status-tabs" aria-label="Filter WPT tests" role="tablist">
   {% for status in status_tabs %}
   <button type="button" class="wpt-status-tab{% if loop.first %} active{% endif %}" role="tab" aria-selected="{{ 'true' if loop.first else 'false' }}" aria-controls="wpt-test-list" data-status-tab="{{ status }}">

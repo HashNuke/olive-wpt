@@ -55,6 +55,7 @@ function actionElement(event) {
 function actionMessage(element) {
   const action = element && element.getAttribute("hx-post");
   if (!action) return "Review updated";
+  if (action.includes("/reconcile")) return "Results reconciled";
   if (action.includes("/approve?")) return "Render approved";
   if (action.includes("/unapprove?")) return "Render unapproved";
   if (action.includes("/reject?")) return "Render rejected";
@@ -126,6 +127,10 @@ document.body.addEventListener("htmx:afterRequest", (event) => {
     successful ? actionMessage(element) : "Could not update review",
     !successful,
   );
+  const action = element.getAttribute("hx-post") || "";
+  if (successful && action.includes("/reconcile")) {
+    window.setTimeout(() => window.location.reload(), 700);
+  }
 });
 
 document.body.addEventListener("htmx:sendError", (event) => {

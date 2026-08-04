@@ -16,6 +16,27 @@ body.wpt-index {
   color: #1f2933;
 }
 
+.wpt-home-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.wpt-home-actions button {
+  padding: 0.4rem 0.65rem;
+  border: 1px solid #c8ced6;
+  border-radius: 0.25rem;
+  background: #ffffff;
+  color: #1f2933;
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.wpt-home-actions button:hover {
+  background: #e8edf2;
+}
+
 .wpt-status-tabs {
   display: flex;
   flex-wrap: wrap;
