@@ -89,6 +89,37 @@ class DatabaseTests(unittest.TestCase):
         finally:
             temporary.cleanup()
 
+    def test_approved_improved_render_is_pass(self):
+        temporary, root = self.make_project()
+        try:
+            (root / "outputs" / "css" / "example-html-test" / "metadata.json").write_text(
+                json.dumps(
+                    {
+                        "status": "approved",
+                        "approved_result_sha256": "older-render",
+                        "approved_diff_percent": 2.0,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            current_path = root / "outputs" / "css" / "example-html-test" / "current.json"
+            current = json.loads(current_path.read_text(encoding="utf-8"))
+            current["current_diff_percent"] = 1.0
+            current["run_passed"] = False
+            current["run_outcome"] = "pixel_mismatch"
+            current_path.write_text(json.dumps(current), encoding="utf-8")
+
+            db.rebuild_database(root)
+
+            with sqlite3.connect(root / "data.sqlite") as connection:
+                status = connection.execute(
+                    "SELECT status FROM wpt_tests WHERE path = ?",
+                    ("css/example.html",),
+                ).fetchone()[0]
+            self.assertEqual(status, "PASS")
+        finally:
+            temporary.cleanup()
+
 
 if __name__ == "__main__":
     unittest.main()

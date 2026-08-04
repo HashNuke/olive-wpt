@@ -323,6 +323,8 @@ def report_context(test: WptTest) -> dict[str, object]:
             approved_diff_percent,
             "approved",
         )
+        if review_status == "improved":
+            review_status = "approved"
     else:
         review_status = "pending"
     return {
@@ -356,13 +358,22 @@ def home_status(test: WptTest) -> str:
     context = report_context(test)
     if not context["olive_available"]:
         return "NONE"
+    approved_improved = (
+        context["approval_status"] == "approved"
+        and not context["review_state_available"]
+        and context["current_diff_percent"] is not None
+        and context["approved_diff_percent"] is not None
+        and context["current_diff_percent"] < context["approved_diff_percent"]
+    )
     if context["run_passed"] is False:
         approved_hash = context["approved_result_sha256"]
         current_hash = context["current_result_sha256"]
         if not (
             context["approval_status"] == "approved"
-            and current_hash
-            and current_hash == approved_hash
+            and (
+                (current_hash and current_hash == approved_hash)
+                or approved_improved
+            )
         ):
             return "FAIL"
     if context["review_status"] == "rejected":
@@ -375,7 +386,7 @@ def home_status(test: WptTest) -> str:
     approved_hash = context["approved_result_sha256"]
     if not current_hash or not approved_hash:
         return "UNKN"
-    return "PASS" if current_hash == approved_hash else "REVW"
+    return "PASS" if current_hash == approved_hash or approved_improved else "REVW"
 
 
 def load_database_statuses() -> dict[str, str]:

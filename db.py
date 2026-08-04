@@ -104,6 +104,20 @@ def result_hash(path: Path) -> str | None:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def approved_result_improved(metadata, current) -> bool:
+    if not metadata or metadata.get("status") != "approved" or not current:
+        return False
+    approved_diff = metadata.get("approved_diff_percent")
+    current_diff = current.get("current_diff_percent")
+    return (
+        isinstance(approved_diff, (int, float))
+        and not isinstance(approved_diff, bool)
+        and isinstance(current_diff, (int, float))
+        and not isinstance(current_diff, bool)
+        and current_diff < approved_diff
+    )
+
+
 def derive_status(result_path: Path, metadata, review_state, current) -> str:
     current_hash = result_hash(result_path)
     if current_hash is None:
@@ -115,11 +129,16 @@ def derive_status(result_path: Path, metadata, review_state, current) -> str:
         if not (
             metadata
             and metadata.get("status") == "approved"
-            and approved_hash == current_hash
+            and (approved_hash == current_hash or approved_result_improved(metadata, current))
         ):
             return "FAIL"
     if metadata and metadata.get("status") == "approved":
-        return "PASS" if metadata.get("approved_result_sha256") == current_hash else "REVW"
+        return (
+            "PASS"
+            if metadata.get("approved_result_sha256") == current_hash
+            or approved_result_improved(metadata, current)
+            else "REVW"
+        )
     return "UNKN"
 
 

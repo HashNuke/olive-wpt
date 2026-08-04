@@ -121,6 +121,30 @@ class ReportImagePresentationTests(unittest.TestCase):
 
         self.assertEqual(app.result_status(self.test), "PASS")
 
+    def test_approved_improved_render_is_pass_without_review_label(self):
+        self.write_artifact("result.png")
+        self.write_artifact("reference.png")
+        self.write_current_comparison(0.5)
+        current_path = self.artifact_directory / "current.json"
+        current = json.loads(current_path.read_text(encoding="utf-8"))
+        current["run_passed"] = False
+        current["run_outcome"] = "pixel_mismatch"
+        current_path.write_text(json.dumps(current), encoding="utf-8")
+        (self.artifact_directory / "metadata.json").write_text(
+            json.dumps(
+                {
+                    "status": "approved",
+                    "approved_result_sha256": "older-render",
+                    "approved_diff_percent": 1.0,
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        context = app.report_context(self.test)
+        self.assertEqual(context["review_status"], "approved")
+        self.assertEqual(app.result_status(self.test), "PASS")
+
     def test_missing_olive_render_is_none_without_csv(self):
         self.write_artifact("reference.png")
         self.assertEqual(app.result_status(self.test), "NONE")

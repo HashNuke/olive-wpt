@@ -19,6 +19,8 @@
     <span class="approval-label">Review</span>
     {% if review_status == "rejected" %}
     <strong class="approval-rejected">Rejected</strong>
+    {% elif review_status == "approved" %}
+    <strong class="approval-approved">Approved</strong>
     {% elif review_status in ("improved", "regressed", "changed") %}
     <strong class="approval-review">Needs review ({{ review_status }})</strong>
     {% else %}
