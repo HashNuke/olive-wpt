@@ -79,10 +79,14 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.write_current_comparison(2.0)
         improved = app.report_context(self.test)
         self.assertEqual(improved["review_status"], "improved")
-        self.assertEqual(app.home_status(self.test), "REVIEW")
+        self.assertEqual(app.home_status(self.test), "REVW")
 
         app.delete_review_state(self.test)
         self.assertFalse(app.review_state_path_for_wpt_path(self.test.path).exists())
+
+    def test_home_status_is_none_without_an_olive_render(self):
+        self.write_artifact("reference.png")
+        self.assertEqual(app.home_status(self.test), "NONE")
 
 
 if __name__ == "__main__":

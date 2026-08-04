@@ -346,17 +346,19 @@ def report_context(test: WptTest) -> dict[str, object]:
 
 def home_status(test: WptTest) -> str:
     context = report_context(test)
+    if not context["olive_available"]:
+        return "NONE"
     if context["review_status"] == "rejected":
         return "FAIL"
     if context["review_status"] in {"changed", "improved", "regressed"}:
-        return "REVIEW"
+        return "REVW"
     if context["approval_status"] != "approved" or not context["approved_baseline_available"]:
         return "UNKN"
     current_hash = context["current_result_sha256"]
     approved_hash = context["approved_result_sha256"]
     if not current_hash or not approved_hash:
         return "UNKN"
-    return "PASS" if current_hash == approved_hash else "FAIL"
+    return "PASS" if current_hash == approved_hash else "REVW"
 
 
 def load_result_statuses(path: Path = WPT_RESULTS_FILE) -> dict[str, str]:
@@ -371,7 +373,9 @@ def load_result_statuses(path: Path = WPT_RESULTS_FILE) -> dict[str, str]:
             for row in rows:
                 status = row.get("status")
                 wpt_path = row.get("path")
-                if status not in {"PASS", "FAIL", "REVIEW", "UNKN"} or not wpt_path:
+                if status == "REVIEW":
+                    status = "REVW"
+                if status not in {"PASS", "FAIL", "REVW", "UNKN", "NONE"} or not wpt_path:
                     raise ValueError("result CSV contains an invalid row")
                 statuses[wpt_path] = status
             return statuses

@@ -47,14 +47,14 @@ updater run succeeds for them.
 
 Each run writes current comparison metrics to ignored `current.json` and a
 `current/result.csv` status index. The CSV has `status,path` columns and uses
-`PASS`, `FAIL`, `REVIEW`, or `UNKN` for each WPT-relative test path. The home
-page prefixes each test with the same status: only an exact approved result is
-`PASS`, a rejected current result is `FAIL`, a changed or improved result is
-`REVIEW`, and a test without an approved baseline is `UNKN`. Approval stores
-the approved result hash and diff baseline in `metadata.json`. A rejected render
-stores its reason and exact result/reference hashes in a tracked per-test
-`review-state.json`; the local `result.png` is deliberately not committed while
-metadata is pending. Approving the render updates `metadata.json`, deletes
-`review-state.json`, and allows the matching `result.png` to be committed. A
-changed or improved render is shown as `REVIEW` until it is approved or rejected
-again.
+`PASS`, `FAIL`, `REVW`, `UNKN`, or `NONE` for each WPT-relative test path. The
+home page prefixes each test with the same status: `PASS` means the current
+Olive result matches an approved hash, `FAIL` means it matches a recorded
+rejection, `REVW` means it changed after approval or rejection, `UNKN` means an
+Olive result exists but has not been reviewed, and `NONE` means no Olive result
+exists. Approval stores the approved result hash and diff baseline in
+`metadata.json`. A rejected render stores its reason and exact result/reference
+hashes in a tracked per-test `review-state.json`; the local `result.png` is
+deliberately not committed while metadata is pending. Approving the render
+updates `metadata.json`, deletes `review-state.json`, and allows the matching
+`result.png` to be committed.

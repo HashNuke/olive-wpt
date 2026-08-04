@@ -56,7 +56,7 @@ comparison metrics:
 ```
 
 The ignored `current/result.csv` file is the home-page status index. It has
-`status,path` columns, with one `PASS`, `FAIL`, `REVIEW`, or `UNKN` row per
+`status,path` columns, with one `PASS`, `FAIL`, `REVW`, `UNKN`, or `NONE` row per
 WPT-relative test path.
 
 The generated baseline commit contains `reference.png` files. An approved test
@@ -103,10 +103,12 @@ committed unless the staged metadata approves that exact result hash.
 `external/wpt/` or an absolute checkout path.
 
 If no committed `result.png` and approved `metadata.json` exist, the test is
-pending approval. A rejected current result is `FAIL`; a changed or improved
-result after review is `REVIEW`; an exact approved result is `PASS`. The
-application can derive these states from Git plus the current output files; the
-generated reference diff is review evidence, not an approval artifact.
+pending approval. A missing Olive `result.png` is `NONE`; an available result
+without a review decision is `UNKN`; a rejected current result is `FAIL`; a
+changed or improved result after review is `REVW`; and an exact approved result
+is `PASS`. The application can derive these states from Git plus the current
+output files; the generated reference diff is review evidence, not an approval
+artifact.
 
 Renderer and infrastructure errors are reported separately from pending,
 approved, and deviation states.
