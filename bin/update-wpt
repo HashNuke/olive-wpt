@@ -217,7 +217,6 @@ def main() -> int:
             str(args.workers),
             "--timeout-ms",
             str(args.timeout_ms),
-            "--skip-existing",
         ]
         if args.chromium:
             command.extend(["--chromium", args.chromium])
