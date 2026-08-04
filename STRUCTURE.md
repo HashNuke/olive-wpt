@@ -7,7 +7,9 @@ complete WPT-relative path under `outputs/`.
 
 The source checkout tag used for the inventory is recorded in `WPT_REVISION`.
 `bin/update-wpt` refreshes that tag, the inventory, and missing Chromium
-references as one repeatable operation.
+references as one repeatable operation. Paths whose references still fail are
+listed in `failed-references.txt` and omitted from the active `wpt_paths.txt`
+until a later refresh succeeds.
 
 The test filename becomes a directory name with its extension spelled out:
 

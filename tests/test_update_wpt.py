@@ -56,6 +56,21 @@ class UpdateWptTests(unittest.TestCase):
             self.assertTrue(expected.is_dir())
             self.assertFalse(stale.exists())
 
+    def test_failed_references_are_removed_from_active_inventory(self):
+        report = {
+            "results": [
+                {"path": "ok.html", "status": "ok"},
+                {"path": "request-failure.html", "status": "ok_with_request_failures"},
+                {"path": "timeout.html", "status": "timeout"},
+            ]
+        }
+        self.assertEqual(
+            update_wpt.failed_reference_paths(
+                report, ["ok.html", "request-failure.html", "timeout.html"]
+            ),
+            ["timeout.html"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

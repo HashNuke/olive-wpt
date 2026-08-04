@@ -40,6 +40,9 @@ The source checkout tag is recorded in [`WPT_REVISION`](WPT_REVISION). Run
 `merge_pr_*` tag, keep the shared checkout at that tag in a one-commit shallow
 detached state, regenerate `wpt_paths.txt`, prune output directories for paths
 that no longer exist, and generate missing Chromium `reference.png` files.
+Tests whose references still fail generation are written to
+`failed-references.txt` and removed from the active inventory until a later
+updater run succeeds for them.
 
 Each run writes current comparison metrics to ignored `current.json` and a
 `current/result.csv` status index. The CSV has `status,path` columns and uses
