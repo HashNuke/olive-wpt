@@ -175,6 +175,37 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.assertIn("No tests have this status.", html)
         self.assertIn("Rebuild database", html)
 
+    def test_home_tests_sort_by_current_diff_descending_with_missing_last(self):
+        lower = app.WptTest(
+            path="css/lower.html",
+            url="https://wpt.live/css/lower.html",
+            review_url="/test-report/view?path=css%2Flower.html",
+        )
+        higher = app.WptTest(
+            path="css/higher.html",
+            url="https://wpt.live/css/higher.html",
+            review_url="/test-report/view?path=css%2Fhigher.html",
+        )
+        missing = app.WptTest(
+            path="css/missing.html",
+            url="https://wpt.live/css/missing.html",
+            review_url="/test-report/view?path=css%2Fmissing.html",
+        )
+
+        sorted_tests = app.sort_home_tests(
+            [
+                {"test": lower, "status": "FAIL", "current_diff_percent": 1.0},
+                {"test": missing, "status": "NONE", "current_diff_percent": None},
+                {"test": higher, "status": "FAIL", "current_diff_percent": 3.0},
+            ]
+        )
+
+        self.assertEqual([item["test"].path for item in sorted_tests], [
+            "css/higher.html",
+            "css/lower.html",
+            "css/missing.html",
+        ])
+
     def test_reconcile_results_rebuilds_the_status_index_on_demand(self):
         with patch.object(app, "run_build_db") as build_db:
             response = app.reconcile_results()

@@ -15,7 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from PIL import Image, ImageChops, UnidentifiedImageError
 
-from db import load_statuses, upsert_test
+from db import load_test_index, load_statuses, upsert_test
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -570,6 +570,17 @@ def get_wpt_test(wpt_path: str) -> WptTest:
     return test
 
 
+def sort_home_tests(tests: list[dict[str, object]]) -> list[dict[str, object]]:
+    return sorted(
+        tests,
+        key=lambda item: (
+            item["current_diff_percent"] is None,
+            -(item["current_diff_percent"] or 0.0),
+            item["test"].path,
+        ),
+    )
+
+
 app = FastAPI(
     title="Olive WPT Output Review",
     version="0.1.0",
@@ -582,8 +593,17 @@ app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request) -> HTMLResponse:
     wpt_tests = load_wpt_tests()
-    statuses = load_database_statuses()
-    tests = [{"test": test, "status": statuses.get(test.path, "NONE")} for test in wpt_tests]
+    test_index = load_test_index(WPT_DATABASE_FILE)
+    tests = sort_home_tests(
+        [
+            {
+                "test": test,
+                "status": test_index.get(test.path, {}).get("status", "NONE"),
+                "current_diff_percent": test_index.get(test.path, {}).get("current_diff_percent"),
+            }
+            for test in wpt_tests
+        ]
+    )
     status_counts = {status: 0 for status in HOME_STATUS_TABS}
     status_counts["ALL"] = len(tests)
     for item in tests:

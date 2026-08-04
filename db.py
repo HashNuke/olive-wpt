@@ -231,3 +231,19 @@ def load_statuses(database_path: Path) -> dict[str, str]:
         return {record.path: record.status for record in WptTestRecord.select()}
     finally:
         database.close()
+
+
+def load_test_index(database_path: Path) -> dict[str, dict[str, object]]:
+    if not database_path.is_file():
+        raise FileNotFoundError(database_path)
+    database = open_database(database_path)
+    try:
+        return {
+            record.path: {
+                "status": record.status,
+                "current_diff_percent": record.current_diff_percent,
+            }
+            for record in WptTestRecord.select()
+        }
+    finally:
+        database.close()

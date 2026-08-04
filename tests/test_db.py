@@ -59,6 +59,22 @@ class DatabaseTests(unittest.TestCase):
         finally:
             temporary.cleanup()
 
+    def test_load_test_index_includes_current_diff(self):
+        temporary, root = self.make_project()
+        try:
+            db.rebuild_database(root)
+            index = db.load_test_index(root / "data.sqlite")
+            self.assertEqual(index["css/example.html"], {
+                "status": "UNKN",
+                "current_diff_percent": 1.5,
+            })
+            self.assertEqual(index["css/missing.html"], {
+                "status": "NONE",
+                "current_diff_percent": None,
+            })
+        finally:
+            temporary.cleanup()
+
     def test_approved_unchanged_render_ignores_existing_run_mismatch(self):
         temporary, root = self.make_project()
         try:
