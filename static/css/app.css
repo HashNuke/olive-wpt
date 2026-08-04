@@ -119,6 +119,12 @@ body.wpt-index {
   color: #8a4b08;
 }
 
+.wpt-test-diff {
+  color: #6b7280;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
 body.test-review {
   margin: 2rem;
 }

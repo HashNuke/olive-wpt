@@ -165,7 +165,7 @@ class ReportImagePresentationTests(unittest.TestCase):
 
     def test_home_template_contains_status_tabs_and_filterable_rows(self):
         html = app.templates.get_template("home.html").render(
-            tests=[{"test": self.test, "status": "NONE"}],
+            tests=[{"test": self.test, "status": "NONE", "current_diff_percent": 1.234}],
             status_tabs=app.HOME_STATUS_TABS,
             status_counts={"ALL": 1, "PASS": 0, "FAIL": 0, "REVW": 0, "UNKN": 0, "NONE": 1},
         )
@@ -174,6 +174,7 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.assertIn('data-status-item="NONE"', html)
         self.assertIn("No tests have this status.", html)
         self.assertIn("Rebuild database", html)
+        self.assertIn("(1.23%)", html)
 
     def test_home_tests_sort_by_current_diff_descending_with_missing_last(self):
         lower = app.WptTest(

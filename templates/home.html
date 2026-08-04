@@ -24,6 +24,9 @@
   <li class="wpt-test-entry" data-status-item="{{ item.status }}">
     <span class="wpt-status wpt-status-{{ item.status|lower }}">[{{ item.status }}]</span>
     <a href="{{ item.test.review_url }}">{{ item.test.path }}</a>
+    {% if item.current_diff_percent is not none %}
+    <span class="wpt-test-diff">({{ "%.2f"|format(item.current_diff_percent) }}%)</span>
+    {% endif %}
   </li>
   {% endfor %}
 </ul>
