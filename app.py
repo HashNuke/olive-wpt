@@ -283,6 +283,7 @@ def report_context(test: WptTest) -> dict[str, object]:
     current_diff_percent = comparison_number(current, "current_diff_percent")
     run_passed = current.get("run_passed") if current and isinstance(current.get("run_passed"), bool) else None
     run_outcome = current.get("run_outcome") if current and isinstance(current.get("run_outcome"), str) else None
+    run_detail = current.get("run_detail") if current and isinstance(current.get("run_detail"), str) else None
     approved_diff_percent = comparison_number(metadata, "approved_diff_percent")
     current_hash = result_sha256(test)
     current_reference_hash = reference_sha256(test)
@@ -341,6 +342,7 @@ def report_context(test: WptTest) -> dict[str, object]:
         "current_diff_percent": current_diff_percent,
         "run_passed": run_passed,
         "run_outcome": run_outcome,
+        "run_detail": run_detail,
         "approved_diff_percent": approved_diff_percent,
         "comparison_status": comparison_status,
         "comparison_passed": comparison_passed,
@@ -355,7 +357,14 @@ def home_status(test: WptTest) -> str:
     if not context["olive_available"]:
         return "NONE"
     if context["run_passed"] is False:
-        return "FAIL"
+        approved_hash = context["approved_result_sha256"]
+        current_hash = context["current_result_sha256"]
+        if not (
+            context["approval_status"] == "approved"
+            and current_hash
+            and current_hash == approved_hash
+        ):
+            return "FAIL"
     if context["review_status"] == "rejected":
         return "FAIL"
     if context["review_status"] in {"changed", "improved", "regressed"}:

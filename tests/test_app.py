@@ -99,6 +99,28 @@ class ReportImagePresentationTests(unittest.TestCase):
         current_path.write_text(json.dumps(current), encoding="utf-8")
         self.assertEqual(app.result_status(self.test), "FAIL")
 
+    def test_approved_unchanged_render_is_not_marked_fail_for_existing_mismatch(self):
+        self.write_artifact("result.png")
+        self.write_artifact("reference.png")
+        self.write_current_comparison(1.0)
+        current_path = self.artifact_directory / "current.json"
+        current = json.loads(current_path.read_text(encoding="utf-8"))
+        current["run_passed"] = False
+        current["run_outcome"] = "pixel_mismatch"
+        current_path.write_text(json.dumps(current), encoding="utf-8")
+        (self.artifact_directory / "metadata.json").write_text(
+            json.dumps(
+                {
+                    "status": "approved",
+                    "approved_result_sha256": app.result_sha256(self.test),
+                    "approved_diff_percent": 1.0,
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        self.assertEqual(app.result_status(self.test), "PASS")
+
     def test_missing_olive_render_is_none_without_csv(self):
         self.write_artifact("reference.png")
         self.assertEqual(app.result_status(self.test), "NONE")
@@ -200,6 +222,29 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.assertIn(">Approve</button>", html)
         self.assertIn(">Reject</button>", html)
         self.assertIn('rows="3"', html)
+
+    def test_approval_controls_show_run_failure_reason(self):
+        html = app.templates.get_template("approval-controls.html").render(
+            test=self.test,
+            result_status="FAIL",
+            approval_status="pending",
+            review_status="pending",
+            review_reason=None,
+            rejected=False,
+            metadata_available=False,
+            olive_available=True,
+            current_comparison_available=True,
+            current_result_sha256="current",
+            approved_result_sha256=None,
+            current_diff_percent=1.0,
+            approved_diff_percent=None,
+            comparison_status="awaiting approval",
+            run_passed=False,
+            run_outcome="pixel_mismatch",
+            run_detail="no match reference matched",
+        )
+        self.assertIn("Run failed: pixel_mismatch", html)
+        self.assertIn("no match reference matched", html)
 
     def test_base_template_contains_transient_action_toast(self):
         html = app.templates.get_template("base.html").render()

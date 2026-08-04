@@ -179,6 +179,18 @@ body.test-review {
   font-weight: normal;
 }
 
+.run-failure {
+  margin: 1rem 0 0;
+  padding: 0.65rem 0.8rem;
+  border-left: 3px solid #a12828;
+  background: #fff1f1;
+  color: #6f1d1d;
+}
+
+.run-failure p {
+  margin: 0.25rem 0 0;
+}
+
 .render-panel img {
   display: block;
   max-width: 100%;
