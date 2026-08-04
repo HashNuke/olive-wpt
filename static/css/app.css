@@ -243,11 +243,8 @@ body.test-review {
 }
 
 .approval-body {
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.85fr);
-  gap: 0.65rem;
+  display: block;
   margin-top: 0.65rem;
-  align-items: stretch;
 }
 
 .approval-panel {
@@ -275,10 +272,17 @@ body.test-review {
 .approval-actions {
   display: flex;
   flex-wrap: wrap;
+  flex: 0 0 auto;
   gap: 0.5rem;
   min-width: 0;
   align-items: flex-start;
   justify-content: flex-start;
+}
+
+.review-actions-row {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-end;
 }
 
 .approval-help {
@@ -332,6 +336,7 @@ body.test-review {
 
 .rejection-form {
   display: grid;
+  flex: 1 1 auto;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.5rem;
   min-width: 0;
@@ -459,7 +464,12 @@ body.test-review {
   }
 
   .approval-body {
-    grid-template-columns: minmax(0, 1fr);
+    display: block;
+  }
+
+  .review-actions-row {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 

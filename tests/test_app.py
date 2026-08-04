@@ -233,7 +233,8 @@ class ReportImagePresentationTests(unittest.TestCase):
             approved_diff_percent=None,
             comparison_status="awaiting approval",
         )
-        self.assertIn("Approve current Olive render", html)
+        self.assertIn(">Approve</button>", html)
+        self.assertIn(">Reject</button>", html)
         self.assertIn('rows="3"', html)
 
     def test_base_template_contains_transient_action_toast(self):

@@ -47,39 +47,34 @@
     {% if review_reason %}
     <p class="review-reason"><strong>Previous rejection:</strong> {{ review_reason }}</p>
     {% endif %}
-    {% if olive_available %}
-    <form class="rejection-form" hx-post="{{ test.rejection_url(true) }}" hx-target="#approval-controls" hx-swap="innerHTML">
-      <label for="rejection-reason">Reason for rejection</label>
-      <textarea id="rejection-reason" name="reason" rows="3" required placeholder="What should be fixed before approval?">{% if rejected %}{{ review_reason }}{% endif %}</textarea>
-      <div class="rejection-actions">
-        <button type="submit" class="approval-reject">{% if rejected %}Reject revised result{% else %}Reject current result{% endif %}</button>
-        {% if rejected %}
-        <button type="button" class="approval-reject approval-secondary" hx-post="{{ test.rejection_url(false) }}" hx-target="#approval-controls" hx-swap="innerHTML">Clear rejection</button>
+    <div class="review-actions-row">
+      {% if olive_available %}
+      <form class="rejection-form" hx-post="{{ test.rejection_url(true) }}" hx-target="#approval-controls" hx-swap="innerHTML">
+        <label for="rejection-reason">Reason for rejection</label>
+        <textarea id="rejection-reason" name="reason" rows="3" required placeholder="What should be fixed before approval?">{% if rejected %}{{ review_reason }}{% endif %}</textarea>
+        <div class="rejection-actions">
+          <button type="submit" class="approval-reject">Reject</button>
+          {% if rejected %}
+          <button type="button" class="approval-reject approval-secondary" hx-post="{{ test.rejection_url(false) }}" hx-target="#approval-controls" hx-swap="innerHTML">Clear rejection</button>
+          {% endif %}
+        </div>
+      </form>
+      {% else %}
+      <p class="approval-help">Olive render missing; feedback is unavailable.</p>
+      {% endif %}
+
+      <div class="approval-actions">
+        {% if olive_available and current_comparison_available and approval_status == "approved" and current_result_sha256 == approved_result_sha256 %}
+        <button type="button" hx-post="{{ test.approval_url(false) }}" hx-target="#approval-controls" hx-swap="innerHTML">Unapprove</button>
+        {% elif olive_available and current_comparison_available %}
+        <button type="button" class="approval-approve" hx-post="{{ test.approval_url(true) }}" hx-target="#approval-controls" hx-swap="innerHTML">Approve</button>
+        {% endif %}
+        {% if not olive_available %}
+        <span class="approval-help">Olive render missing.</span>
+        {% elif not current_comparison_available %}
+        <span class="approval-help">Current diff unavailable.</span>
         {% endif %}
       </div>
-    </form>
-    {% else %}
-    <p class="approval-help">Olive render missing; feedback is unavailable.</p>
-    {% endif %}
-  </section>
-
-  <section class="approval-panel approval-decision" aria-labelledby="decision-heading">
-    <div class="approval-panel-heading">
-      <h3 id="decision-heading">Decision</h3>
-    </div>
-    <div class="approval-actions">
-      {% if olive_available and current_comparison_available and approval_status == "approved" and current_result_sha256 == approved_result_sha256 %}
-      <button type="button" hx-post="{{ test.approval_url(false) }}" hx-target="#approval-controls" hx-swap="innerHTML">Unapprove</button>
-      {% elif olive_available and current_comparison_available %}
-      <button type="button" class="approval-approve" hx-post="{{ test.approval_url(true) }}" hx-target="#approval-controls" hx-swap="innerHTML">Approve current Olive render</button>
-      {% endif %}
-      {% if not olive_available %}
-      <span class="approval-help">Olive render missing.</span>
-      {% elif not current_comparison_available %}
-      <span class="approval-help">Current diff unavailable.</span>
-      {% elif not metadata_available %}
-      <span class="approval-help">Approval metadata will be created when approved.</span>
-      {% endif %}
     </div>
   </section>
 </div>
