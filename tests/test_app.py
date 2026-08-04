@@ -41,7 +41,7 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.write_artifact("result.png")
         context = app.render_context(self.test, "olive")
         html = app.templates.get_template("render-panel.html").render(**context)
-        self.assertIn(">Open image</a>", html)
+        self.assertIn(">[Open image]</a>", html)
         self.assertIn("<img ", html)
         self.assertNotIn("<a href=\"/test-report/image", html)
 

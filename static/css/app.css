@@ -98,8 +98,8 @@ body.test-review {
 
 .open-image {
   margin-left: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 400;
+  font-size: 0.75rem;
+  font-weight: normal;
 }
 
 .render-panel img {
