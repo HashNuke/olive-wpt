@@ -11,26 +11,28 @@ class DatabaseTests(unittest.TestCase):
     def make_project(self):
         temporary = tempfile.TemporaryDirectory()
         root = Path(temporary.name)
-        (root / "current").mkdir()
         (root / "outputs" / "css" / "example-html-test").mkdir(parents=True)
         (root / "wpt_paths.txt").write_text("css/example.html\ncss/missing.html\n", encoding="utf-8")
-        (root / "current" / "result.csv").write_text(
-            "status,path\nUNKN,css/example.html\nNONE,css/missing.html\n",
-            encoding="utf-8",
-        )
         (root / "outputs" / "css" / "example-html-test" / "result.png").write_bytes(b"result")
         (root / "outputs" / "css" / "example-html-test" / "current.json").write_text(
-            json.dumps({"current_diff_percent": 1.5}), encoding="utf-8"
+            json.dumps({"current_diff_percent": 1.5, "run_passed": True, "run_outcome": "pass"}),
+            encoding="utf-8",
         )
         return temporary, root
 
-    def test_rebuild_creates_rows_from_inventory_csv_and_json(self):
+    def test_rebuild_creates_rows_from_inventory_and_json(self):
         temporary, root = self.make_project()
         try:
             self.assertEqual(db.rebuild_database(root), 2)
             with sqlite3.connect(root / "data.sqlite") as connection:
                 rows = dict(connection.execute("SELECT path, status FROM wpt_tests"))
             self.assertEqual(rows, {"css/example.html": "UNKN", "css/missing.html": "NONE"})
+            with sqlite3.connect(root / "data.sqlite") as connection:
+                run_data = connection.execute(
+                    "SELECT run_passed, run_outcome FROM wpt_tests WHERE path = ?",
+                    ("css/example.html",),
+                ).fetchone()
+            self.assertEqual(run_data, (1, "pass"))
         finally:
             temporary.cleanup()
 

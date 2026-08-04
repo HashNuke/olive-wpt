@@ -55,12 +55,11 @@ comparison metrics:
 }
 ```
 
-The ignored `current/result.csv` file is the status export. It has `status,path`
-columns, with one `PASS`, `FAIL`, `REVW`, `UNKN`, or `NONE` row per WPT-relative
-test path. `bin/build-db` uses that export, the committed inventory, and each
-test's JSON files to rebuild the ignored Peewee/SQLite `data.sqlite` homepage
-index. The homepage reads SQLite; a test page reads its flat JSON, and page
-actions update both representations for the affected test.
+The ignored per-test `current.json` file stores comparison metrics and the WPT
+run outcome. `bin/build-db` uses the committed inventory and each test's PNG and
+JSON files to rebuild the ignored Peewee/SQLite `data.sqlite` homepage index.
+The homepage reads SQLite; a test page reads its flat JSON, and page actions
+update both representations for the affected test.
 
 The ignored `current/progress.json` file records the latest status delta:
 `new_passes`, `regressions`, `review_needed`, `unrendered`, `unreviewed`, and

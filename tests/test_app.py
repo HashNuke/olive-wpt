@@ -19,17 +19,9 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.artifact_directory = self.outputs_root / "css" / "example-html-test"
         self.outputs_patch = patch.object(app, "OUTPUTS_ROOT", self.outputs_root)
         self.outputs_patch.start()
-        self.results_path = Path(self.temp_directory.name) / "current" / "result.csv"
-        self.progress_path = Path(self.temp_directory.name) / "current" / "progress.json"
-        self.results_patch = patch.object(app, "WPT_RESULTS_FILE", self.results_path)
-        self.progress_patch = patch.object(app, "WPT_PROGRESS_FILE", self.progress_path)
-        self.results_patch.start()
-        self.progress_patch.start()
 
     def tearDown(self):
         self.outputs_patch.stop()
-        self.results_patch.stop()
-        self.progress_patch.stop()
         self.temp_directory.cleanup()
 
     def write_artifact(self, name):
@@ -96,42 +88,20 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.write_artifact("reference.png")
         self.assertEqual(app.home_status(self.test), "NONE")
 
-    def test_stale_csv_cannot_hide_missing_olive_render(self):
-        self.write_artifact("reference.png")
-        self.results_path.parent.mkdir(parents=True, exist_ok=True)
-        self.results_path.write_text(
-            "status,path\nUNKN,css/example.html\n", encoding="utf-8"
-        )
-        self.assertEqual(app.result_status(self.test), "NONE")
-        self.assertEqual(
-            app.indexed_result_status(self.test, {self.test.path: "UNKN"}),
-            "NONE",
-        )
-
-    def test_result_status_progress_records_new_pass_and_regression(self):
+    def test_current_json_run_failure_is_visible_without_csv(self):
         self.write_artifact("result.png")
         self.write_artifact("reference.png")
-        self.write_current_comparison(0.0)
-        app.write_result_statuses((self.test,))
-        self.assertEqual(app.load_result_statuses(self.results_path)[self.test.path], "UNKN")
+        self.write_current_comparison(1.0)
+        current_path = self.artifact_directory / "current.json"
+        current = json.loads(current_path.read_text(encoding="utf-8"))
+        current["run_passed"] = False
+        current["run_outcome"] = "pixel_mismatch"
+        current_path.write_text(json.dumps(current), encoding="utf-8")
+        self.assertEqual(app.result_status(self.test), "FAIL")
 
-        metadata = {
-            "status": "approved",
-            "approved_result_sha256": app.result_sha256(self.test),
-            "approved_diff_percent": 0.0,
-        }
-        (self.artifact_directory / "metadata.json").write_text(
-            json.dumps(metadata), encoding="utf-8"
-        )
-        app.write_result_statuses((self.test,))
-        progress = json.loads(self.progress_path.read_text(encoding="utf-8"))
-        self.assertEqual(progress["new_passes"], 1)
-        self.assertEqual(progress["regressions"], 0)
-
-        app.write_review_state(self.test, "Regression")
-        app.write_result_statuses((self.test,))
-        progress = json.loads(self.progress_path.read_text(encoding="utf-8"))
-        self.assertEqual(progress["regressions"], 1)
+    def test_missing_olive_render_is_none_without_csv(self):
+        self.write_artifact("reference.png")
+        self.assertEqual(app.result_status(self.test), "NONE")
 
     def test_approval_creates_missing_metadata_for_available_render(self):
         self.write_artifact("result.png")
@@ -157,31 +127,25 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.assertIn('data-status-tab="NONE"', html)
         self.assertIn('data-status-item="NONE"', html)
         self.assertIn("No tests have this status.", html)
-        self.assertIn("Reconcile results", html)
+        self.assertIn("Rebuild database", html)
 
     def test_reconcile_results_rebuilds_the_status_index_on_demand(self):
-        with patch.object(app, "load_wpt_tests", return_value=(self.test,)) as load_tests:
-            with patch.object(app, "write_result_statuses") as write_statuses:
-                with patch.object(app, "run_build_db") as build_db:
-                    response = app.reconcile_results()
+        with patch.object(app, "run_build_db") as build_db:
+            response = app.reconcile_results()
 
         self.assertEqual(response.status_code, 204)
-        load_tests.assert_called_once_with()
-        write_statuses.assert_called_once_with((self.test,))
         build_db.assert_called_once_with()
 
     def test_approval_does_not_rebuild_the_full_status_index(self):
         with patch.object(app, "get_wpt_test", return_value=self.test):
             with patch.object(app, "write_approval_status"):
                 with patch.object(app, "delete_review_state"):
-                    with patch.object(app, "write_result_statuses") as write_statuses:
-                        with patch.object(app, "update_database_test") as update_db:
-                            with patch.object(app, "stage_test_output") as stage_output:
-                                with patch.object(app, "approval_response", return_value="updated"):
-                                    response = app.approve_test(None, self.test.path)
+                    with patch.object(app, "update_database_test") as update_db:
+                        with patch.object(app, "stage_test_output") as stage_output:
+                            with patch.object(app, "approval_response", return_value="updated"):
+                                response = app.approve_test(None, self.test.path)
 
         self.assertEqual(response, "updated")
-        write_statuses.assert_not_called()
         update_db.assert_called_once_with(self.test)
         stage_output.assert_called_once_with(self.test)
 

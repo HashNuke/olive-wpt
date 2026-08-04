@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import csv
 import hashlib
 import json
 import os
@@ -15,10 +14,11 @@ from peewee import BooleanField, FloatField, Model, SqliteDatabase, TextField
 
 VALID_STATUSES = {"PASS", "FAIL", "REVW", "UNKN", "NONE"}
 ROW_FIELDS = (
-    "path", "status", "csv_status", "wpt_url", "output_directory",
+    "path", "status", "wpt_url", "output_directory",
     "result_exists", "reference_exists", "metadata_status",
     "approved_result_sha256", "review_state", "review_reason",
-    "current_diff_percent", "metadata_json", "review_state_json",
+    "wpt_passed", "run_passed", "run_outcome", "current_diff_percent",
+    "metadata_json", "review_state_json",
     "current_json", "updated_at",
 )
 
@@ -26,7 +26,6 @@ ROW_FIELDS = (
 class WptTestRecord(Model):
     path = TextField(primary_key=True)
     status = TextField()
-    csv_status = TextField(null=True)
     wpt_url = TextField()
     output_directory = TextField()
     result_exists = BooleanField()
@@ -35,6 +34,9 @@ class WptTestRecord(Model):
     approved_result_sha256 = TextField(null=True)
     review_state = TextField(null=True)
     review_reason = TextField(null=True)
+    wpt_passed = BooleanField(null=True)
+    run_passed = BooleanField(null=True)
+    run_outcome = TextField(null=True)
     current_diff_percent = FloatField(null=True)
     metadata_json = TextField(null=True)
     review_state_json = TextField(null=True)
@@ -86,25 +88,6 @@ def load_paths(path: Path) -> tuple[str, ...]:
     return tuple(sorted(paths))
 
 
-def load_csv_statuses(path: Path) -> dict[str, str]:
-    if not path.is_file():
-        return {}
-    with path.open(newline="", encoding="utf-8") as handle:
-        rows = csv.DictReader(handle)
-        if rows.fieldnames != ["status", "path"]:
-            raise ValueError("result CSV must have status,path columns")
-        statuses = {}
-        for row in rows:
-            status = row.get("status")
-            if status == "REVIEW":
-                status = "REVW"
-            wpt_path = row.get("path")
-            if status not in VALID_STATUSES or not wpt_path:
-                raise ValueError("result CSV contains an invalid row")
-            statuses[wpt_path] = status
-        return statuses
-
-
 def read_json(path: Path) -> tuple[str | None, dict[str, object] | None]:
     if not path.is_file():
         return None, None
@@ -121,31 +104,32 @@ def result_hash(path: Path) -> str | None:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def derive_status(result_path: Path, metadata, review_state, csv_status: str | None) -> str:
+def derive_status(result_path: Path, metadata, review_state, current) -> str:
     current_hash = result_hash(result_path)
     if current_hash is None:
         return "NONE"
     if review_state is not None:
         return "FAIL" if review_state.get("olive_result_sha256") == current_hash else "REVW"
+    if current and current.get("run_passed") is False:
+        return "FAIL"
     if metadata and metadata.get("status") == "approved":
         return "PASS" if metadata.get("approved_result_sha256") == current_hash else "REVW"
-    return csv_status if csv_status in VALID_STATUSES else "UNKN"
+    return "UNKN"
 
 
-def row_for_test(project_root: Path, path: str, csv_status=None, status=None) -> dict[str, object]:
+def row_for_test(project_root: Path, path: str, status=None) -> dict[str, object]:
     directory = output_directory(project_root, path)
     result_path = directory / "result.png"
     reference_path = directory / "reference.png"
     metadata_text, metadata = read_json(directory / "metadata.json")
     review_text, review_state = read_json(directory / "review-state.json")
     current_text, current = read_json(directory / "current.json")
-    status = status or derive_status(result_path, metadata, review_state, csv_status)
+    status = status or derive_status(result_path, metadata, review_state, current)
     if status not in VALID_STATUSES:
         raise ValueError(f"invalid WPT status for {path}: {status}")
     return {
         "path": path,
         "status": status,
-        "csv_status": csv_status,
         "wpt_url": f"https://wpt.live/{quote(path, safe='/')}",
         "output_directory": str(directory.relative_to(project_root)),
         "result_exists": result_path.is_file(),
@@ -154,6 +138,9 @@ def row_for_test(project_root: Path, path: str, csv_status=None, status=None) ->
         "approved_result_sha256": metadata.get("approved_result_sha256") if metadata else None,
         "review_state": review_state.get("state") if review_state else None,
         "review_reason": review_state.get("reason") if review_state else None,
+        "wpt_passed": current.get("wpt_passed") if current and isinstance(current.get("wpt_passed"), bool) else None,
+        "run_passed": current.get("run_passed") if current and isinstance(current.get("run_passed"), bool) else None,
+        "run_outcome": current.get("run_outcome") if current and isinstance(current.get("run_outcome"), str) else None,
         "current_diff_percent": current.get("current_diff_percent") if current else None,
         "metadata_json": metadata_text,
         "review_state_json": review_text,
@@ -171,13 +158,12 @@ def rebuild_database(project_root: Path) -> int:
     temporary_path = project_root / ".data.sqlite.tmp"
     if temporary_path.exists():
         temporary_path.unlink()
-    csv_statuses = load_csv_statuses(project_root / "current" / "result.csv")
     paths = load_paths(project_root / "wpt_paths.txt")
     database = open_database(temporary_path)
     try:
         with database.atomic():
             for path in paths:
-                insert_row(row_for_test(project_root, path, csv_statuses.get(path)))
+                insert_row(row_for_test(project_root, path))
     finally:
         database.close()
     os.replace(temporary_path, database_path)
@@ -187,9 +173,8 @@ def rebuild_database(project_root: Path) -> int:
 def upsert_test(project_root: Path, path: str, status: str) -> None:
     database = open_database(project_root / "data.sqlite")
     try:
-        csv_status = load_csv_statuses(project_root / "current" / "result.csv").get(path)
         with database.atomic():
-            insert_row(row_for_test(project_root, path, csv_status, status))
+            insert_row(row_for_test(project_root, path, status))
     finally:
         database.close()
 

@@ -1,6 +1,5 @@
 """FastAPI application for Olive WPT output review."""
 
-import csv
 import hashlib
 import json
 from dataclasses import dataclass
@@ -26,8 +25,6 @@ OUTPUTS_ROOT = PROJECT_ROOT / "outputs"
 WPT_PATHS_FILE = PROJECT_ROOT / "wpt_paths.txt"
 WPT_LIVE_ROOT = "https://wpt.live"
 CURRENT_COMPARISON_FILENAME = "current.json"
-WPT_RESULTS_FILE = PROJECT_ROOT / "current" / "result.csv"
-WPT_PROGRESS_FILE = PROJECT_ROOT / "current" / "progress.json"
 WPT_DATABASE_FILE = PROJECT_ROOT / "data.sqlite"
 REVIEW_STATE_FILENAME = "review-state.json"
 RENDER_LABELS = {
@@ -284,6 +281,8 @@ def report_context(test: WptTest) -> dict[str, object]:
     review_state = load_review_state(test)
     output_directory = output_directory_for_wpt_path(test.path)
     current_diff_percent = comparison_number(current, "current_diff_percent")
+    run_passed = current.get("run_passed") if current and isinstance(current.get("run_passed"), bool) else None
+    run_outcome = current.get("run_outcome") if current and isinstance(current.get("run_outcome"), str) else None
     approved_diff_percent = comparison_number(metadata, "approved_diff_percent")
     current_hash = result_sha256(test)
     current_reference_hash = reference_sha256(test)
@@ -340,6 +339,8 @@ def report_context(test: WptTest) -> dict[str, object]:
         "approved_baseline_available": approved_hash is not None and approved_diff_percent is not None,
         "current_comparison_available": current_diff_percent is not None,
         "current_diff_percent": current_diff_percent,
+        "run_passed": run_passed,
+        "run_outcome": run_outcome,
         "approved_diff_percent": approved_diff_percent,
         "comparison_status": comparison_status,
         "comparison_passed": comparison_passed,
@@ -353,6 +354,8 @@ def home_status(test: WptTest) -> str:
     context = report_context(test)
     if not context["olive_available"]:
         return "NONE"
+    if context["run_passed"] is False:
+        return "FAIL"
     if context["review_status"] == "rejected":
         return "FAIL"
     if context["review_status"] in {"changed", "improved", "regressed"}:
@@ -364,29 +367,6 @@ def home_status(test: WptTest) -> str:
     if not current_hash or not approved_hash:
         return "UNKN"
     return "PASS" if current_hash == approved_hash else "REVW"
-
-
-def load_result_statuses(path: Path | None = None) -> dict[str, str]:
-    path = WPT_RESULTS_FILE if path is None else path
-    if not path.is_file():
-        return {}
-    try:
-        with path.open(newline="", encoding="utf-8") as handle:
-            rows = csv.DictReader(handle)
-            if rows.fieldnames != ["status", "path"]:
-                raise ValueError("result CSV must have status,path columns")
-            statuses: dict[str, str] = {}
-            for row in rows:
-                status = row.get("status")
-                wpt_path = row.get("path")
-                if status == "REVIEW":
-                    status = "REVW"
-                if status not in {"PASS", "FAIL", "REVW", "UNKN", "NONE"} or not wpt_path:
-                    raise ValueError("result CSV contains an invalid row")
-                statuses[wpt_path] = status
-            return statuses
-    except (OSError, csv.Error, ValueError) as error:
-        raise HTTPException(status_code=500, detail="WPT result CSV is invalid") from error
 
 
 def load_database_statuses() -> dict[str, str]:
@@ -420,68 +400,6 @@ def stage_test_output(test: WptTest) -> None:
         )
     except (OSError, ValueError, subprocess.CalledProcessError) as error:
         raise HTTPException(status_code=500, detail="Could not stage approved WPT output") from error
-
-
-def indexed_result_status(test: WptTest, statuses: dict[str, str]) -> str:
-    if not (output_directory_for_wpt_path(test.path) / "result.png").is_file():
-        return "NONE"
-    return statuses.get(test.path, home_status(test))
-
-
-def write_progress_delta(
-    previous: dict[str, str],
-    current: dict[str, str],
-    tests: tuple[WptTest, ...],
-) -> None:
-    approved_paths = {
-        test.path
-        for test in tests
-        if (metadata := load_metadata(test))
-        and metadata.get("status") == "approved"
-        and isinstance(metadata.get("approved_result_sha256"), str)
-    }
-    progress = {
-        "schema_version": 1,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "new_passes": sum(
-            status == "PASS" and previous.get(path) not in {"PASS", None}
-            for path, status in current.items()
-        ),
-        "regressions": sum(
-            status == "FAIL" and (previous.get(path) == "PASS" or path in approved_paths)
-            for path, status in current.items()
-        ),
-        "review_needed": sum(status == "REVW" for status in current.values()),
-        "unrendered": sum(status == "NONE" for status in current.values()),
-        "unreviewed": sum(status == "UNKN" for status in current.values()),
-        "total": len(current),
-    }
-    WPT_PROGRESS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    temporary_path = WPT_PROGRESS_FILE.with_name(f".{WPT_PROGRESS_FILE.name}.tmp")
-    try:
-        temporary_path.write_text(json.dumps(progress, indent=2) + "\n", encoding="utf-8")
-        temporary_path.replace(WPT_PROGRESS_FILE)
-    finally:
-        if temporary_path.exists():
-            temporary_path.unlink()
-
-
-def write_result_statuses(tests: tuple[WptTest, ...]) -> None:
-    previous = load_result_statuses()
-    current = {test.path: home_status(test) for test in tests}
-    WPT_RESULTS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    temporary_path = WPT_RESULTS_FILE.with_name(f".{WPT_RESULTS_FILE.name}.tmp")
-    try:
-        with temporary_path.open("w", newline="", encoding="utf-8") as handle:
-            writer = csv.writer(handle)
-            writer.writerow(("status", "path"))
-            for test in tests:
-                writer.writerow((current[test.path], test.path))
-        temporary_path.replace(WPT_RESULTS_FILE)
-    finally:
-        if temporary_path.exists():
-            temporary_path.unlink()
-    write_progress_delta(previous, current, tests)
 
 
 def result_status(test: WptTest) -> str:
@@ -745,7 +663,6 @@ def unreject_test(request: Request, path: str) -> HTMLResponse:
 
 @app.post("/test-report/reconcile", status_code=204)
 def reconcile_results() -> Response:
-    write_result_statuses(load_wpt_tests())
     run_build_db()
     return Response(status_code=204)
 
