@@ -15,9 +15,10 @@ Before committing output changes, install the repository's pre-commit hook:
 bin/install-hooks
 ```
 
-The hook runs `bin/lint`. It examines only staged `metadata.json` files and
-rejects the commit unless each one contains the exact JSON field
-`"status": "approved"`. Other staged files are not blocked by this check.
+The hook runs `bin/lint`. It requires staged `metadata.json` files to contain
+`"status": "approved"`, and rejects staged `result.png` files unless their
+metadata approves that exact PNG hash. Other staged files are not blocked by
+this check.
 
 The application currently provides its FastAPI/static-asset scaffold and a
 directory-style home page. Pending, Approved, and Deviations routes will be
@@ -46,11 +47,14 @@ updater run succeeds for them.
 
 Each run writes current comparison metrics to ignored `current.json` and a
 `current/result.csv` status index. The CSV has `status,path` columns and uses
-`PASS`, `FAIL`, or `UNKN` for each WPT-relative test path. The home
-page prefixes each test with `PASS`, `FAIL`, or `UNKN`: only an exact match with
-an approved result is `PASS`, a changed approved result is `FAIL`, and a test
-without an approved baseline is `UNKN`. Approval stores the approved result hash
-and diff baseline in `metadata.json`. Local review rejections are stored in the
-ignored `current/rejections.txt` path list, so agents can work from the list
-without adding rejection state to the repository. A locally rejected test is
-shown as `FAIL` even when it has no previously approved render.
+`PASS`, `FAIL`, `REVIEW`, or `UNKN` for each WPT-relative test path. The home
+page prefixes each test with the same status: only an exact approved result is
+`PASS`, a rejected current result is `FAIL`, a changed or improved result is
+`REVIEW`, and a test without an approved baseline is `UNKN`. Approval stores
+the approved result hash and diff baseline in `metadata.json`. A rejected render
+stores its reason and exact result/reference hashes in a tracked per-test
+`review-state.json`; the local `result.png` is deliberately not committed while
+metadata is pending. Approving the render updates `metadata.json`, deletes
+`review-state.json`, and allows the matching `result.png` to be committed. A
+changed or improved render is shown as `REVIEW` until it is approved or rejected
+again.

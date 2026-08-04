@@ -4,10 +4,11 @@ import csv
 import hashlib
 import json
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from io import BytesIO
 from pathlib import Path, PurePosixPath
 import subprocess
-from urllib.parse import quote, urlencode
+from urllib.parse import parse_qs, quote, urlencode
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, Response
@@ -24,7 +25,7 @@ WPT_PATHS_FILE = PROJECT_ROOT / "wpt_paths.txt"
 WPT_LIVE_ROOT = "https://wpt.live"
 CURRENT_COMPARISON_FILENAME = "current.json"
 WPT_RESULTS_FILE = PROJECT_ROOT / "current" / "result.csv"
-REJECTIONS_FILE = PROJECT_ROOT / "current" / "rejections.txt"
+REVIEW_STATE_FILENAME = "review-state.json"
 RENDER_LABELS = {
     "olive": "Olive render",
     "reference": "Reference",
@@ -111,6 +112,10 @@ def metadata_path_for_wpt_path(wpt_path: str) -> Path:
     return output_directory_for_wpt_path(wpt_path) / "metadata.json"
 
 
+def review_state_path_for_wpt_path(wpt_path: str) -> Path:
+    return output_directory_for_wpt_path(wpt_path) / REVIEW_STATE_FILENAME
+
+
 def current_comparison_path_for_wpt_path(wpt_path: str) -> Path:
     return output_directory_for_wpt_path(wpt_path) / CURRENT_COMPARISON_FILENAME
 
@@ -141,11 +146,65 @@ def load_current_comparison(test: WptTest) -> dict[str, object] | None:
     return current
 
 
+def load_review_state(test: WptTest) -> dict[str, object] | None:
+    review_path = review_state_path_for_wpt_path(test.path)
+    if not review_path.is_file():
+        return None
+    try:
+        review = json.loads(review_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        raise HTTPException(status_code=500, detail="Review state is invalid JSON") from error
+    if not isinstance(review, dict):
+        raise HTTPException(status_code=500, detail="Review state must be a JSON object")
+    return review
+
+
 def result_sha256(test: WptTest) -> str | None:
     result_path = output_directory_for_wpt_path(test.path) / "result.png"
     if not result_path.is_file():
         return None
     return hashlib.sha256(result_path.read_bytes()).hexdigest()
+
+
+def reference_sha256(test: WptTest) -> str | None:
+    reference_path = output_directory_for_wpt_path(test.path) / "reference.png"
+    if not reference_path.is_file():
+        return None
+    return hashlib.sha256(reference_path.read_bytes()).hexdigest()
+
+
+def write_review_state(test: WptTest, reason: str) -> None:
+    current = load_current_comparison(test)
+    result_hash = result_sha256(test)
+    if result_hash is None:
+        raise HTTPException(status_code=409, detail="Current Olive render is not available")
+    state = {
+        "schema_version": 1,
+        "state": "rejected",
+        "reason": reason,
+        "olive_result_sha256": result_hash,
+        "reference_sha256": reference_sha256(test),
+        "diff_percent": comparison_number(current, "current_diff_percent"),
+        "different_pixels": comparison_number(current, "current_different_pixels"),
+        "total_pixels": comparison_number(current, "current_total_pixels"),
+        "reviewed_at": datetime.now(timezone.utc).isoformat(),
+    }
+    review_path = review_state_path_for_wpt_path(test.path)
+    review_path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path = review_path.with_name(f".{review_path.name}.tmp")
+    try:
+        temporary_path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
+        temporary_path.replace(review_path)
+    finally:
+        if temporary_path.exists():
+            temporary_path.unlink()
+
+
+def delete_review_state(test: WptTest) -> None:
+    try:
+        review_state_path_for_wpt_path(test.path).unlink()
+    except FileNotFoundError:
+        pass
 
 
 def approved_result_bytes(test: WptTest) -> bytes | None:
@@ -197,14 +256,35 @@ def comparison_number(comparison: dict[str, object] | None, key: str) -> float |
     return value if isinstance(value, (int, float)) and not isinstance(value, bool) else None
 
 
+def review_delta_status(
+    current_hash: str | None,
+    current_diff_percent: float | None,
+    reviewed_hash: str | None,
+    reviewed_diff_percent: float | None,
+    same_result_label: str,
+) -> str:
+    if current_hash and reviewed_hash and current_hash == reviewed_hash:
+        return same_result_label
+    if current_diff_percent is not None and reviewed_diff_percent is not None:
+        if current_diff_percent < reviewed_diff_percent:
+            return "improved"
+        if current_diff_percent > reviewed_diff_percent:
+            return "regressed"
+    return "changed"
+
+
 def report_context(test: WptTest) -> dict[str, object]:
     metadata = load_metadata(test)
     current = load_current_comparison(test)
+    review_state = load_review_state(test)
     output_directory = output_directory_for_wpt_path(test.path)
     current_diff_percent = comparison_number(current, "current_diff_percent")
     approved_diff_percent = comparison_number(metadata, "approved_diff_percent")
     current_hash = result_sha256(test)
+    current_reference_hash = reference_sha256(test)
     approved_hash = metadata.get("approved_result_sha256") if metadata else None
+    reviewed_hash = review_state.get("olive_result_sha256") if review_state else None
+    reviewed_diff_percent = comparison_number(review_state, "diff_percent")
     comparison_status = "unavailable"
     comparison_passed: bool | None = None
     if current_diff_percent is not None and approved_diff_percent is not None:
@@ -222,12 +302,35 @@ def report_context(test: WptTest) -> dict[str, object]:
             comparison_passed = False
     elif current_diff_percent is not None:
         comparison_status = "awaiting approval"
+    if review_state is not None:
+        review_status = review_delta_status(
+            current_hash,
+            current_diff_percent,
+            reviewed_hash if isinstance(reviewed_hash, str) else None,
+            reviewed_diff_percent,
+            "rejected",
+        )
+    elif metadata and metadata.get("status") == "approved":
+        review_status = review_delta_status(
+            current_hash,
+            current_diff_percent,
+            approved_hash if isinstance(approved_hash, str) else None,
+            approved_diff_percent,
+            "approved",
+        )
+    else:
+        review_status = "pending"
     return {
-        "rejected": test.path in load_rejections(),
+        "rejected": review_status == "rejected",
+        "review_state_available": review_state is not None,
+        "review_status": review_status,
+        "review_reason": review_state.get("reason") if review_state else None,
         "approval_status": "approved" if metadata and metadata.get("status") == "approved" else "pending",
         "metadata_available": metadata is not None,
         "olive_available": (output_directory / "result.png").is_file(),
         "current_result_sha256": current_hash,
+        "current_reference_sha256": current_reference_hash,
+        "reviewed_result_sha256": reviewed_hash,
         "approved_result_sha256": approved_hash,
         "approved_baseline_available": approved_hash is not None and approved_diff_percent is not None,
         "current_comparison_available": current_diff_percent is not None,
@@ -242,9 +345,11 @@ def report_context(test: WptTest) -> dict[str, object]:
 
 
 def home_status(test: WptTest) -> str:
-    if test.path in load_rejections():
-        return "FAIL"
     context = report_context(test)
+    if context["review_status"] == "rejected":
+        return "FAIL"
+    if context["review_status"] in {"changed", "improved", "regressed"}:
+        return "REVIEW"
     if context["approval_status"] != "approved" or not context["approved_baseline_available"]:
         return "UNKN"
     current_hash = context["current_result_sha256"]
@@ -266,11 +371,9 @@ def load_result_statuses(path: Path = WPT_RESULTS_FILE) -> dict[str, str]:
             for row in rows:
                 status = row.get("status")
                 wpt_path = row.get("path")
-                if status not in {"PASS", "FAIL", "UNKN"} or not wpt_path:
+                if status not in {"PASS", "FAIL", "REVIEW", "UNKN"} or not wpt_path:
                     raise ValueError("result CSV contains an invalid row")
                 statuses[wpt_path] = status
-            for rejected_path in load_rejections():
-                statuses[rejected_path] = "FAIL"
             return statuses
     except (OSError, csv.Error, ValueError) as error:
         raise HTTPException(status_code=500, detail="WPT result CSV is invalid") from error
@@ -293,41 +396,6 @@ def write_result_statuses(tests: tuple[WptTest, ...]) -> None:
 
 def result_status(test: WptTest) -> str:
     return load_result_statuses().get(test.path, home_status(test))
-
-
-def load_rejections(path: Path | None = None) -> set[str]:
-    path = REJECTIONS_FILE if path is None else path
-    if not path.is_file():
-        return set()
-    try:
-        return {
-            line.strip()
-            for line in path.read_text(encoding="utf-8").splitlines()
-            if line.strip()
-        }
-    except OSError as error:
-        raise HTTPException(status_code=500, detail="WPT rejection list is unreadable") from error
-
-
-def write_rejections(paths: set[str]) -> None:
-    REJECTIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    temporary_path = REJECTIONS_FILE.with_name(f".{REJECTIONS_FILE.name}.tmp")
-    try:
-        contents = "".join(f"{path}\n" for path in sorted(paths))
-        temporary_path.write_text(contents, encoding="utf-8")
-        temporary_path.replace(REJECTIONS_FILE)
-    finally:
-        if temporary_path.exists():
-            temporary_path.unlink()
-
-
-def set_rejection(test: WptTest, rejected: bool) -> None:
-    paths = load_rejections()
-    if rejected:
-        paths.add(test.path)
-    else:
-        paths.discard(test.path)
-    write_rejections(paths)
 
 
 def render_context(test: WptTest, render_name: str) -> dict[str, object]:
@@ -493,6 +561,7 @@ def approval_response(request: Request, path: str) -> HTMLResponse:
 def approve_test(request: Request, path: str) -> HTMLResponse:
     test = get_wpt_test(path)
     write_approval_status(test, "approved")
+    delete_review_state(test)
     write_result_statuses(load_wpt_tests())
     return approval_response(request, path)
 
@@ -506,11 +575,15 @@ def unapprove_test(request: Request, path: str) -> HTMLResponse:
 
 
 @app.post("/test-report/reject", response_class=HTMLResponse)
-def reject_test(request: Request, path: str) -> HTMLResponse:
+async def reject_test(request: Request, path: str) -> HTMLResponse:
     test = get_wpt_test(path)
     if not result_sha256(test):
         raise HTTPException(status_code=409, detail="Current Olive render is not available")
-    set_rejection(test, True)
+    body = parse_qs((await request.body()).decode("utf-8"))
+    reason = body.get("reason", [""])[0].strip()
+    if not reason:
+        raise HTTPException(status_code=400, detail="A rejection reason is required")
+    write_review_state(test, reason)
     write_result_statuses(load_wpt_tests())
     return approval_response(request, path)
 
@@ -518,7 +591,7 @@ def reject_test(request: Request, path: str) -> HTMLResponse:
 @app.post("/test-report/unreject", response_class=HTMLResponse)
 def unreject_test(request: Request, path: str) -> HTMLResponse:
     test = get_wpt_test(path)
-    set_rejection(test, False)
+    delete_review_state(test)
     write_result_statuses(load_wpt_tests())
     return approval_response(request, path)
 

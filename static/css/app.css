@@ -46,6 +46,10 @@ body.wpt-index {
   color: #a12828;
 }
 
+.wpt-status-review {
+  color: #9a6700;
+}
+
 .wpt-status-unkn {
   color: #8a4b08;
 }
@@ -186,8 +190,32 @@ body.test-review {
   color: #a12828;
 }
 
+.approval-review {
+  color: #9a6700;
+}
+
 .approval-open {
   color: #586574;
+}
+
+.review-reason {
+  margin: 0 0 0.75rem;
+}
+
+.rejection-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.5rem;
+}
+
+.rejection-form label {
+  flex-basis: 100%;
+}
+
+.rejection-form textarea {
+  min-width: 24rem;
+  font: inherit;
 }
 
 .approval-controls .approval-reject {

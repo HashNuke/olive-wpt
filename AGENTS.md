@@ -16,8 +16,10 @@ this application.
 
 - Keep approved artifacts and their metadata under `outputs/` following
   `STRUCTURE.md`.
-- Commit only reviewed `result.png`, `reference.png`, and stable approved
-  `metadata.json` files. Generated `result-vs-reference.png` files are ignored.
+- Commit reviewed `reference.png`, stable approved `metadata.json`, and
+  non-approved per-test `review-state.json` files. Commit `result.png` only
+  alongside metadata that approves that exact result. Generated
+  `result-vs-reference.png` files are ignored.
 - Preserve the WPT-relative path in every test directory; do not flatten test
   names or use absolute checkout paths.
 - Never silently replace an approved render. Approval is an explicit reviewed
@@ -29,10 +31,10 @@ this application.
 - Use `uv sync` to install dependencies and `bin/dev` to run the local app.
 - Make small commits with a clear description. Validate the application and
   inspect the Git diff before committing.
-- Run `bin/install-hooks` once per checkout. Its pre-commit hook runs `bin/lint`
-  and prevents staged `metadata.json` files from being committed unless their
-  JSON `status` is exactly `approved`. The check reads staged contents, so it
-  applies only to metadata files added or updated by the attempted commit.
+- Run `bin/install-hooks` once per checkout. Its pre-commit hook runs `bin/lint`,
+  requires staged metadata to be approved, and prevents staged `result.png`
+  files from being committed unless their exact hash is approved by that
+  metadata.
 
 ## Labnotes
 

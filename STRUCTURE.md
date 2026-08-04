@@ -24,7 +24,7 @@ and makes the directory visibly distinct from a source-test directory.
 
 ## Per-test files
 
-Each test directory can contain this four-file contract:
+Each test directory can contain these artifacts:
 
 ```text
 outputs/css/css-backgrounds/example-1-html-test/
@@ -32,6 +32,7 @@ outputs/css/css-backgrounds/example-1-html-test/
   reference.png
   result-vs-reference.png
   metadata.json
+  review-state.json
 ```
 
 `reference.png` is generated once by
@@ -55,15 +56,19 @@ comparison metrics:
 ```
 
 The ignored `current/result.csv` file is the home-page status index. It has
-`status,path` columns, with one `PASS`, `FAIL`, or `UNKN` row per WPT-relative
-test path.
+`status,path` columns, with one `PASS`, `FAIL`, `REVIEW`, or `UNKN` row per
+WPT-relative test path.
 
-The generated baseline commit contains `reference.png` files. Existing approved
-work may additionally contain:
+The generated baseline commit contains `reference.png` files. An approved test
+may additionally contain:
 
 - `result.png`
-- `reference.png`
 - `metadata.json`
+
+A rejected or changed result may additionally contain a tracked
+`review-state.json`; its local `result.png` remains uncommitted until that
+specific result is approved. Approval deletes `review-state.json` and permits
+the matching `result.png` to be committed.
 
 The committed `result.png` is the approved Olive baseline when present. A later
 run overwrites the worktree copy at the same path; Git then exposes a binary
@@ -89,14 +94,19 @@ comparison baseline: `approved_result_sha256`, `approved_diff_percent`,
 comparison itself is exact RGBA equality; approval metadata is separate review
 state.
 
+`review-state.json` is tracked review state for a non-approved render. It stores
+the rejection reason, current Olive/reference hashes, and comparison metrics.
+Approval deletes it. The pre-commit hook prevents `result.png` from being
+committed unless the staged metadata approves that exact result hash.
+
 `wpt_local_path` is relative to the WPT repository root. It must not contain
 `external/wpt/` or an absolute checkout path.
 
 If no committed `result.png` and approved `metadata.json` exist, the test is
-pending approval. If they exist and the current `result.png` differs from the
-committed version, the test is a deviation. The application can derive these
-states from Git plus the current output files; the generated reference diff is
-review evidence, not an approval artifact.
+pending approval. A rejected current result is `FAIL`; a changed or improved
+result after review is `REVIEW`; an exact approved result is `PASS`. The
+application can derive these states from Git plus the current output files; the
+generated reference diff is review evidence, not an approval artifact.
 
 Renderer and infrastructure errors are reported separately from pending,
 approved, and deviation states.

@@ -45,7 +45,57 @@ done <<EOF
 $staged_metadata
 EOF
 
+staged_results=$(git diff --cached --name-only --diff-filter=ACMR | while IFS= read -r path; do
+  case "$path" in
+    outputs/*/result.png)
+      printf '%s\n' "$path"
+      ;;
+  esac
+done)
+
+while IFS= read -r path; do
+  [ -n "$path" ] || continue
+  metadata_path="${path%/result.png}/metadata.json"
+  if ! git cat-file -e ":$metadata_path" 2>/dev/null; then
+    echo "pre-commit: $path: metadata.json must be staged with the result." >&2
+    failed=1
+    continue
+  fi
+  result_hash=$(git show ":$path" | sha256sum | awk '{print $1}')
+  metadata_json=$(git show ":$metadata_path")
+  if ! printf '%s' "$metadata_json" | WPT_METADATA_PATH="$metadata_path" RESULT_HASH="$result_hash" python3 -c '
+import json
+import os
+import sys
+
+path = os.environ["WPT_METADATA_PATH"]
+result_hash = os.environ["RESULT_HASH"]
+
+try:
+    metadata = json.load(sys.stdin)
+except json.JSONDecodeError as error:
+    print(f"pre-commit: {path}: invalid JSON: {error}", file=sys.stderr)
+    raise SystemExit(1)
+
+if not isinstance(metadata, dict) or metadata.get("status") != "approved":
+    status = metadata.get("status") if isinstance(metadata, dict) else None
+    print(f"pre-commit: {path}: status must be approved (found {status!r})", file=sys.stderr)
+    raise SystemExit(1)
+
+if metadata.get("approved_result_sha256") != result_hash:
+    print(
+        f"pre-commit: {path}: approved_result_sha256 does not match staged result.png",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
+' WPT_METADATA_PATH="$metadata_path"; then
+    failed=1
+  fi
+done <<EOF
+$staged_results
+EOF
+
 if [ "$failed" -ne 0 ]; then
-  echo "Commit rejected: every staged metadata.json must have status=approved." >&2
+  echo "Commit rejected: metadata must be approved, and staged result.png files must match their approved hash." >&2
   exit 1
 fi
