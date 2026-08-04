@@ -46,9 +46,14 @@ Tests whose references still fail generation are written to
 updater run succeeds for them.
 
 Each run writes current comparison metrics to ignored `current.json` and a
-`current/result.csv` status index. The CSV has `status,path` columns and uses
-`PASS`, `FAIL`, `REVW`, `UNKN`, or `NONE` for each WPT-relative test path. The
-home page prefixes each test with the same status: `PASS` means the current
+`current/result.csv` status export. The CSV has `status,path` columns and uses
+`PASS`, `FAIL`, `REVW`, `UNKN`, or `NONE` for each WPT-relative test path. Run
+[`bin/build-db`](bin/build-db) after the CSV is ready to rebuild the ignored
+Peewee/SQLite `data.sqlite` homepage index from the inventory, CSV, and per-test
+JSON files. The homepage reads that database. The test page reads its own
+flat JSON files directly, while page actions update both the JSON files and
+the corresponding database row. The home page prefixes each test with the same
+status: `PASS` means the current
 Olive result matches an approved hash, `FAIL` means it matches a recorded
 rejection, `REVW` means it changed after approval or rejection, `UNKN` means an
 Olive result exists but has not been reviewed, and `NONE` means no Olive result
@@ -69,3 +74,5 @@ which requires at least one newly passing WPT test.
 Larger runs can use the parent repository's `bin/run-wpt-batches` helper. Each
 batch updates only its selected paths and merges those statuses into the
 existing `current/result.csv`, preserving rows for tests outside the batch.
+The Olive WPT runner rebuilds `data.sqlite` after future result CSV writes; the
+currently running sweep can be indexed afterward with `bin/build-db`.

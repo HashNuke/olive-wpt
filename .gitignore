@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+data.sqlite
+.data.sqlite.tmp
 
 # Local labnotes are intentionally not published from this repository.
 worklogs/

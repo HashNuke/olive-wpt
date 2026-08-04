@@ -162,22 +162,28 @@ class ReportImagePresentationTests(unittest.TestCase):
     def test_reconcile_results_rebuilds_the_status_index_on_demand(self):
         with patch.object(app, "load_wpt_tests", return_value=(self.test,)) as load_tests:
             with patch.object(app, "write_result_statuses") as write_statuses:
-                response = app.reconcile_results()
+                with patch.object(app, "run_build_db") as build_db:
+                    response = app.reconcile_results()
 
         self.assertEqual(response.status_code, 204)
         load_tests.assert_called_once_with()
         write_statuses.assert_called_once_with((self.test,))
+        build_db.assert_called_once_with()
 
     def test_approval_does_not_rebuild_the_full_status_index(self):
         with patch.object(app, "get_wpt_test", return_value=self.test):
             with patch.object(app, "write_approval_status"):
                 with patch.object(app, "delete_review_state"):
                     with patch.object(app, "write_result_statuses") as write_statuses:
-                        with patch.object(app, "approval_response", return_value="updated"):
-                            response = app.approve_test(None, self.test.path)
+                        with patch.object(app, "update_database_test") as update_db:
+                            with patch.object(app, "stage_test_output") as stage_output:
+                                with patch.object(app, "approval_response", return_value="updated"):
+                                    response = app.approve_test(None, self.test.path)
 
         self.assertEqual(response, "updated")
         write_statuses.assert_not_called()
+        update_db.assert_called_once_with(self.test)
+        stage_output.assert_called_once_with(self.test)
 
     def test_review_title_has_wrapping_class_for_long_wpt_paths(self):
         html = app.templates.get_template("test-review.html").render(

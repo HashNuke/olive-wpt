@@ -16,6 +16,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from PIL import Image, ImageChops, UnidentifiedImageError
 
+from db import load_statuses, upsert_test
+
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 STATIC_ROOT = PROJECT_ROOT / "static"
@@ -26,6 +28,7 @@ WPT_LIVE_ROOT = "https://wpt.live"
 CURRENT_COMPARISON_FILENAME = "current.json"
 WPT_RESULTS_FILE = PROJECT_ROOT / "current" / "result.csv"
 WPT_PROGRESS_FILE = PROJECT_ROOT / "current" / "progress.json"
+WPT_DATABASE_FILE = PROJECT_ROOT / "data.sqlite"
 REVIEW_STATE_FILENAME = "review-state.json"
 RENDER_LABELS = {
     "olive": "Olive render",
@@ -386,6 +389,39 @@ def load_result_statuses(path: Path | None = None) -> dict[str, str]:
         raise HTTPException(status_code=500, detail="WPT result CSV is invalid") from error
 
 
+def load_database_statuses() -> dict[str, str]:
+    try:
+        return load_statuses(WPT_DATABASE_FILE)
+    except FileNotFoundError as error:
+        raise HTTPException(
+            status_code=503,
+            detail="WPT database is missing; run wpt-outputs/bin/build-db",
+        ) from error
+    except Exception as error:
+        raise HTTPException(status_code=500, detail="WPT database is unavailable") from error
+
+
+def update_database_test(test: WptTest) -> None:
+    try:
+        upsert_test(PROJECT_ROOT, test.path, home_status(test))
+    except Exception as error:
+        raise HTTPException(status_code=500, detail="Could not update WPT database") from error
+
+
+def stage_test_output(test: WptTest) -> None:
+    try:
+        output_directory = output_directory_for_wpt_path(test.path).relative_to(PROJECT_ROOT)
+        subprocess.run(
+            ["git", "add", "--all", "--", output_directory.as_posix()],
+            cwd=PROJECT_ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, ValueError, subprocess.CalledProcessError) as error:
+        raise HTTPException(status_code=500, detail="Could not stage approved WPT output") from error
+
+
 def indexed_result_status(test: WptTest, statuses: dict[str, str]) -> str:
     if not (output_directory_for_wpt_path(test.path) / "result.png").is_file():
         return "NONE"
@@ -449,7 +485,7 @@ def write_result_statuses(tests: tuple[WptTest, ...]) -> None:
 
 
 def result_status(test: WptTest) -> str:
-    return indexed_result_status(test, load_result_statuses())
+    return home_status(test)
 
 
 def render_context(test: WptTest, render_name: str) -> dict[str, object]:
@@ -576,6 +612,19 @@ def reference_browser_version() -> str:
     return version if isinstance(version, str) and version else "unknown"
 
 
+def run_build_db() -> None:
+    try:
+        subprocess.run(
+            [str(PROJECT_ROOT / "bin" / "build-db")],
+            cwd=PROJECT_ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise HTTPException(status_code=500, detail="Could not rebuild WPT database") from error
+
+
 def get_wpt_test(wpt_path: str) -> WptTest:
     test = next((test for test in load_wpt_tests() if test.path == wpt_path), None)
     if test is None:
@@ -595,8 +644,8 @@ app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request) -> HTMLResponse:
     wpt_tests = load_wpt_tests()
-    statuses = load_result_statuses()
-    tests = [{"test": test, "status": indexed_result_status(test, statuses)} for test in wpt_tests]
+    statuses = load_database_statuses()
+    tests = [{"test": test, "status": statuses.get(test.path, "NONE")} for test in wpt_tests]
     status_counts = {status: 0 for status in HOME_STATUS_TABS}
     status_counts["ALL"] = len(tests)
     for item in tests:
@@ -659,6 +708,8 @@ def approve_test(request: Request, path: str) -> HTMLResponse:
     test = get_wpt_test(path)
     write_approval_status(test, "approved")
     delete_review_state(test)
+    update_database_test(test)
+    stage_test_output(test)
     return approval_response(request, path)
 
 
@@ -666,6 +717,7 @@ def approve_test(request: Request, path: str) -> HTMLResponse:
 def unapprove_test(request: Request, path: str) -> HTMLResponse:
     test = get_wpt_test(path)
     write_approval_status(test, "pending")
+    update_database_test(test)
     return approval_response(request, path)
 
 
@@ -679,6 +731,7 @@ async def reject_test(request: Request, path: str) -> HTMLResponse:
     if not reason:
         raise HTTPException(status_code=400, detail="A rejection reason is required")
     write_review_state(test, reason)
+    update_database_test(test)
     return approval_response(request, path)
 
 
@@ -686,12 +739,14 @@ async def reject_test(request: Request, path: str) -> HTMLResponse:
 def unreject_test(request: Request, path: str) -> HTMLResponse:
     test = get_wpt_test(path)
     delete_review_state(test)
+    update_database_test(test)
     return approval_response(request, path)
 
 
 @app.post("/test-report/reconcile", status_code=204)
 def reconcile_results() -> Response:
     write_result_statuses(load_wpt_tests())
+    run_build_db()
     return Response(status_code=204)
 
 
