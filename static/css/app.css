@@ -187,26 +187,42 @@ body.test-review {
 }
 
 .approval-controls {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  display: block;
   margin: 1rem 0;
   padding: 0.75rem 1rem;
   border: 1px solid #c8ced6;
+  border-radius: 0.4rem;
   background: #f6f7f9;
 }
 
-.approval-summary {
+.approval-heading {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 1.25rem;
   align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.approval-heading h2 {
+  margin: 0.15rem 0 0;
+  color: #1f2933;
+  font-size: 1rem;
+}
+
+.approval-summary {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.5rem 0.85rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #dce1e7;
+  border-radius: 0.3rem;
+  background: #ffffff;
 }
 
 .approval-item {
-  display: inline-flex;
+  display: flex;
+  min-width: 0;
+  flex-direction: row;
   gap: 0.35rem;
   align-items: baseline;
   white-space: nowrap;
@@ -220,13 +236,46 @@ body.test-review {
   text-transform: uppercase;
 }
 
+.approval-item strong {
+  overflow-wrap: anywhere;
+}
+
+.approval-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.85fr);
+  gap: 0.65rem;
+  margin-top: 0.65rem;
+  align-items: stretch;
+}
+
+.approval-panel {
+  min-width: 0;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #dce1e7;
+  border-radius: 0.3rem;
+  background: #ffffff;
+}
+
+.approval-panel-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.45rem;
+}
+
+.approval-panel-heading h3 {
+  margin: 0;
+  color: #1f2933;
+  font-size: 0.9rem;
+}
+
 .approval-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  width: 100%;
   min-width: 0;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .approval-help {
@@ -272,19 +321,21 @@ body.test-review {
 
 .review-reason {
   margin: 0 0 0.75rem;
+  padding: 0.6rem 0.7rem;
+  border-left: 3px solid #a12828;
+  background: #fff6f6;
+  overflow-wrap: anywhere;
 }
 
 .rejection-form {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.5rem;
-  width: min(100%, 40rem);
   min-width: 0;
 }
 
 .rejection-form label {
-  flex-basis: 100%;
+  grid-column: 1 / -1;
 }
 
 .rejection-form textarea {
@@ -294,6 +345,13 @@ body.test-review {
   min-height: 4.5rem;
   resize: vertical;
   font: inherit;
+}
+
+.rejection-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-start;
 }
 
 .toast {
@@ -319,6 +377,20 @@ body.test-review {
 .approval-controls .approval-reject {
   border-color: #a12828;
   color: #a12828;
+}
+
+.approval-controls .approval-approve {
+  border-color: #176b3a;
+  background: #176b3a;
+  color: #ffffff;
+}
+
+.approval-controls .approval-approve:hover {
+  background: #12562f;
+}
+
+.approval-controls .approval-secondary {
+  background: #ffffff;
 }
 
 .comparison-improved {
@@ -378,9 +450,32 @@ body.test-review {
   color: #586574;
 }
 
-@media (max-width: 48rem) {
-  .approval-controls {
+@media (max-width: 64rem) {
+  .approval-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .approval-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 38rem) {
+  .approval-heading {
     align-items: flex-start;
     flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .approval-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rejection-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rejection-actions {
+    grid-column: 1 / -1;
   }
 }
