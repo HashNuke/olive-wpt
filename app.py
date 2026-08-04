@@ -336,12 +336,18 @@ def render_context(test: WptTest, render_name: str) -> dict[str, object]:
     except KeyError as error:
         raise HTTPException(status_code=404, detail="Unknown render") from error
     directory = output_directory_for_wpt_path(test.path)
-    asset = directory / "result.png"
-    if render_name in {"reference", "diff"}:
-        asset = directory / "reference.png"
-    render_available = asset.is_file()
+    result_available = (directory / "result.png").is_file()
+    reference_available = (directory / "reference.png").is_file()
+    if render_name == "olive":
+        render_available = result_available
+    elif render_name == "reference":
+        render_available = reference_available
+    elif render_name == "diff":
+        render_available = result_available and reference_available
+    else:
+        render_available = False
     if render_name == "approved-diff":
-        render_available = render_available and approved_result_bytes(test) is not None
+        render_available = result_available and approved_result_bytes(test) is not None
     return {
         "test": test,
         "render_label": render_label,

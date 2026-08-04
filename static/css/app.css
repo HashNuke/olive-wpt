@@ -96,6 +96,12 @@ body.test-review {
   font-weight: 700;
 }
 
+.open-image {
+  margin-left: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
 .render-panel img {
   display: block;
   max-width: 100%;
