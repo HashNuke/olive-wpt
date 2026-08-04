@@ -19,9 +19,17 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.artifact_directory = self.outputs_root / "css" / "example-html-test"
         self.outputs_patch = patch.object(app, "OUTPUTS_ROOT", self.outputs_root)
         self.outputs_patch.start()
+        self.results_path = Path(self.temp_directory.name) / "current" / "result.csv"
+        self.progress_path = Path(self.temp_directory.name) / "current" / "progress.json"
+        self.results_patch = patch.object(app, "WPT_RESULTS_FILE", self.results_path)
+        self.progress_patch = patch.object(app, "WPT_PROGRESS_FILE", self.progress_path)
+        self.results_patch.start()
+        self.progress_patch.start()
 
     def tearDown(self):
         self.outputs_patch.stop()
+        self.results_patch.stop()
+        self.progress_patch.stop()
         self.temp_directory.cleanup()
 
     def write_artifact(self, name):
@@ -87,6 +95,39 @@ class ReportImagePresentationTests(unittest.TestCase):
     def test_home_status_is_none_without_an_olive_render(self):
         self.write_artifact("reference.png")
         self.assertEqual(app.home_status(self.test), "NONE")
+
+    def test_stale_csv_cannot_hide_missing_olive_render(self):
+        self.write_artifact("reference.png")
+        self.results_path.parent.mkdir(parents=True, exist_ok=True)
+        self.results_path.write_text(
+            "status,path\nUNKN,css/example.html\n", encoding="utf-8"
+        )
+        self.assertEqual(app.result_status(self.test), "NONE")
+
+    def test_result_status_progress_records_new_pass_and_regression(self):
+        self.write_artifact("result.png")
+        self.write_artifact("reference.png")
+        self.write_current_comparison(0.0)
+        app.write_result_statuses((self.test,))
+        self.assertEqual(app.load_result_statuses(self.results_path)[self.test.path], "UNKN")
+
+        metadata = {
+            "status": "approved",
+            "approved_result_sha256": app.result_sha256(self.test),
+            "approved_diff_percent": 0.0,
+        }
+        (self.artifact_directory / "metadata.json").write_text(
+            json.dumps(metadata), encoding="utf-8"
+        )
+        app.write_result_statuses((self.test,))
+        progress = json.loads(self.progress_path.read_text(encoding="utf-8"))
+        self.assertEqual(progress["new_passes"], 1)
+        self.assertEqual(progress["regressions"], 0)
+
+        app.write_review_state(self.test, "Regression")
+        app.write_result_statuses((self.test,))
+        progress = json.loads(self.progress_path.read_text(encoding="utf-8"))
+        self.assertEqual(progress["regressions"], 1)
 
 
 if __name__ == "__main__":

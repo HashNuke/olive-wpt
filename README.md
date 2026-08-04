@@ -58,3 +58,9 @@ hashes in a tracked per-test `review-state.json`; the local `result.png` is
 deliberately not committed while metadata is pending. Approving the render
 updates `metadata.json`, deletes `review-state.json`, and allows the matching
 `result.png` to be committed.
+
+Each status write also updates ignored `current/progress.json` with the latest
+`new_passes`, `regressions`, `review_needed`, `unrendered`, and `unreviewed`
+counts. The Olive repository lint gate blocks approved regressions. An engine
+feature checkpoint must additionally run `bin/check-wpt-progress --engine`,
+which requires at least one newly passing WPT test.

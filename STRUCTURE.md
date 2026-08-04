@@ -59,6 +59,12 @@ The ignored `current/result.csv` file is the home-page status index. It has
 `status,path` columns, with one `PASS`, `FAIL`, `REVW`, `UNKN`, or `NONE` row per
 WPT-relative test path.
 
+The ignored `current/progress.json` file records the latest status delta:
+`new_passes`, `regressions`, `review_needed`, `unrendered`, `unreviewed`, and
+`total`. The normal Olive lint gate blocks nonzero approved regressions; an
+engine-feature checkpoint additionally requires `bin/check-wpt-progress
+--engine` to report at least one new pass.
+
 The generated baseline commit contains `reference.png` files. An approved test
 may additionally contain:
 
