@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import sys
+from html.parser import HTMLParser
 from pathlib import Path, PurePosixPath
 
 
@@ -82,35 +83,37 @@ def checkout_wpt_tag(wpt_root: Path, remote: str, tag: str) -> str:
     return commit
 
 
-def discover(olive_root: Path, wpt_root: Path, tag: str, report: Path) -> dict[str, object]:
-    report.parent.mkdir(parents=True, exist_ok=True)
-    run(
-        [
-            str(olive_root / "bin/discover-chromium-wpt"),
-            "--wpt-root",
-            str(wpt_root),
-            "--wpt-revision",
-            tag,
-            "--pretty",
-            "--output",
-            str(report),
-        ],
-        cwd=olive_root,
-    )
-    return json.loads(report.read_text(encoding="utf-8"))
+class ReftestLinkParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.has_reftest_link = False
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag.lower() != "link":
+            return
+        attributes = {name.lower(): value or "" for name, value in attrs}
+        rel_values = set(attributes.get("rel", "").lower().split())
+        self.has_reftest_link |= bool(rel_values & {"match", "mismatch"})
 
 
-def inventory_paths(report: dict[str, object]) -> list[str]:
+def inventory_paths(wpt_root: Path) -> list[str]:
     paths: set[str] = set()
-    for test in report.get("tests", []):
-        if not isinstance(test, dict) or not isinstance(test.get("path"), str):
-            raise RuntimeError("WPT discovery report contains an invalid test entry")
-        path = PurePosixPath(test["path"])
-        if any(part in IGNORED_PATH_PARTS for part in path.parts):
+    source_suffixes = {".html", ".htm", ".xhtml", ".xht", ".svg"}
+    for source in wpt_root.rglob("*"):
+        if not source.is_file() or source.suffix.lower() not in source_suffixes:
             continue
-        paths.add(path.as_posix())
+        relative = source.relative_to(wpt_root)
+        if any(part in IGNORED_PATH_PARTS for part in relative.parts):
+            continue
+        try:
+            parser = ReftestLinkParser()
+            parser.feed(source.read_text(encoding="utf-8", errors="replace"))
+        except OSError as error:
+            raise RuntimeError(f"could not read WPT source {relative}: {error}") from error
+        if parser.has_reftest_link:
+            paths.add(PurePosixPath(relative.as_posix()).as_posix())
     if not paths:
-        raise RuntimeError("WPT discovery produced no reftest paths")
+        raise RuntimeError("WPT checkout contains no rel=match/rel=mismatch reftests")
     return sorted(paths)
 
 
@@ -220,14 +223,12 @@ def main() -> int:
     args = arguments()
     submodule_root = Path(__file__).resolve().parents[1]
     output_root = submodule_root / "outputs"
-    report = submodule_root / "current" / "wpt-discovery.json"
     all_paths_file = submodule_root / "current" / "wpt_paths-before-reference-filter.txt"
     generation_report = submodule_root / "current" / "reference-generation.json"
     try:
         tag = latest_wpt_tag(args.wpt_root, args.remote)
         commit = checkout_wpt_tag(args.wpt_root, args.remote, tag)
-        discovery = discover(args.olive_root, args.wpt_root, tag, report)
-        discovered_paths = inventory_paths(discovery)
+        discovered_paths = inventory_paths(args.wpt_root)
         write_inventory(all_paths_file, discovered_paths)
 
         command = [
@@ -268,7 +269,7 @@ def main() -> int:
     print(
         f"WPT_UPDATE tag={tag} commit={commit} paths={len(paths)} "
         f"failed_references={len(failed)} "
-        f"pruned_output_dirs={removed} report={report}"
+        f"pruned_output_dirs={removed}"
     )
     return 0
 

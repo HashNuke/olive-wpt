@@ -69,8 +69,8 @@ counts. The Olive repository lint gate blocks approved regressions. An engine
 feature checkpoint must additionally run `bin/check-wpt-progress --engine`,
 which requires at least one newly passing WPT test.
 
-Larger runs can use the parent repository's `bin/run-wpt-batches` helper. Each
-batch updates only its selected test directories and immediately upserts each
-completed test into SQLite through the persistent database writer. Tests
-outside the batch are untouched. Run `bin/build-db` when the inventory itself
-changes or when a full read-model rebuild is explicitly needed.
+Run the parent repository's WPT test command against the committed path list.
+Each completed test updates its own JSON files and SQLite row immediately, so a
+single full run can be resumed or focused with `OLIVE_WPT_PATHS`. Run
+`bin/build-db` when the inventory itself changes or when a full read-model
+rebuild is explicitly needed.

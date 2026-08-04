@@ -27,18 +27,28 @@ class UpdateWptTests(unittest.TestCase):
                 "merge_pr_61702",
             )
 
-    def test_inventory_keeps_dynamic_reftests_and_excludes_tools(self):
-        report = {
-            "tests": [
-                {"path": "css/static.html", "classification": "static_candidate"},
-                {"path": "html/scripted.html", "classification": "javascript"},
-                {"path": "tools/template.html", "classification": "static_candidate"},
-            ]
-        }
-        self.assertEqual(
-            update_wpt.inventory_paths(report),
-            ["css/static.html", "html/scripted.html"],
-        )
+    def test_inventory_reads_reftest_links_and_excludes_tools(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "css").mkdir()
+            (root / "html").mkdir()
+            (root / "tools").mkdir()
+            (root / "css/static.html").write_text(
+                '<link rel="match" href="ref.html">', encoding="utf-8"
+            )
+            (root / "html/scripted.html").write_text(
+                '<link rel="mismatch" href="ref.html"><script>run()</script>',
+                encoding="utf-8",
+            )
+            (root / "tools/template.html").write_text(
+                '<link rel="match" href="ref.html">', encoding="utf-8"
+            )
+            (root / "css/plain.html").write_text("<p>not a reftest</p>", encoding="utf-8")
+
+            self.assertEqual(
+                update_wpt.inventory_paths(root),
+                ["css/static.html", "html/scripted.html"],
+            )
 
     def test_prune_removes_only_stale_test_directories(self):
         with tempfile.TemporaryDirectory() as temporary:
