@@ -5,9 +5,18 @@
 
 {% block content %}
 <h1>Olive WPT Outputs</h1>
-<ul class="wpt-test-list">
+<nav class="wpt-status-tabs" aria-label="Filter WPT tests" role="tablist">
+  {% for status in status_tabs %}
+  <button type="button" class="wpt-status-tab{% if loop.first %} active{% endif %}" role="tab" aria-selected="{{ 'true' if loop.first else 'false' }}" aria-controls="wpt-test-list" data-status-tab="{{ status }}">
+    {{ 'All' if status == 'ALL' else status }} <span class="wpt-status-tab-count">{{ status_counts[status] }}</span>
+  </button>
+  {% endfor %}
+</nav>
+<p class="wpt-status-summary" data-status-summary>Showing all {{ status_counts['ALL'] }} tests.</p>
+<p class="wpt-status-empty" data-status-empty hidden>No tests have this status.</p>
+<ul id="wpt-test-list" class="wpt-test-list">
   {% for item in tests %}
-  <li class="wpt-test-entry">
+  <li class="wpt-test-entry" data-status-item="{{ item.status }}">
     <span class="wpt-status wpt-status-{{ item.status|lower }}">[{{ item.status }}]</span>
     <a href="{{ item.test.review_url }}">{{ item.test.path }}</a>
   </li>

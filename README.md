@@ -52,7 +52,8 @@ home page prefixes each test with the same status: `PASS` means the current
 Olive result matches an approved hash, `FAIL` means it matches a recorded
 rejection, `REVW` means it changed after approval or rejection, `UNKN` means an
 Olive result exists but has not been reviewed, and `NONE` means no Olive result
-exists. Approval stores the approved result hash and diff baseline in
+exists. The home page provides tabs for `ALL`, `PASS`, `FAIL`, `REVW`, `UNKN`,
+and `NONE` with counts. Approval stores the approved result hash and diff baseline in
 `metadata.json`. A rejected render stores its reason and exact result/reference
 hashes in a tracked per-test `review-state.json`; the local `result.png` is
 deliberately not committed while metadata is pending. Approving the render
@@ -64,3 +65,7 @@ Each status write also updates ignored `current/progress.json` with the latest
 counts. The Olive repository lint gate blocks approved regressions. An engine
 feature checkpoint must additionally run `bin/check-wpt-progress --engine`,
 which requires at least one newly passing WPT test.
+
+Larger runs can use the parent repository's `bin/run-wpt-batches` helper. Each
+batch updates only its selected paths and merges those statuses into the
+existing `current/result.csv`, preserving rows for tests outside the batch.

@@ -16,6 +16,46 @@ body.wpt-index {
   color: #1f2933;
 }
 
+.wpt-status-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.wpt-status-tab {
+  padding: 0.4rem 0.65rem;
+  border: 1px solid #c8ced6;
+  border-radius: 0.25rem;
+  background: #ffffff;
+  color: #1f2933;
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.wpt-status-tab:hover,
+.wpt-status-tab.active {
+  border-color: #315b8a;
+  background: #e8edf2;
+}
+
+.wpt-status-tab-count {
+  color: #586574;
+  font-size: 0.8rem;
+}
+
+.wpt-status-summary {
+  margin: 0.75rem 0 0;
+  color: #586574;
+  font-size: 0.875rem;
+}
+
+.wpt-status-empty {
+  margin: 1.5rem 0 0;
+  color: #586574;
+}
+
 .wpt-test-list {
   display: grid;
   gap: 0.175rem;

@@ -33,6 +33,7 @@ RENDER_LABELS = {
     "approved-diff": "Result vs Approved",
     "diff": "Result vs Ref",
 }
+HOME_STATUS_TABS = ("ALL", "PASS", "FAIL", "REVW", "UNKN", "NONE")
 
 templates = Jinja2Templates(directory=str(TEMPLATES_ROOT))
 
@@ -385,6 +386,12 @@ def load_result_statuses(path: Path | None = None) -> dict[str, str]:
         raise HTTPException(status_code=500, detail="WPT result CSV is invalid") from error
 
 
+def indexed_result_status(test: WptTest, statuses: dict[str, str]) -> str:
+    if not (output_directory_for_wpt_path(test.path) / "result.png").is_file():
+        return "NONE"
+    return statuses.get(test.path, home_status(test))
+
+
 def write_progress_delta(
     previous: dict[str, str],
     current: dict[str, str],
@@ -442,9 +449,7 @@ def write_result_statuses(tests: tuple[WptTest, ...]) -> None:
 
 
 def result_status(test: WptTest) -> str:
-    if not (output_directory_for_wpt_path(test.path) / "result.png").is_file():
-        return "NONE"
-    return load_result_statuses().get(test.path, home_status(test))
+    return indexed_result_status(test, load_result_statuses())
 
 
 def render_context(test: WptTest, render_name: str) -> dict[str, object]:
@@ -552,11 +557,15 @@ app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
 def home(request: Request) -> HTMLResponse:
     wpt_tests = load_wpt_tests()
     statuses = load_result_statuses()
-    tests = [{"test": test, "status": statuses.get(test.path, home_status(test))} for test in wpt_tests]
+    tests = [{"test": test, "status": indexed_result_status(test, statuses)} for test in wpt_tests]
+    status_counts = {status: 0 for status in HOME_STATUS_TABS}
+    status_counts["ALL"] = len(tests)
+    for item in tests:
+        status_counts[item["status"]] = status_counts.get(item["status"], 0) + 1
     return templates.TemplateResponse(
         request=request,
         name="home.html",
-        context={"tests": tests},
+        context={"tests": tests, "status_counts": status_counts, "status_tabs": HOME_STATUS_TABS},
     )
 
 

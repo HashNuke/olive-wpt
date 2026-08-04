@@ -103,6 +103,10 @@ class ReportImagePresentationTests(unittest.TestCase):
             "status,path\nUNKN,css/example.html\n", encoding="utf-8"
         )
         self.assertEqual(app.result_status(self.test), "NONE")
+        self.assertEqual(
+            app.indexed_result_status(self.test, {self.test.path: "UNKN"}),
+            "NONE",
+        )
 
     def test_result_status_progress_records_new_pass_and_regression(self):
         self.write_artifact("result.png")
@@ -128,6 +132,17 @@ class ReportImagePresentationTests(unittest.TestCase):
         app.write_result_statuses((self.test,))
         progress = json.loads(self.progress_path.read_text(encoding="utf-8"))
         self.assertEqual(progress["regressions"], 1)
+
+    def test_home_template_contains_status_tabs_and_filterable_rows(self):
+        html = app.templates.get_template("home.html").render(
+            tests=[{"test": self.test, "status": "NONE"}],
+            status_tabs=app.HOME_STATUS_TABS,
+            status_counts={"ALL": 1, "PASS": 0, "FAIL": 0, "REVW": 0, "UNKN": 0, "NONE": 1},
+        )
+        self.assertIn('data-status-tab="ALL"', html)
+        self.assertIn('data-status-tab="NONE"', html)
+        self.assertIn('data-status-item="NONE"', html)
+        self.assertIn("No tests have this status.", html)
 
 
 if __name__ == "__main__":
