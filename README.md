@@ -70,6 +70,7 @@ feature checkpoint must additionally run `bin/check-wpt-progress --engine`,
 which requires at least one newly passing WPT test.
 
 Larger runs can use the parent repository's `bin/run-wpt-batches` helper. Each
-batch updates only its selected test directories and then refreshes the SQLite
-read model from the complete inventory. Tests outside the batch are untouched.
-The currently running sweep can be indexed afterward with `bin/build-db`.
+batch updates only its selected test directories and immediately upserts each
+completed test into SQLite through the persistent database writer. Tests
+outside the batch are untouched. Run `bin/build-db` when the inventory itself
+changes or when a full read-model rebuild is explicitly needed.

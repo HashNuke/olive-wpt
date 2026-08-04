@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from urllib.parse import quote
@@ -170,7 +171,26 @@ def rebuild_database(project_root: Path) -> int:
     return len(paths)
 
 
-def upsert_test(project_root: Path, path: str, status: str) -> None:
+def ensure_database(project_root: Path) -> int:
+    database_path = project_root / "data.sqlite"
+    expected_paths = load_paths(project_root / "wpt_paths.txt")
+    if not database_path.is_file():
+        return rebuild_database(project_root)
+    try:
+        with sqlite3.connect(database_path) as connection:
+            columns = {
+                row[1]
+                for row in connection.execute("PRAGMA table_info(wpt_tests)")
+            }
+            row_count = connection.execute("SELECT COUNT(*) FROM wpt_tests").fetchone()[0]
+    except sqlite3.Error:
+        return rebuild_database(project_root)
+    if not set(ROW_FIELDS).issubset(columns) or row_count != len(expected_paths):
+        return rebuild_database(project_root)
+    return 0
+
+
+def upsert_test(project_root: Path, path: str, status: str | None = None) -> None:
     database = open_database(project_root / "data.sqlite")
     try:
         with database.atomic():
