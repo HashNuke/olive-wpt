@@ -1,9 +1,9 @@
 # WPT output structure
 
-The Olive WPT runner creates one directory for every WPT test it discovers and
-runs. It does not copy WPT source files into this repository. The source remains
-in the shared external WPT checkout, and the directory preserves the complete
-WPT-relative path under `outputs/`.
+The reference-baseline generator and Olive WPT runner create one directory for
+each WPT path. They do not copy WPT source files into this repository. The source
+remains in the shared external WPT checkout, and the directory preserves the
+complete WPT-relative path under `outputs/`.
 
 The test filename becomes a directory name with its extension spelled out:
 
@@ -18,7 +18,7 @@ and makes the directory visibly distinct from a source-test directory.
 
 ## Per-test files
 
-Each test directory uses this four-file contract:
+Each test directory can contain this four-file contract:
 
 ```text
 outputs/css/css-backgrounds/example-1-html-test/
@@ -28,11 +28,16 @@ outputs/css/css-backgrounds/example-1-html-test/
   metadata.json
 ```
 
-`result.png` is Olive's render and `reference.png` is the capture from the
-reference browser. The browser name and exact version belong in `metadata.json`,
-not in the image filename. `result-vs-reference.png` is a generated comparison
-image for local review and is ignored by Git. The ignored `current.json` file
-records the latest run's exact comparison metrics:
+`reference.png` is generated once by
+`bin/generate-wpt-reference-screenshots.py` with Playwright Chromium from
+`https://wpt.live/<WPT-relative-path>`, using an 800x600 viewport, device scale
+factor 1, network-idle navigation, settled fonts/images, and a 3-second deadline.
+The generator writes a JSON report under ignored `current/`; it records timeout
+and request-failure outcomes instead of inventing a screenshot. `result.png` is
+Olive's render from the normal local sweep. No Chromium process is started by
+that sweep. `result-vs-reference.png` is a generated comparison image for local
+review and is ignored by Git. The ignored `current.json` file records the latest
+comparison metrics:
 
 ```json
 {
@@ -47,15 +52,16 @@ The ignored `current/result.csv` file is the home-page status index. It has
 `status,path` columns, with one `PASS`, `FAIL`, or `UNKN` row per WPT-relative
 test path.
 
-The approved Git state contains only:
+The generated baseline commit contains `reference.png` files. Existing approved
+work may additionally contain:
 
 - `result.png`
 - `reference.png`
 - `metadata.json`
 
-The committed `result.png` is the approved Olive baseline. A later run
-overwrites the worktree copy at the same path; Git then exposes a binary change
-against the approved baseline. No separate approved-render diff is needed.
+The committed `result.png` is the approved Olive baseline when present. A later
+run overwrites the worktree copy at the same path; Git then exposes a binary
+change against the approved baseline. No separate approved-render diff is needed.
 
 `metadata.json` contains stable test identity and approval metadata:
 
@@ -71,12 +77,11 @@ against the approved baseline. No separate approved-render diff is needed.
 }
 ```
 
-When a result is approved, metadata also records the approved result hash and
+When a result is approved, metadata may also record the approved result hash and
 comparison baseline: `approved_result_sha256`, `approved_diff_percent`,
-`approved_different_pixels`, and `approved_total_pixels`. A later run is a pass
-when its current diff is equal to or lower than the approved diff, and a fail
-when it is higher. The review app also detects an unchanged result by comparing
-the current `result.png` hash with the approved hash.
+`approved_different_pixels`, and `approved_total_pixels`. The reference-baseline
+comparison itself is exact RGBA equality; approval metadata is separate review
+state.
 
 `wpt_local_path` is relative to the WPT repository root. It must not contain
 `external/wpt/` or an absolute checkout path.
