@@ -49,15 +49,18 @@ comparison metrics:
 ```json
 {
   "schema_version": 1,
+  "result_at": "2026-08-04T10:11:12Z",
   "current_different_pixels": 123,
   "current_total_pixels": 480000,
   "current_diff_percent": 0.025625
 }
 ```
 
-The ignored per-test `current.json` file stores comparison metrics and the WPT
-run outcome. `bin/build-db` uses the committed inventory and each test's PNG and
-JSON files to rebuild the ignored Peewee/SQLite `data.sqlite` homepage index.
+The ignored per-test `current.json` file stores comparison metrics, the WPT run
+outcome, and `result_at`, the UTC time at which the latest result was recorded.
+`bin/build-db` uses the committed inventory and each test's PNG and JSON files to
+rebuild the ignored Peewee/SQLite `data.sqlite` homepage index. SQLite stores the
+same `result_at` value; it has no separate result-update timestamp.
 The homepage reads SQLite; a test page reads its flat JSON, and page actions
 update both representations for the affected test.
 

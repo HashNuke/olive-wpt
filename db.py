@@ -6,7 +6,6 @@ import hashlib
 import json
 import os
 import sqlite3
-from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from urllib.parse import quote
 
@@ -20,7 +19,7 @@ ROW_FIELDS = (
     "approved_result_sha256", "review_state", "review_reason",
     "wpt_passed", "run_passed", "run_outcome", "result_at", "current_diff_percent",
     "metadata_json", "review_state_json",
-    "current_json", "updated_at",
+    "current_json",
 )
 
 
@@ -43,7 +42,6 @@ class WptTestRecord(Model):
     metadata_json = TextField(null=True)
     review_state_json = TextField(null=True)
     current_json = TextField(null=True)
-    updated_at = TextField()
 
     class Meta:
         table_name = "wpt_tests"
@@ -148,7 +146,6 @@ def row_for_test(project_root: Path, path: str, status=None) -> dict[str, object
         "metadata_json": metadata_text,
         "review_state_json": review_text,
         "current_json": current_text,
-        "updated_at": datetime.now(timezone.utc).isoformat(),
     }
 
 
@@ -187,7 +184,7 @@ def ensure_database(project_root: Path) -> int:
             row_count = connection.execute("SELECT COUNT(*) FROM wpt_tests").fetchone()[0]
     except sqlite3.Error:
         return rebuild_database(project_root)
-    if not set(ROW_FIELDS).issubset(columns) or row_count != len(expected_paths):
+    if columns != set(ROW_FIELDS) or row_count != len(expected_paths):
         return rebuild_database(project_root)
     return 0
 

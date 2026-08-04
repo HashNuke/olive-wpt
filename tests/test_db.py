@@ -35,10 +35,15 @@ class DatabaseTests(unittest.TestCase):
                 rows = dict(connection.execute("SELECT path, status FROM wpt_tests"))
             self.assertEqual(rows, {"css/example.html": "UNKN", "css/missing.html": "NONE"})
             with sqlite3.connect(root / "data.sqlite") as connection:
+                columns = {
+                    row[1] for row in connection.execute("PRAGMA table_info(wpt_tests)")
+                }
                 run_data = connection.execute(
                     "SELECT run_passed, run_outcome, result_at FROM wpt_tests WHERE path = ?",
                     ("css/example.html",),
                 ).fetchone()
+            self.assertIn("result_at", columns)
+            self.assertNotIn("updated_at", columns)
             self.assertEqual(run_data, (1, "pass", "2026-08-04T10:11:12Z"))
         finally:
             temporary.cleanup()
