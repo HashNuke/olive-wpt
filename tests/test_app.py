@@ -168,11 +168,11 @@ class ReportImagePresentationTests(unittest.TestCase):
             tests=[{"test": self.test, "status": "NONE", "current_diff_percent": 1.234}],
             status_tabs=app.HOME_STATUS_TABS,
             status_counts={"ALL": 1, "PASS": 0, "FAIL": 0, "REVW": 0, "UNKN": 0, "NONE": 1},
+            selected_status="ALL",
         )
-        self.assertIn('data-status-tab="ALL"', html)
-        self.assertIn('data-status-tab="NONE"', html)
-        self.assertIn('data-status-item="NONE"', html)
-        self.assertIn("No tests have this status.", html)
+        self.assertIn('href="/"', html)
+        self.assertIn('href="/?result=none"', html)
+        self.assertNotIn("No tests have this status.", html)
         self.assertIn("Rebuild database", html)
         self.assertIn("(1.23%)", html)
 

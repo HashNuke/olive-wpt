@@ -6,31 +6,6 @@ function activateRenderTab(tab) {
   });
 }
 
-function activateStatusTab(tab) {
-  const status = tab.dataset.statusTab;
-  const all = status === "ALL";
-  const items = document.querySelectorAll("[data-status-item]");
-  let visible = 0;
-  document.querySelectorAll("[data-status-tab]").forEach((candidate) => {
-    const active = candidate === tab;
-    candidate.classList.toggle("active", active);
-    candidate.setAttribute("aria-selected", active ? "true" : "false");
-  });
-  items.forEach((item) => {
-    const show = all || item.dataset.statusItem === status;
-    item.hidden = !show;
-    if (show) visible += 1;
-  });
-  const summary = document.querySelector("[data-status-summary]");
-  if (summary) {
-    summary.textContent = all
-      ? "Showing all " + visible + " tests."
-      : "Showing " + visible + " " + status + " tests.";
-  }
-  const empty = document.querySelector("[data-status-empty]");
-  if (empty) empty.hidden = visible !== 0;
-}
-
 let toastTimer;
 
 function showToast(message, error = false, duration = 2200) {
@@ -81,9 +56,6 @@ function setActionBusy(element, busy) {
 }
 
 document.body.addEventListener("click", async (event) => {
-  const statusTab = event.target.closest("[data-status-tab]");
-  if (statusTab) activateStatusTab(statusTab);
-
   const tab = event.target.closest("[data-render-tab]");
   if (tab && !tab.disabled) activateRenderTab(tab);
 

@@ -15,7 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from PIL import Image, ImageChops, UnidentifiedImageError
 
-from db import load_test_index, load_statuses, upsert_test
+from db import load_test_index, upsert_test
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -389,9 +389,9 @@ def home_status(test: WptTest) -> str:
     return "PASS" if current_hash == approved_hash or approved_improved else "REVW"
 
 
-def load_database_statuses() -> dict[str, str]:
+def load_database_test_index() -> dict[str, dict[str, object]]:
     try:
-        return load_statuses(WPT_DATABASE_FILE)
+        return load_test_index(WPT_DATABASE_FILE)
     except FileNotFoundError as error:
         raise HTTPException(
             status_code=503,
@@ -593,8 +593,8 @@ app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request) -> HTMLResponse:
     wpt_tests = load_wpt_tests()
-    test_index = load_test_index(WPT_DATABASE_FILE)
-    tests = sort_home_tests(
+    test_index = load_database_test_index()
+    all_tests = sort_home_tests(
         [
             {
                 "test": test,
@@ -604,14 +604,34 @@ def home(request: Request) -> HTMLResponse:
             for test in wpt_tests
         ]
     )
+    selected_result = request.query_params.get("result")
+    if selected_result is None or not selected_result.strip():
+        selected_status = "ALL"
+    else:
+        selected_status = selected_result.strip().upper()
+        if selected_status not in HOME_STATUS_TABS[1:]:
+            raise HTTPException(
+                status_code=400,
+                detail="result must be one of unkn, fail, pass, revw, or none",
+            )
+    tests = (
+        all_tests
+        if selected_status == "ALL"
+        else [item for item in all_tests if item["status"] == selected_status]
+    )
     status_counts = {status: 0 for status in HOME_STATUS_TABS}
-    status_counts["ALL"] = len(tests)
-    for item in tests:
+    status_counts["ALL"] = len(all_tests)
+    for item in all_tests:
         status_counts[item["status"]] = status_counts.get(item["status"], 0) + 1
     return templates.TemplateResponse(
         request=request,
         name="home.html",
-        context={"tests": tests, "status_counts": status_counts, "status_tabs": HOME_STATUS_TABS},
+        context={
+            "tests": tests,
+            "status_counts": status_counts,
+            "status_tabs": HOME_STATUS_TABS,
+            "selected_status": selected_status,
+        },
     )
 
 
