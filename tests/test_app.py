@@ -207,6 +207,11 @@ class ReportImagePresentationTests(unittest.TestCase):
             comparison_status="awaiting approval",
         )
         self.assertIn("Approve current Olive render", html)
+        self.assertIn('rows="3"', html)
+
+    def test_base_template_contains_transient_action_toast(self):
+        html = app.templates.get_template("base.html").render()
+        self.assertIn('id="toast"', html)
 
 
 if __name__ == "__main__":

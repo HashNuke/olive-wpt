@@ -31,6 +31,54 @@ function activateStatusTab(tab) {
   if (empty) empty.hidden = visible !== 0;
 }
 
+let toastTimer;
+
+function showToast(message, error = false, duration = 2200) {
+  const toast = document.querySelector("#toast");
+  if (!toast) return;
+  window.clearTimeout(toastTimer);
+  toast.textContent = message;
+  toast.classList.toggle("toast-error", error);
+  toast.hidden = false;
+  if (duration > 0) {
+    toastTimer = window.setTimeout(() => {
+      toast.hidden = true;
+    }, duration);
+  }
+}
+
+function actionElement(event) {
+  const element = event.detail && event.detail.elt;
+  return element && element.closest ? element : null;
+}
+
+function actionMessage(element) {
+  const action = element && element.getAttribute("hx-post");
+  if (!action) return "Review updated";
+  if (action.includes("/approve?")) return "Render approved";
+  if (action.includes("/unapprove?")) return "Render unapproved";
+  if (action.includes("/reject?")) return "Render rejected";
+  if (action.includes("/unreject?")) return "Rejection cleared";
+  return "Review updated";
+}
+
+function setActionBusy(element, busy) {
+  if (!element) return;
+  const button = element.matches("button")
+    ? element
+    : element.querySelector("button[type=submit]");
+  if (!button) return;
+  if (busy) {
+    button.dataset.originalLabel = button.textContent;
+    button.disabled = true;
+    button.textContent = "Saving…";
+  } else if (button.dataset.originalLabel) {
+    button.disabled = false;
+    button.textContent = button.dataset.originalLabel;
+    delete button.dataset.originalLabel;
+  }
+}
+
 document.body.addEventListener("click", async (event) => {
   const statusTab = event.target.closest("[data-status-tab]");
   if (statusTab) activateStatusTab(statusTab);
@@ -60,4 +108,29 @@ document.body.addEventListener("click", async (event) => {
   window.setTimeout(() => {
     button.textContent = originalLabel;
   }, 1500);
+});
+
+document.body.addEventListener("htmx:beforeRequest", (event) => {
+  const element = actionElement(event);
+  if (!element || !element.closest("#approval-controls")) return;
+  setActionBusy(element, true);
+  showToast("Saving…", false, 0);
+});
+
+document.body.addEventListener("htmx:afterRequest", (event) => {
+  const element = actionElement(event);
+  if (!element || !element.closest("#approval-controls")) return;
+  const successful = event.detail.xhr && event.detail.xhr.status >= 200 && event.detail.xhr.status < 300;
+  setActionBusy(element, false);
+  showToast(
+    successful ? actionMessage(element) : "Could not update review",
+    !successful,
+  );
+});
+
+document.body.addEventListener("htmx:sendError", (event) => {
+  const element = actionElement(event);
+  if (!element || !element.closest("#approval-controls")) return;
+  setActionBusy(element, false);
+  showToast("Could not reach review server", true);
 });

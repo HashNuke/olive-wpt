@@ -43,7 +43,7 @@
   {% if olive_available %}
   <form class="rejection-form" hx-post="{{ test.rejection_url(true) }}" hx-target="#approval-controls" hx-swap="innerHTML">
     <label for="rejection-reason">Reason for rejection</label>
-    <textarea id="rejection-reason" name="reason" rows="2" required placeholder="What should be fixed before approval?">{% if rejected %}{{ review_reason }}{% endif %}</textarea>
+    <textarea id="rejection-reason" name="reason" rows="3" required placeholder="What should be fixed before approval?">{% if rejected %}{{ review_reason }}{% endif %}</textarea>
     <button type="submit" class="approval-reject">{% if rejected %}Reject revised result{% else %}Reject current result{% endif %}</button>
   </form>
   {% if rejected %}
