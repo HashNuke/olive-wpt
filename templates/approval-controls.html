@@ -50,16 +50,16 @@
   <button type="button" class="approval-reject" hx-post="{{ test.rejection_url(false) }}" hx-target="#approval-controls" hx-swap="innerHTML">Clear rejection</button>
   {% endif %}
   {% endif %}
-  {% if metadata_available and olive_available and current_comparison_available and approval_status == "approved" and current_result_sha256 == approved_result_sha256 %}
+  {% if olive_available and current_comparison_available and approval_status == "approved" and current_result_sha256 == approved_result_sha256 %}
   <button type="button" hx-post="{{ test.approval_url(false) }}" hx-target="#approval-controls" hx-swap="innerHTML">Unapprove</button>
-  {% elif metadata_available and olive_available and current_comparison_available %}
+  {% elif olive_available and current_comparison_available %}
   <button type="button" hx-post="{{ test.approval_url(true) }}" hx-target="#approval-controls" hx-swap="innerHTML">Approve current Olive render</button>
   {% endif %}
-  {% if not metadata_available %}
-  <span class="approval-help">Approval metadata missing</span>
-  {% elif not olive_available %}
+  {% if not olive_available %}
   <span class="approval-help">Olive render missing</span>
   {% elif not current_comparison_available %}
   <span class="approval-help">Current diff unavailable</span>
+  {% elif not metadata_available %}
+  <span class="approval-help">Approval metadata will be created when approved</span>
   {% endif %}
 </div>

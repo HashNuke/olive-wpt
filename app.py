@@ -511,7 +511,9 @@ def write_approval_status(test: WptTest, status: str) -> None:
     metadata_path = metadata_path_for_wpt_path(test.path)
     metadata = load_metadata(test)
     if metadata is None:
-        raise HTTPException(status_code=404, detail="Test metadata not found")
+        if status != "approved":
+            raise HTTPException(status_code=404, detail="Test metadata not found")
+        metadata = new_metadata(test)
     if status == "approved":
         current = load_current_comparison(test)
         current_diff_percent = comparison_number(current, "current_diff_percent")
@@ -535,6 +537,43 @@ def write_approval_status(test: WptTest, status: str) -> None:
     finally:
         if temporary_path.exists():
             temporary_path.unlink()
+
+
+def new_metadata(test: WptTest) -> dict[str, object]:
+    return {
+        "schema_version": 1,
+        "status": "pending",
+        "olive_version": olive_version(),
+        "reference_browser": "chromium",
+        "reference_browser_version": reference_browser_version(),
+        "wpt_url": test.url,
+        "wpt_local_path": test.path,
+    }
+
+
+def olive_version() -> str:
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            check=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return "0.1.0+unknown"
+    revision = result.stdout.strip()
+    return f"0.1.0+{revision}" if revision else "0.1.0+unknown"
+
+
+def reference_browser_version() -> str:
+    report_path = PROJECT_ROOT / "current" / "reference-generation.json"
+    try:
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return "unknown"
+    version = report.get("chromium_version")
+    return version if isinstance(version, str) and version else "unknown"
 
 
 def get_wpt_test(wpt_path: str) -> WptTest:

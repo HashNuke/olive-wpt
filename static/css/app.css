@@ -98,6 +98,14 @@ body.test-review {
   margin: 2rem;
 }
 
+.test-path-title {
+  max-width: 100%;
+  margin: 1rem 0 0.5rem;
+  font-size: 1.35rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
 .review-nav {
   display: flex;
   align-items: center;

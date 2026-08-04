@@ -133,6 +133,20 @@ class ReportImagePresentationTests(unittest.TestCase):
         progress = json.loads(self.progress_path.read_text(encoding="utf-8"))
         self.assertEqual(progress["regressions"], 1)
 
+    def test_approval_creates_missing_metadata_for_available_render(self):
+        self.write_artifact("result.png")
+        self.write_artifact("reference.png")
+        self.write_current_comparison(0.0)
+
+        app.write_approval_status(self.test, "approved")
+
+        metadata = json.loads(
+            (self.artifact_directory / "metadata.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(metadata["status"], "approved")
+        self.assertEqual(metadata["wpt_local_path"], self.test.path)
+        self.assertEqual(metadata["wpt_url"], self.test.url)
+
     def test_home_template_contains_status_tabs_and_filterable_rows(self):
         html = app.templates.get_template("home.html").render(
             tests=[{"test": self.test, "status": "NONE"}],
@@ -143,6 +157,56 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.assertIn('data-status-tab="NONE"', html)
         self.assertIn('data-status-item="NONE"', html)
         self.assertIn("No tests have this status.", html)
+
+    def test_review_title_has_wrapping_class_for_long_wpt_paths(self):
+        html = app.templates.get_template("test-review.html").render(
+            test=self.test,
+            result_status="NONE",
+            render_labels=app.RENDER_LABELS,
+            render_availability={name: False for name in app.RENDER_LABELS},
+            render_name="olive",
+            render_label="Olive",
+            render_available=False,
+            image_url="/test-report/image",
+            rejected=False,
+            review_state_available=False,
+            review_status="pending",
+            review_reason=None,
+            approval_status="pending",
+            metadata_available=False,
+            olive_available=False,
+            current_result_sha256=None,
+            current_reference_sha256=None,
+            reviewed_result_sha256=None,
+            approved_result_sha256=None,
+            approved_baseline_available=False,
+            current_comparison_available=False,
+            current_diff_percent=None,
+            approved_diff_percent=None,
+            comparison_status="unavailable",
+            comparison_passed=None,
+            comparison_outcome="pending",
+        )
+        self.assertIn('<h1 class="test-path-title">css/example.html</h1>', html)
+
+    def test_approval_controls_show_approve_without_preexisting_metadata(self):
+        html = app.templates.get_template("approval-controls.html").render(
+            test=self.test,
+            result_status="UNKN",
+            approval_status="pending",
+            review_status="pending",
+            review_reason=None,
+            rejected=False,
+            metadata_available=False,
+            olive_available=True,
+            current_comparison_available=True,
+            current_result_sha256="current",
+            approved_result_sha256=None,
+            current_diff_percent=0.0,
+            approved_diff_percent=None,
+            comparison_status="awaiting approval",
+        )
+        self.assertIn("Approve current Olive render", html)
 
 
 if __name__ == "__main__":
