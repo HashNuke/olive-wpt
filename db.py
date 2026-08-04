@@ -18,7 +18,7 @@ ROW_FIELDS = (
     "path", "status", "wpt_url", "output_directory",
     "result_exists", "reference_exists", "metadata_status",
     "approved_result_sha256", "review_state", "review_reason",
-    "wpt_passed", "run_passed", "run_outcome", "current_diff_percent",
+    "wpt_passed", "run_passed", "run_outcome", "result_at", "current_diff_percent",
     "metadata_json", "review_state_json",
     "current_json", "updated_at",
 )
@@ -38,6 +38,7 @@ class WptTestRecord(Model):
     wpt_passed = BooleanField(null=True)
     run_passed = BooleanField(null=True)
     run_outcome = TextField(null=True)
+    result_at = TextField(null=True)
     current_diff_percent = FloatField(null=True)
     metadata_json = TextField(null=True)
     review_state_json = TextField(null=True)
@@ -142,6 +143,7 @@ def row_for_test(project_root: Path, path: str, status=None) -> dict[str, object
         "wpt_passed": current.get("wpt_passed") if current and isinstance(current.get("wpt_passed"), bool) else None,
         "run_passed": current.get("run_passed") if current and isinstance(current.get("run_passed"), bool) else None,
         "run_outcome": current.get("run_outcome") if current and isinstance(current.get("run_outcome"), str) else None,
+        "result_at": current.get("result_at") if current and isinstance(current.get("result_at"), str) else None,
         "current_diff_percent": current.get("current_diff_percent") if current else None,
         "metadata_json": metadata_text,
         "review_state_json": review_text,
