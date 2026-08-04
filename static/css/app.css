@@ -190,10 +190,7 @@ body.test-review {
   display: block;
   text-align: left;
   margin: 1rem 0;
-  padding: 0.75rem 1rem;
-  border: 1px solid #c8ced6;
-  border-radius: 0.4rem;
-  background: #f6f7f9;
+  padding: 0;
 }
 
 .approval-heading {
@@ -279,10 +276,12 @@ body.test-review {
   justify-content: flex-start;
 }
 
-.review-actions-row {
+.review-action-buttons {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.65rem;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .approval-help {
@@ -336,8 +335,7 @@ body.test-review {
 
 .rejection-form {
   display: grid;
-  flex: 1 1 auto;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.5rem;
   min-width: 0;
 }
@@ -353,6 +351,12 @@ body.test-review {
   min-height: 4.5rem;
   resize: vertical;
   font: inherit;
+}
+
+.review-action-buttons,
+.rejection-actions,
+.approval-actions {
+  grid-column: 1 / -1;
 }
 
 .rejection-actions {
@@ -479,16 +483,4 @@ body.test-review {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .rejection-form {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .rejection-actions {
-    grid-column: 1 / -1;
-  }
-
-  .review-actions-row {
-    align-items: stretch;
-    flex-direction: column;
-  }
 }
