@@ -92,6 +92,10 @@ body.wpt-index {
   padding: 0.175rem 0;
 }
 
+.wpt-test-entry[hidden] {
+  display: none;
+}
+
 .wpt-status {
   flex: 0 0 4rem;
   font-size: 0.8rem;
