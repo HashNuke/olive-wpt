@@ -1,0 +1,26 @@
+#!/bin/sh
+
+set -eu
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+
+approval_date=$(date +%F)
+next_number=$(
+  git log --all --format=%s | awk -v prefix="Approved ${approval_date}." '
+    BEGIN {
+      highest = -1
+    }
+    index($0, prefix) == 1 {
+      suffix = substr($0, length(prefix) + 1)
+      if (suffix ~ /^[0-9]+$/ && suffix + 0 >= highest) {
+        highest = suffix + 0
+      }
+    }
+    END {
+      print highest + 1
+    }
+  '
+)
+
+exec git commit -m "Approved ${approval_date}.${next_number}"
