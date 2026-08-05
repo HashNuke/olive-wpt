@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+2b71a28e8d3e2eaba7b4f6bbbd232d110dfc126e",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-text/text-indent/text-indent-each-line-hanging.html",
+  "wpt_local_path": "css/css-text/text-indent/text-indent-each-line-hanging.html",
+  "approved_result_sha256": "3b1f41d8002c4f822472e075df1abfcfee9a9f98a55d01a15601fc0596803eef",
+  "approved_diff_percent": 0.6297916666666666,
+  "approved_different_pixels": 3023,
+  "approved_total_pixels": 480000
+}

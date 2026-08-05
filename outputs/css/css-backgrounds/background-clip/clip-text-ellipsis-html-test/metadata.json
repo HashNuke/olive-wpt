@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+2b71a28e8d3e2eaba7b4f6bbbd232d110dfc126e",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-backgrounds/background-clip/clip-text-ellipsis.html",
+  "wpt_local_path": "css/css-backgrounds/background-clip/clip-text-ellipsis.html",
+  "approved_result_sha256": "d62db83679a9cd9e821efcd0cd80168d182f8ab8ac74dc83166b8ecca5a2cf6d",
+  "approved_diff_percent": 0.25354166666666667,
+  "approved_different_pixels": 1217,
+  "approved_total_pixels": 480000
+}
