@@ -5,7 +5,7 @@ set -eu
 repo_root=$(git rev-parse --show-toplevel)
 cd "$repo_root"
 
-approval_date=$(date +%F)
+approval_date=$(date +%Y%m%d)
 next_number=$(
   git log --all --format=%s | awk -v prefix="Approved ${approval_date}." '
     BEGIN {
