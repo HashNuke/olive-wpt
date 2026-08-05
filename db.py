@@ -118,12 +118,28 @@ def approved_result_improved(metadata, current) -> bool:
     )
 
 
+def rejected_result_improved(review_state, current) -> bool:
+    if not review_state or not current:
+        return False
+    reviewed_pixels = review_state.get("different_pixels")
+    current_pixels = current.get("current_different_pixels")
+    return (
+        isinstance(reviewed_pixels, (int, float))
+        and not isinstance(reviewed_pixels, bool)
+        and isinstance(current_pixels, (int, float))
+        and not isinstance(current_pixels, bool)
+        and current_pixels < reviewed_pixels
+    )
+
+
 def derive_status(result_path: Path, metadata, review_state, current) -> str:
     current_hash = result_hash(result_path)
     if current_hash is None:
         return "NONE"
     if review_state is not None:
-        return "FAIL" if review_state.get("olive_result_sha256") == current_hash else "REVW"
+        if review_state.get("olive_result_sha256") == current_hash:
+            return "FAIL"
+        return "REVW" if rejected_result_improved(review_state, current) else "FAIL"
     if current and current.get("run_passed") is False:
         approved_hash = metadata.get("approved_result_sha256") if metadata else None
         if not (

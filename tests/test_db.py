@@ -136,6 +136,72 @@ class DatabaseTests(unittest.TestCase):
         finally:
             temporary.cleanup()
 
+    def test_rejected_equal_pixel_diff_remains_failed(self):
+        temporary, root = self.make_project()
+        try:
+            result_path = root / "outputs" / "css" / "example-html-test" / "result.png"
+            reviewed_hash = db.result_hash(result_path)
+            review_path = result_path.parent / "review-state.json"
+            review_path.write_text(
+                json.dumps(
+                    {
+                        "state": "rejected",
+                        "olive_result_sha256": reviewed_hash,
+                        "different_pixels": 10,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            result_path.write_bytes(b"new-render-with-the-same-diff")
+            current_path = result_path.parent / "current.json"
+            current = json.loads(current_path.read_text(encoding="utf-8"))
+            current["current_different_pixels"] = 10
+            current_path.write_text(json.dumps(current), encoding="utf-8")
+
+            db.rebuild_database(root)
+
+            with sqlite3.connect(root / "data.sqlite") as connection:
+                status = connection.execute(
+                    "SELECT status FROM wpt_tests WHERE path = ?",
+                    ("css/example.html",),
+                ).fetchone()[0]
+            self.assertEqual(status, "FAIL")
+        finally:
+            temporary.cleanup()
+
+    def test_rejected_strictly_lower_pixel_diff_is_reviewable(self):
+        temporary, root = self.make_project()
+        try:
+            result_path = root / "outputs" / "css" / "example-html-test" / "result.png"
+            reviewed_hash = db.result_hash(result_path)
+            review_path = result_path.parent / "review-state.json"
+            review_path.write_text(
+                json.dumps(
+                    {
+                        "state": "rejected",
+                        "olive_result_sha256": reviewed_hash,
+                        "different_pixels": 10,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            result_path.write_bytes(b"new-render-with-a-lower-diff")
+            current_path = result_path.parent / "current.json"
+            current = json.loads(current_path.read_text(encoding="utf-8"))
+            current["current_different_pixels"] = 9
+            current_path.write_text(json.dumps(current), encoding="utf-8")
+
+            db.rebuild_database(root)
+
+            with sqlite3.connect(root / "data.sqlite") as connection:
+                status = connection.execute(
+                    "SELECT status FROM wpt_tests WHERE path = ?",
+                    ("css/example.html",),
+                ).fetchone()[0]
+            self.assertEqual(status, "REVW")
+        finally:
+            temporary.cleanup()
+
 
 if __name__ == "__main__":
     unittest.main()
