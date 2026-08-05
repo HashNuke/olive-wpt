@@ -28,13 +28,13 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.artifact_directory.mkdir(parents=True, exist_ok=True)
         (self.artifact_directory / name).write_bytes(b"png")
 
-    def write_current_comparison(self, diff_percent):
+    def write_current_comparison(self, diff_percent, different_pixels=10):
         self.artifact_directory.mkdir(parents=True, exist_ok=True)
         (self.artifact_directory / "current.json").write_text(
             json.dumps(
                 {
                     "current_diff_percent": diff_percent,
-                    "current_different_pixels": 10,
+                    "current_different_pixels": different_pixels,
                     "current_total_pixels": 100,
                 }
             ),
@@ -76,13 +76,26 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.assertEqual(rejected["review_reason"], "Text is vertically misaligned")
 
         (self.artifact_directory / "result.png").write_bytes(b"improved-render")
-        self.write_current_comparison(2.0)
+        self.write_current_comparison(2.0, different_pixels=4)
         improved = app.report_context(self.test)
         self.assertEqual(improved["review_status"], "improved")
         self.assertEqual(app.home_status(self.test), "REVW")
 
         app.delete_review_state(self.test)
         self.assertFalse(app.review_state_path_for_wpt_path(self.test.path).exists())
+
+    def test_rejected_equal_pixel_diff_remains_failed(self):
+        self.write_artifact("result.png")
+        self.write_artifact("reference.png")
+        self.write_current_comparison(5.0)
+
+        app.write_review_state(self.test, "Text is still vertically misaligned")
+        (self.artifact_directory / "result.png").write_bytes(b"same-diff-render")
+        self.write_current_comparison(5.0)
+
+        context = app.report_context(self.test)
+        self.assertEqual(context["review_status"], "rejected")
+        self.assertEqual(app.home_status(self.test), "FAIL")
 
     def test_home_status_is_none_without_an_olive_render(self):
         self.write_artifact("reference.png")

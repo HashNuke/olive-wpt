@@ -261,17 +261,28 @@ def comparison_number(comparison: dict[str, object] | None, key: str) -> float |
 def review_delta_status(
     current_hash: str | None,
     current_diff_percent: float | None,
+    current_different_pixels: float | None,
     reviewed_hash: str | None,
     reviewed_diff_percent: float | None,
+    reviewed_different_pixels: float | None,
     same_result_label: str,
 ) -> str:
     if current_hash and reviewed_hash and current_hash == reviewed_hash:
         return same_result_label
+    if current_different_pixels is not None and reviewed_different_pixels is not None:
+        if current_different_pixels < reviewed_different_pixels:
+            return "improved"
+        if current_different_pixels > reviewed_different_pixels:
+            return "regressed"
+        if same_result_label == "rejected":
+            return same_result_label
     if current_diff_percent is not None and reviewed_diff_percent is not None:
         if current_diff_percent < reviewed_diff_percent:
             return "improved"
         if current_diff_percent > reviewed_diff_percent:
             return "regressed"
+        if same_result_label == "rejected":
+            return same_result_label
     return "changed"
 
 
@@ -285,11 +296,13 @@ def report_context(test: WptTest) -> dict[str, object]:
     run_outcome = current.get("run_outcome") if current and isinstance(current.get("run_outcome"), str) else None
     run_detail = current.get("run_detail") if current and isinstance(current.get("run_detail"), str) else None
     approved_diff_percent = comparison_number(metadata, "approved_diff_percent")
+    current_different_pixels = comparison_number(current, "current_different_pixels")
     current_hash = result_sha256(test)
     current_reference_hash = reference_sha256(test)
     approved_hash = metadata.get("approved_result_sha256") if metadata else None
     reviewed_hash = review_state.get("olive_result_sha256") if review_state else None
     reviewed_diff_percent = comparison_number(review_state, "diff_percent")
+    reviewed_different_pixels = comparison_number(review_state, "different_pixels")
     comparison_status = "unavailable"
     comparison_passed: bool | None = None
     if current_diff_percent is not None and approved_diff_percent is not None:
@@ -311,16 +324,20 @@ def report_context(test: WptTest) -> dict[str, object]:
         review_status = review_delta_status(
             current_hash,
             current_diff_percent,
+            current_different_pixels,
             reviewed_hash if isinstance(reviewed_hash, str) else None,
             reviewed_diff_percent,
+            reviewed_different_pixels,
             "rejected",
         )
     elif metadata and metadata.get("status") == "approved":
         review_status = review_delta_status(
             current_hash,
             current_diff_percent,
+            current_different_pixels,
             approved_hash if isinstance(approved_hash, str) else None,
             approved_diff_percent,
+            comparison_number(metadata, "approved_different_pixels"),
             "approved",
         )
         if review_status == "improved":
