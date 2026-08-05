@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+6946ea449fd9449d767549b5ac64e16cc1350220",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/CSS2/stacking-context/composite-change-after-scroll-preserves-stacking-order.html",
+  "wpt_local_path": "css/CSS2/stacking-context/composite-change-after-scroll-preserves-stacking-order.html",
+  "approved_result_sha256": "af98df88f60b6c4a67976f611d5bf7d435f9b75c4274498b958462a9911896df",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
