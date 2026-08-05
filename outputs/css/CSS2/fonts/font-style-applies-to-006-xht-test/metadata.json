@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+9a17ddc7131a05ccd10cd5393a6b300bfbf0061a",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/CSS2/fonts/font-style-applies-to-006.xht",
+  "wpt_local_path": "css/CSS2/fonts/font-style-applies-to-006.xht",
+  "approved_result_sha256": "9723e6e44ce47ca6e54373ece3f2c94f56ec610785707702a58459464ab8ef01",
+  "approved_diff_percent": 0.49375,
+  "approved_different_pixels": 2370,
+  "approved_total_pixels": 480000
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+9a17ddc7131a05ccd10cd5393a6b300bfbf0061a",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-backgrounds/fieldset-inset-shadow.html",
+  "wpt_local_path": "css/css-backgrounds/fieldset-inset-shadow.html",
+  "approved_result_sha256": "af46d0e78d4dd6d38611d3e7939a69d21fcb45790afe498ee4c309d5daea698b",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+9a17ddc7131a05ccd10cd5393a6b300bfbf0061a",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/filter-effects/backdrop-filter-backdrop-root-opacity.html",
+  "wpt_local_path": "css/filter-effects/backdrop-filter-backdrop-root-opacity.html",
+  "approved_result_sha256": "0511e8dec03788b2ff368c5786ec18392e1a6e35c957e3fa1cd79c06a387c27e",
+  "approved_diff_percent": 0.0008333333333333334,
+  "approved_different_pixels": 4,
+  "approved_total_pixels": 480000
+}

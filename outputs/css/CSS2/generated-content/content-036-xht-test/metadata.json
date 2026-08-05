@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+5ffb074e04d9cfd7eeac8a5791b9552192103e28",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/CSS2/generated-content/content-036.xht",
+  "wpt_local_path": "css/CSS2/generated-content/content-036.xht",
+  "approved_result_sha256": "1ff70670b0fa8812d859dd6068fdc33389f7b3f895f11f2c52fd67efd724ee34",
+  "approved_diff_percent": 0.25,
+  "approved_different_pixels": 1200,
+  "approved_total_pixels": 480000
+}

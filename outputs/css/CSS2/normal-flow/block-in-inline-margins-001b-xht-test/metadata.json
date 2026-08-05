@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+9a17ddc7131a05ccd10cd5393a6b300bfbf0061a",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/CSS2/normal-flow/block-in-inline-margins-001b.xht",
+  "wpt_local_path": "css/CSS2/normal-flow/block-in-inline-margins-001b.xht",
+  "approved_result_sha256": "e24d622e528a698a88f7e8e1463f11d03e9ef9dd0d0ea81c57795e79e8729deb",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

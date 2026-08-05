@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+558fd5383535625b991b1dcbe08b1da47daec69c",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/CSS2/floats/float-with-absolutely-positioned-child-with-static-inset.html",
+  "wpt_local_path": "css/CSS2/floats/float-with-absolutely-positioned-child-with-static-inset.html",
+  "approved_result_sha256": "210d49bde7061905180c5a769b9d8141adab98e5ac6f7a345dc35221b2d1cb39",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

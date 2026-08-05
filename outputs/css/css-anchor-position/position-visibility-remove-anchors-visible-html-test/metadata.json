@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+9a17ddc7131a05ccd10cd5393a6b300bfbf0061a",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-anchor-position/position-visibility-remove-anchors-visible.html",
+  "wpt_local_path": "css/css-anchor-position/position-visibility-remove-anchors-visible.html",
+  "approved_result_sha256": "a9b036e791d7cac497c5f8c40485af0e3a6fd68d354d89c1c86b6541d0bc849f",
+  "approved_diff_percent": 0.016666666666666666,
+  "approved_different_pixels": 80,
+  "approved_total_pixels": 480000
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+9a17ddc7131a05ccd10cd5393a6b300bfbf0061a",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-backgrounds/background-size/vector/zero-width-ratio-auto-5px.html",
+  "wpt_local_path": "css/css-backgrounds/background-size/vector/zero-width-ratio-auto-5px.html",
+  "approved_result_sha256": "4cace9a3bdb540ce8988738d7826e1ca2b73c9285f6b1599d56e0342fb351c3d",
+  "approved_diff_percent": 0.0010416666666666669,
+  "approved_different_pixels": 5,
+  "approved_total_pixels": 480000
+}

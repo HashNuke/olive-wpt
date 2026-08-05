@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+558fd5383535625b991b1dcbe08b1da47daec69c",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/CSS2/margin-padding-clear/margin-auto-on-block-box.html",
+  "wpt_local_path": "css/CSS2/margin-padding-clear/margin-auto-on-block-box.html",
+  "approved_result_sha256": "118f1e8f8e3e0fd09452eb0c9825116c01d6c1f2d9a9deca4e44df6069299866",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

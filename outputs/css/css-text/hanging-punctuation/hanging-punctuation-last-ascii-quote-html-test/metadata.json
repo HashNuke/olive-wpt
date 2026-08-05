@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+9a17ddc7131a05ccd10cd5393a6b300bfbf0061a",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-text/hanging-punctuation/hanging-punctuation-last-ascii-quote.html",
+  "wpt_local_path": "css/css-text/hanging-punctuation/hanging-punctuation-last-ascii-quote.html",
+  "approved_result_sha256": "d4788a4c26ad77d4bb0f85656f8b0d8d3f97394fa472b7d6af3709d71e9ea042",
+  "approved_diff_percent": 0.004375,
+  "approved_different_pixels": 21,
+  "approved_total_pixels": 480000
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+9a17ddc7131a05ccd10cd5393a6b300bfbf0061a",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-ui/compute-kind-widget-generated/kind-of-widget-fallback-link-background-attachment-001.html",
+  "wpt_local_path": "css/css-ui/compute-kind-widget-generated/kind-of-widget-fallback-link-background-attachment-001.html",
+  "approved_result_sha256": "37d013d46cfbbe7f4d2290bee94ce856b160b78f8b18f40cbb605df9e76ebd98",
+  "approved_diff_percent": 0.006458333333333333,
+  "approved_different_pixels": 31,
+  "approved_total_pixels": 480000
+}
