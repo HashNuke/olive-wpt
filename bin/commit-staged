@@ -13,12 +13,12 @@ next_number=$(
     }
     index($0, prefix) == 1 {
       suffix = substr($0, length(prefix) + 1)
-      if (suffix ~ /^[0-9]+$/ && suffix + 0 >= highest) {
+      if (suffix ~ /^[0-9]{3}$/ && suffix + 0 >= highest) {
         highest = suffix + 0
       }
     }
     END {
-      print highest + 1
+      printf "%03d\n", highest + 1
     }
   '
 )
