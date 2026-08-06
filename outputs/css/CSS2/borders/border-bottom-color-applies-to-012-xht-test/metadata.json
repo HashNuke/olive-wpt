@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+8933db627fbb61b00227b844dbe65fd2d7b013a8",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/CSS2/borders/border-bottom-color-applies-to-012.xht",
+  "wpt_local_path": "css/CSS2/borders/border-bottom-color-applies-to-012.xht",
+  "approved_result_sha256": "2eafe408eb8f959bb86865509e23ffc9fc86ce46e4c1da19f31f9d3b6203660c",
+  "approved_diff_percent": 0.2604166666666667,
+  "approved_different_pixels": 1250,
+  "approved_total_pixels": 480000
+}
