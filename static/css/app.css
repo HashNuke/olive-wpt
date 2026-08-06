@@ -277,6 +277,18 @@ body.test-results-page {
   object-position: top left;
 }
 
+.test-result-render-target img {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 22rem;
+  object-fit: contain;
+  object-position: top left;
+  border: 1px solid #c8ced6;
+}
+
 .test-result-comparison {
   min-width: 0;
 }
