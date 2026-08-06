@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+from pathlib import PurePosixPath
 
 from PIL import Image, ImageChops, ImageColor, ImageDraw, ImageEnhance, ImageFont, ImageOps
 
@@ -17,6 +18,7 @@ PADDING = 24
 LABEL_GAP = 8
 SECTION_GAP = 28
 LABEL_SIZE = 22
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 def parse_args() -> argparse.Namespace:
@@ -24,11 +26,38 @@ def parse_args() -> argparse.Namespace:
         description="Create a labeled Olive/reference/diff review image."
     )
     parser.add_argument(
-        "output_directory",
-        type=Path,
-        help="Directory containing reference.png and result.png",
+        "path",
+        help=(
+            "WPT-relative source path or output directory containing "
+            "reference.png and result.png"
+        ),
     )
     return parser.parse_args()
+
+
+def output_directory_for_wpt_path(wpt_path: str) -> Path:
+    source = PurePosixPath(wpt_path)
+    if source.is_absolute() or ".." in source.parts:
+        raise SystemExit(f"WPT path must be relative and contain no '..': {wpt_path}")
+
+    suffix = source.suffix.removeprefix(".")
+    stem = source.name[: -(len(suffix) + 1)] if suffix else source.name
+    output_name = f"{stem}-{suffix}-test" if suffix else f"{stem}-test"
+    return PROJECT_ROOT.joinpath("outputs", *source.parts[:-1], output_name)
+
+
+def resolve_output_directory(path: str) -> Path:
+    candidate = Path(path)
+    if candidate.is_dir():
+        return candidate
+
+    output_directory = output_directory_for_wpt_path(path)
+    if output_directory.is_dir():
+        return output_directory
+
+    raise SystemExit(
+        f"No WPT output directory found for {path}; tried {output_directory}"
+    )
 
 
 def load_rgb(path: Path) -> Image.Image:
@@ -117,5 +146,5 @@ def create_review_image(output_directory: Path) -> Path:
 
 if __name__ == "__main__":
     arguments = parse_args()
-    created = create_review_image(arguments.output_directory)
+    created = create_review_image(resolve_output_directory(arguments.path))
     print(f"WPT_REVIEW_IMAGE_CREATED path={created}")
