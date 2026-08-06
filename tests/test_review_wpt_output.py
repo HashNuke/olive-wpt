@@ -81,6 +81,12 @@ class ReviewWptOutputTests(unittest.TestCase):
             "PASS css/example.html\nDetails: outputs/css/example-html-test/review-state.json",
         )
 
+    def test_format_batch_skip_entry(self):
+        self.assertEqual(
+            review_wpt_output.format_batch_skip_entry("css/missing-output.html"),
+            "SKIP css/missing-output.html",
+        )
+
     def test_format_selection_summary(self):
         self.assertEqual(review_wpt_output.format_selection_summary(1), "Found 1 test to review.")
         self.assertEqual(review_wpt_output.format_selection_summary(12), "Found 12 tests to review.")
@@ -146,6 +152,57 @@ class ReviewWptOutputTests(unittest.TestCase):
                 (review_wpt_output.WPT_OUTPUTS_ROOT, "css/fast.html"),
             },
         )
+
+    def test_review_tests_in_parallel_reports_skips_and_continues(self):
+        def fake_review_test(api_key, model, wpt_path, request_rate_limiter):
+            if wpt_path == "css/missing-reference.html":
+                raise review_wpt_output.ReviewSkipped(
+                    wpt_path,
+                    "Missing required image(s): reference.png",
+                )
+            return "FAIL", Path(f"{wpt_path}.json"), "Feedback"
+
+        paths = ("css/missing-reference.html", "css/complete.html")
+        with (
+            patch.object(review_wpt_output, "review_test", side_effect=fake_review_test),
+            patch.object(review_wpt_output.db, "upsert_test") as upsert_test,
+        ):
+            results = list(
+                review_wpt_output.review_tests_in_parallel(
+                    "test-key", "test-model", paths, concurrency=2
+                )
+            )
+
+        self.assertIn(
+            ("SKIP", "css/missing-reference.html", None, "Missing required image(s): reference.png"),
+            results,
+        )
+        self.assertIn(
+            ("FAIL", "css/complete.html", Path("css/complete.html.json"), "Feedback"),
+            results,
+        )
+        self.assertEqual(
+            [call.args for call in upsert_test.call_args_list],
+            [(review_wpt_output.WPT_OUTPUTS_ROOT, "css/complete.html")],
+        )
+
+    def test_review_test_skips_when_required_images_are_missing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output_directory = Path(directory)
+            (output_directory / "result.png").write_bytes(b"result")
+
+            with patch.object(
+                review_wpt_output,
+                "resolve_output_directory",
+                return_value=output_directory,
+            ):
+                with self.assertRaises(review_wpt_output.ReviewSkipped) as context:
+                    review_wpt_output.review_test(
+                        "test-key", "test-model", "css/missing-reference.html"
+                    )
+
+        self.assertEqual(context.exception.wpt_path, "css/missing-reference.html")
+        self.assertIn("reference.png", context.exception.reason)
 
     def test_response_text_collects_candidate_parts(self):
         response = {
