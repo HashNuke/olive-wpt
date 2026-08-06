@@ -6,8 +6,8 @@
   "reference_browser_version": "150.0.7871.128",
   "wpt_url": "https://wpt.live/css/CSS2/backgrounds/background-090.xht",
   "wpt_local_path": "css/CSS2/backgrounds/background-090.xht",
-  "approved_result_sha256": "838de2f288ffa20163ddcd5fedbfd51daaedc311fb05d42fe95adcbe97ff608d",
-  "approved_diff_percent": 0.7060416666666667,
-  "approved_different_pixels": 3389,
+  "approved_result_sha256": "3be8fcaec589b9be2ce07907d28e877887ef585f58bcbd607eea1093fafc0059",
+  "approved_diff_percent": 0.32916666666666666,
+  "approved_different_pixels": 1580,
   "approved_total_pixels": 480000
 }
