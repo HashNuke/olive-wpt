@@ -19,17 +19,55 @@ SPEC.loader.exec_module(review_wpt_output)
 
 
 class ReviewWptOutputTests(unittest.TestCase):
-    def test_output_directory_round_trips_to_wpt_path(self):
-        output_directory = (
-            review_wpt_output.OUTPUTS_ROOT
-            / "css"
-            / "css-backgrounds"
-            / "background-image-001-html-test"
+    def test_expand_wpt_paths_uses_exact_inventory_entries_and_directory_prefixes(self):
+        inventory = (
+            "css/css-text/text-indent/example.html",
+            "css/css-text/text-indent/nested.html",
+            "css/css-text/white-space.html",
+            "css/backgrounds/example.html",
+        )
+        self.assertEqual(
+            review_wpt_output.expand_wpt_paths(
+                ["css/css-text", "css/backgrounds/example.html"], inventory
+            ),
+            (
+                "css/css-text/text-indent/example.html",
+                "css/css-text/text-indent/nested.html",
+                "css/css-text/white-space.html",
+                "css/backgrounds/example.html",
+            ),
         )
 
+    def test_expand_wpt_paths_deduplicates_overlapping_arguments(self):
+        inventory = (
+            "css/css-text/example.html",
+            "css/css-text/nested/other.html",
+        )
         self.assertEqual(
-            review_wpt_output.wpt_path_for_output_directory(output_directory),
-            "css/css-backgrounds/background-image-001.html",
+            review_wpt_output.expand_wpt_paths(
+                ["css/css-text", "css/css-text/example.html"], inventory
+            ),
+            inventory,
+        )
+
+    def test_expand_wpt_paths_rejects_missing_file_or_directory(self):
+        inventory = ("css/css-text/example.html",)
+        with self.assertRaises(SystemExit):
+            review_wpt_output.expand_wpt_paths(["css/missing.html"], inventory)
+        with self.assertRaises(SystemExit):
+            review_wpt_output.expand_wpt_paths(["css/missing"], inventory)
+
+    def test_format_batch_review_output(self):
+        output = review_wpt_output.format_batch_review_output(
+            [
+                ("PASS", "css/one.html", Path("outputs/css/one-html-test/review-state.json")),
+                ("FAIL", "css/two.html", Path("outputs/css/two-html-test/review-state.json")),
+            ]
+        )
+        self.assertEqual(
+            output,
+            "PASS css/one.html\nDetails: outputs/css/one-html-test/review-state.json\n\n"
+            "FAIL css/two.html\nDetails: outputs/css/two-html-test/review-state.json",
         )
 
     def test_response_text_collects_candidate_parts(self):
@@ -109,7 +147,7 @@ class ReviewWptOutputTests(unittest.TestCase):
             "The Olive render is missing the red box.",
         )
 
-    def test_generate_feedback_sends_inline_prompt_and_image(self):
+    def test_generate_review_sends_inline_prompt_and_image(self):
         with tempfile.TemporaryDirectory() as directory:
             image_path = Path(directory) / "review.png"
             image_path.write_bytes(b"png-bytes")
