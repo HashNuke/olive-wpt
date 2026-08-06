@@ -1,0 +1,38 @@
+<div class="test-results-review-panel">
+  <div class="test-results-review-status">
+    <span class="wpt-status wpt-status-{{ result_status|lower }}">{{ result_status }}</span>
+    <span class="test-results-review-state">{% if approval_status == "approved" %}Approved{% else %}Pending approval{% endif %}</span>
+    <span class="test-results-review-state">{% if review_status == "rejected" %}Rejected{% elif review_status == "review" %}Needs review{% elif review_status == "approved" %}Approved{% elif review_status in ("improved", "regressed", "changed") %}Changed{% else %}Open{% endif %}</span>
+  </div>
+
+  <dl class="test-results-metrics">
+    <div><dt>Current diff</dt><dd>{% if current_diff_percent is not none %}{{ "%.4f"|format(current_diff_percent) }}%{% else %}—{% endif %}</dd></div>
+    <div><dt>Approved diff</dt><dd>{% if approved_diff_percent is not none %}{{ "%.4f"|format(approved_diff_percent) }}%{% else %}—{% endif %}</dd></div>
+    <div><dt>Comparison</dt><dd class="comparison-{{ comparison_status|replace(' ', '-') }}">{{ comparison_status|capitalize }}</dd></div>
+  </dl>
+
+  {% if run_passed is sameas false %}
+  <p class="test-results-run-failure"><strong>Run failed{% if run_outcome %}: {{ run_outcome }}{% endif %}</strong>{% if run_detail %} {{ run_detail }}{% endif %}</p>
+  {% endif %}
+
+  {% if review_reason %}
+  <p class="test-results-feedback"><strong>{% if review_status == "rejected" %}Rejected{% else %}Feedback{% endif %}:</strong> {{ review_reason }}</p>
+  {% endif %}
+
+  {% if olive_available %}
+  <div class="test-results-actions">
+    {% if rejected %}
+    <button type="button" class="approval-reject approval-secondary" hx-post="{{ test.rejection_url(false, controls_id, true) }}" hx-target="closest .approval-controls" hx-swap="innerHTML">Clear rejection</button>
+    {% else %}
+    <button type="button" class="approval-reject" hx-post="{{ test.rejection_url(true, controls_id, true) }}" hx-vals='{"reason":"Rejected from test results page"}' hx-target="closest .approval-controls" hx-swap="innerHTML">Reject</button>
+    {% endif %}
+    {% if current_comparison_available and approval_status == "approved" and current_result_sha256 == approved_result_sha256 %}
+    <button type="button" hx-post="{{ test.approval_url(false, controls_id, true) }}" hx-target="closest .approval-controls" hx-swap="innerHTML">Unapprove</button>
+    {% elif current_comparison_available %}
+    <button type="button" class="approval-approve" hx-post="{{ test.approval_url(true, controls_id, true) }}" hx-target="closest .approval-controls" hx-swap="innerHTML">Approve</button>
+    {% endif %}
+  </div>
+  {% else %}
+  <p class="approval-help">Olive render missing.</p>
+  {% endif %}
+</div>

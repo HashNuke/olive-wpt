@@ -68,8 +68,8 @@
         {% endif %}
       </div>
       <section id="{{ row.controls_id }}" class="approval-controls result-row-controls" aria-label="Review {{ row.test.path }}">
-        {% with test=row.test, result_status=row.result_status, rejected=row.rejected, review_state_available=row.review_state_available, review_status=row.review_status, review_reason=row.review_reason, approval_status=row.approval_status, metadata_available=row.metadata_available, olive_available=row.olive_available, current_result_sha256=row.current_result_sha256, approved_result_sha256=row.approved_result_sha256, current_comparison_available=row.current_comparison_available, current_diff_percent=row.current_diff_percent, approved_diff_percent=row.approved_diff_percent, comparison_status=row.comparison_status, run_passed=row.run_passed, run_outcome=row.run_outcome, run_detail=row.run_detail, feedback_id=row.feedback_id, rejection_reason_id=row.rejection_reason_id, controls_id=row.controls_id, compact_review=row.compact_review %}
-        {% include "approval-controls.html" %}
+        {% with test=row.test, result_status=row.result_status, rejected=row.rejected, review_status=row.review_status, review_reason=row.review_reason, approval_status=row.approval_status, olive_available=row.olive_available, current_result_sha256=row.current_result_sha256, approved_result_sha256=row.approved_result_sha256, current_comparison_available=row.current_comparison_available, current_diff_percent=row.current_diff_percent, approved_diff_percent=row.approved_diff_percent, comparison_status=row.comparison_status, run_passed=row.run_passed, run_outcome=row.run_outcome, run_detail=row.run_detail, controls_id=row.controls_id %}
+        {% include "test-results-controls.html" %}
         {% endwith %}
       </section>
     </td>

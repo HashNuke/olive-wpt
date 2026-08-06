@@ -58,18 +58,32 @@ class WptTest:
     def review_image_url(self) -> str:
         return f"/test-report/review-image?{urlencode({'path': self.path})}"
 
-    def approval_url(self, approved: bool, controls_id: str | None = None) -> str:
+    def approval_url(
+        self,
+        approved: bool,
+        controls_id: str | None = None,
+        compact: bool = False,
+    ) -> str:
         endpoint = "approve" if approved else "unapprove"
         query = {"path": self.path}
         if controls_id:
             query["controls_id"] = controls_id
+        if compact:
+            query["compact"] = "1"
         return f"/test-report/{endpoint}?{urlencode(query)}"
 
-    def rejection_url(self, rejected: bool, controls_id: str | None = None) -> str:
+    def rejection_url(
+        self,
+        rejected: bool,
+        controls_id: str | None = None,
+        compact: bool = False,
+    ) -> str:
         endpoint = "reject" if rejected else "unreject"
         query = {"path": self.path}
         if controls_id:
             query["controls_id"] = controls_id
+        if compact:
+            query["compact"] = "1"
         return f"/test-report/{endpoint}?{urlencode(query)}"
 
 
@@ -860,19 +874,21 @@ def test_review_image(path: str) -> Response:
 def approval_response(request: Request, path: str) -> HTMLResponse:
     test = get_wpt_test(path)
     controls_id = request.query_params.get("controls_id")
+    compact = request.query_params.get("compact") == "1"
     feedback_id = f"{controls_id}-feedback" if controls_id else None
     rejection_reason_id = f"{controls_id}-rejection-reason" if controls_id else None
+    context = {
+        "test": test,
+        "result_status": result_status(test),
+        "feedback_id": feedback_id,
+        "rejection_reason_id": rejection_reason_id,
+        "controls_id": controls_id,
+        **report_context(test),
+    }
     return templates.TemplateResponse(
         request=request,
-        name="approval-controls.html",
-        context={
-            "test": test,
-            "result_status": result_status(test),
-            "feedback_id": feedback_id,
-            "rejection_reason_id": rejection_reason_id,
-            "controls_id": controls_id,
-            **report_context(test),
-        },
+        name="test-results-controls.html" if compact else "approval-controls.html",
+        context=context,
     )
 
 
