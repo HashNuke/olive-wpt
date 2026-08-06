@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+c7d0254b892e62ba585a4589408c24885faf1880",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/CSS2/bidi-text/direction-applies-to-004.xht",
+  "wpt_local_path": "css/CSS2/bidi-text/direction-applies-to-004.xht",
+  "approved_result_sha256": "0681b8c69634228bf9cc0cb785e7c6668c7678d16924500a247cc3a08e062f2c",
+  "approved_diff_percent": 0.4216666666666667,
+  "approved_different_pixels": 2024,
+  "approved_total_pixels": 480000
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+c7d0254b892e62ba585a4589408c24885faf1880",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/CSS2/text/text-align-justify-with-overflow.html",
+  "wpt_local_path": "css/CSS2/text/text-align-justify-with-overflow.html",
+  "approved_result_sha256": "04c05fa693d6b67f1a73153bb2e8e4738b12654d40b3c8347599dd05ae04a9c5",
+  "approved_diff_percent": 0.19625,
+  "approved_different_pixels": 942,
+  "approved_total_pixels": 480000
+}
