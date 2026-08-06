@@ -70,6 +70,16 @@ class ReviewWptOutputTests(unittest.TestCase):
             "FAIL css/two.html\nDetails: outputs/css/two-html-test/review-state.json",
         )
 
+    def test_format_batch_review_entry(self):
+        self.assertEqual(
+            review_wpt_output.format_batch_review_entry(
+                "PASS",
+                "css/example.html",
+                Path("outputs/css/example-html-test/review-state.json"),
+            ),
+            "PASS css/example.html\nDetails: outputs/css/example-html-test/review-state.json",
+        )
+
     def test_response_text_collects_candidate_parts(self):
         response = {
             "candidates": [
