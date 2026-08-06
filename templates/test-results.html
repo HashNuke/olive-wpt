@@ -60,6 +60,9 @@
     </td>
 
     <td class="test-result-column test-result-details">
+      <div class="test-result-path-actions">
+        <button class="copy-path" type="button" data-copy-path="{{ row.test.path }}">Copy path</button>
+      </div>
       <div class="test-result-heading">
         <span class="wpt-status wpt-status-{{ row.status|lower }}">[{{ row.status }}]</span>
         <a class="test-result-path" href="{{ row.test.review_url }}">{{ row.test.path }}</a>

@@ -347,6 +347,10 @@ body.test-results-page {
   margin-bottom: 0.65rem;
 }
 
+.test-result-path-actions {
+  margin-bottom: 0.45rem;
+}
+
 .test-result-heading .wpt-status {
   flex: 0 0 auto;
 }
