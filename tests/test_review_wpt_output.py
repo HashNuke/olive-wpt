@@ -67,7 +67,7 @@ class ReviewWptOutputTests(unittest.TestCase):
 
         self.assertEqual(review_wpt_output.response_text(response), "Visible feedback.")
 
-    def test_generate_feedback_uses_cached_prompt_and_image(self):
+    def test_generate_feedback_sends_inline_prompt_and_image(self):
         with tempfile.TemporaryDirectory() as directory:
             image_path = Path(directory) / "review.png"
             image_path.write_bytes(b"png-bytes")
@@ -76,16 +76,16 @@ class ReviewWptOutputTests(unittest.TestCase):
             }
 
             with patch.object(review_wpt_output, "api_request", return_value=response) as request:
-                feedback, cached = review_wpt_output.generate_feedback(
-                    "test-key", "gemini-3.5-flash-lite", image_path, "cachedContents/1"
+                feedback = review_wpt_output.generate_feedback(
+                    "test-key", "gemini-3.5-flash-lite", image_path
                 )
 
             self.assertEqual(feedback, "Feedback")
-            self.assertTrue(cached)
             payload = request.call_args.args[2]
-            self.assertEqual(payload["cachedContent"], "cachedContents/1")
+            self.assertNotIn("cachedContent", payload)
+            self.assertEqual(payload["contents"][0]["parts"][0]["text"], review_wpt_output.PROMPT)
             self.assertEqual(
-                payload["contents"][0]["parts"][0]["inline_data"]["mime_type"],
+                payload["contents"][0]["parts"][1]["inline_data"]["mime_type"],
                 "image/png",
             )
 
@@ -112,7 +112,6 @@ class ReviewWptOutputTests(unittest.TestCase):
                 "The Olive render is missing the red box.",
                 output_directory / "review.png",
                 "gemini-3.5-flash-lite",
-                True,
             )
             state = json.loads(review_path.read_text(encoding="utf-8"))
 
@@ -120,7 +119,7 @@ class ReviewWptOutputTests(unittest.TestCase):
             self.assertEqual(state["reason"], "The Olive render is missing the red box.")
             self.assertEqual(state["gemini_feedback"], state["reason"])
             self.assertEqual(state["gemini_review"]["model"], "gemini-3.5-flash-lite")
-            self.assertTrue(state["gemini_review"]["prompt_cached"])
+            self.assertNotIn("prompt_cached", state["gemini_review"])
             self.assertEqual(state["different_pixels"], 12)
 
 
