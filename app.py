@@ -64,6 +64,7 @@ class WptTest:
         approved: bool,
         controls_id: str | None = None,
         compact: bool = False,
+        actions_only: bool = False,
     ) -> str:
         endpoint = "approve" if approved else "unapprove"
         query = {"path": self.path}
@@ -71,6 +72,8 @@ class WptTest:
             query["controls_id"] = controls_id
         if compact:
             query["compact"] = "1"
+        if actions_only:
+            query["actions"] = "1"
         return f"/test-report/{endpoint}?{urlencode(query)}"
 
     def rejection_url(
@@ -78,6 +81,7 @@ class WptTest:
         rejected: bool,
         controls_id: str | None = None,
         compact: bool = False,
+        actions_only: bool = False,
     ) -> str:
         endpoint = "reject" if rejected else "unreject"
         query = {"path": self.path}
@@ -85,6 +89,8 @@ class WptTest:
             query["controls_id"] = controls_id
         if compact:
             query["compact"] = "1"
+        if actions_only:
+            query["actions"] = "1"
         return f"/test-report/{endpoint}?{urlencode(query)}"
 
 
@@ -721,6 +727,7 @@ def test_result_row(
         "row_number": row_number,
         "render_target": f"test-result-render-{row_number}",
         "comparison_panel_id": f"test-result-comparison-{row_number}",
+        "comparison_controls_id": f"test-result-comparison-{row_number}-actions",
         "controls_id": f"test-result-controls-{row_number}",
         "feedback_id": f"test-result-feedback-{row_number}",
         "rejection_reason_id": f"test-result-rejection-reason-{row_number}",
@@ -824,6 +831,8 @@ def test_results_render(request: Request, path: str, render: str = "diff") -> HT
             "reference_context": render_context(test, "reference"),
             "diff_context": render_context(test, "diff"),
             "comparison_panel_id": target_id,
+            "comparison_controls_id": f"{target_id}-actions",
+            **report_context(test),
         },
     )
 
@@ -879,6 +888,7 @@ def approval_response(request: Request, path: str) -> HTMLResponse:
     test = get_wpt_test(path)
     controls_id = request.query_params.get("controls_id")
     compact = request.query_params.get("compact") == "1"
+    actions_only = request.query_params.get("actions") == "1"
     feedback_id = f"{controls_id}-feedback" if controls_id else None
     rejection_reason_id = f"{controls_id}-rejection-reason" if controls_id else None
     context = {
@@ -887,11 +897,18 @@ def approval_response(request: Request, path: str) -> HTMLResponse:
         "feedback_id": feedback_id,
         "rejection_reason_id": rejection_reason_id,
         "controls_id": controls_id,
+        "action_only": actions_only,
         **report_context(test),
     }
     return templates.TemplateResponse(
         request=request,
-        name="test-results-controls.html" if compact else "approval-controls.html",
+        name=(
+            "test-results-action-buttons.html"
+            if actions_only
+            else "test-results-controls.html"
+            if compact
+            else "approval-controls.html"
+        ),
         context=context,
     )
 

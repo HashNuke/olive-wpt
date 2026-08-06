@@ -53,7 +53,7 @@
 
     <td class="test-result-column test-result-comparison">
       <div id="{{ row.comparison_panel_id }}" class="test-result-comparison-panel">
-        {% with test=row.test, render_name='diff', render_context=row.comparison_render, reference_context=row.reference_render, diff_context=row.comparison_render, comparison_panel_id=row.comparison_panel_id %}
+        {% with test=row.test, render_name='diff', render_context=row.comparison_render, reference_context=row.reference_render, diff_context=row.comparison_render, comparison_panel_id=row.comparison_panel_id, comparison_controls_id=row.comparison_controls_id, olive_available=row.olive_available, rejected=row.rejected, approval_status=row.approval_status, current_result_sha256=row.current_result_sha256, approved_result_sha256=row.approved_result_sha256, current_comparison_available=row.current_comparison_available %}
         {% include "test-results-comparison.html" %}
         {% endwith %}
       </div>

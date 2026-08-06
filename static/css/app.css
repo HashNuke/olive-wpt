@@ -467,6 +467,10 @@ body.test-results-page {
   gap: 0.45rem;
 }
 
+.test-results-comparison-actions {
+  margin-top: 0.65rem;
+}
+
 .test-results-actions button {
   padding: 0.3rem 0.5rem;
   border: 1px solid #586574;

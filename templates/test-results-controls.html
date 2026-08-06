@@ -19,18 +19,7 @@
   {% endif %}
 
   {% if olive_available %}
-  <div class="test-results-actions">
-    {% if rejected %}
-    <button type="button" class="approval-reject approval-secondary" hx-post="{{ test.rejection_url(false, controls_id, true) }}" hx-target="closest .approval-controls" hx-swap="innerHTML">Clear rejection</button>
-    {% else %}
-    <button type="button" class="approval-reject" hx-post="{{ test.rejection_url(true, controls_id, true) }}" hx-vals='{"reason":"Rejected from test results page"}' hx-target="closest .approval-controls" hx-swap="innerHTML">Reject</button>
-    {% endif %}
-    {% if current_comparison_available and approval_status == "approved" and current_result_sha256 == approved_result_sha256 %}
-    <button type="button" hx-post="{{ test.approval_url(false, controls_id, true) }}" hx-target="closest .approval-controls" hx-swap="innerHTML">Unapprove</button>
-    {% elif current_comparison_available %}
-    <button type="button" class="approval-approve" hx-post="{{ test.approval_url(true, controls_id, true) }}" hx-target="closest .approval-controls" hx-swap="innerHTML">Approve</button>
-    {% endif %}
-  </div>
+  {% include "test-results-action-buttons.html" %}
   {% else %}
   <p class="approval-help">Olive render missing.</p>
   {% endif %}

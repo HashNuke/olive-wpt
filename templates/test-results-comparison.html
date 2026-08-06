@@ -18,3 +18,10 @@
   <p class="missing-render">{{ render_context.render_label }} is not available.</p>
   {% endif %}
 </div>
+{% if olive_available %}
+<section id="{{ comparison_controls_id }}" class="approval-controls test-results-comparison-actions" aria-label="Actions for {{ test.path }}">
+  {% with controls_id=comparison_controls_id, action_only=true %}
+  {% include "test-results-action-buttons.html" %}
+  {% endwith %}
+</section>
+{% endif %}
