@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+f42183f17ba318060f47e1f6a1879aa96bfa5f1f",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/CSS2/backgrounds/background-repeat-003.xht",
+  "wpt_local_path": "css/CSS2/backgrounds/background-repeat-003.xht",
+  "approved_result_sha256": "344d997c5cc04c5378882cc749bd0ba1e940901ca151a821f762404481fcc34d",
+  "approved_diff_percent": 0.9385416666666668,
+  "approved_different_pixels": 4505,
+  "approved_total_pixels": 480000
+}
