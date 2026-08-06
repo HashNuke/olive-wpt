@@ -76,6 +76,34 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.assertEqual(response.media_type, "image/png")
         self.assertEqual(response.body, b"png")
 
+    def test_diff_serves_cached_runner_artifact(self):
+        self.write_artifact("result.png")
+        self.write_artifact("reference.png")
+        self.write_artifact("result-vs-reference.png")
+
+        with (
+            patch.object(app, "get_wpt_test", return_value=self.test),
+            patch.object(app, "image_diff_bytes", side_effect=AssertionError),
+        ):
+            response = app.test_image(self.test.path, "diff")
+
+        self.assertEqual(response.media_type, "image/png")
+        self.assertEqual(response.body, b"png")
+
+    def test_diff_falls_back_to_generation_without_cached_artifact(self):
+        self.write_artifact("result.png")
+        self.write_artifact("reference.png")
+
+        with (
+            patch.object(app, "get_wpt_test", return_value=self.test),
+            patch.object(app, "image_diff_bytes", return_value=b"generated") as diff,
+        ):
+            response = app.test_image(self.test.path, "diff")
+
+        diff.assert_called_once_with(b"png", b"png")
+        self.assertEqual(response.media_type, "image/png")
+        self.assertEqual(response.body, b"generated")
+
     def test_review_image_link_is_conditional_on_review_artifact(self):
         context = {
             "test": self.test,

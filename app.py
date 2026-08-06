@@ -25,6 +25,7 @@ OUTPUTS_ROOT = PROJECT_ROOT / "outputs"
 WPT_PATHS_FILE = PROJECT_ROOT / "wpt_paths.txt"
 WPT_LIVE_ROOT = "https://wpt.live"
 CURRENT_COMPARISON_FILENAME = "current.json"
+REFERENCE_DIFF_FILENAME = "result-vs-reference.png"
 REVIEW_IMAGE_FILENAME = "review.png"
 WPT_DATABASE_FILE = PROJECT_ROOT / "data.sqlite"
 REVIEW_STATE_FILENAME = "review-state.json"
@@ -523,6 +524,9 @@ def render_image_bytes(test: WptTest, render_name: str) -> bytes | None:
             return None
         return image_diff_bytes(current_path.read_bytes(), approved)
     if render_name == "diff":
+        cached_diff_path = directory / REFERENCE_DIFF_FILENAME
+        if cached_diff_path.is_file():
+            return cached_diff_path.read_bytes()
         result_path = directory / "result.png"
         reference_path = directory / "reference.png"
         if not result_path.is_file() or not reference_path.is_file():
