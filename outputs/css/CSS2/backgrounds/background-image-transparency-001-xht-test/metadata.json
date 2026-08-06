@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+bd97149633b2474e7eff15989f35389e8f75eda5",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/CSS2/backgrounds/background-image-transparency-001.xht",
+  "wpt_local_path": "css/CSS2/backgrounds/background-image-transparency-001.xht",
+  "approved_result_sha256": "e7655798e5aecd393a187192f6b3efa7a93b7562b0f9117f38d4a0791e1669f3",
+  "approved_diff_percent": 0.3375,
+  "approved_different_pixels": 1620,
+  "approved_total_pixels": 480000
+}
