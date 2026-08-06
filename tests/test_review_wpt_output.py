@@ -67,6 +67,17 @@ class ReviewWptOutputTests(unittest.TestCase):
 
         self.assertEqual(review_wpt_output.response_text(response), "Visible feedback.")
 
+    def test_format_review_output_includes_path_and_feedback(self):
+        self.assertEqual(
+            review_wpt_output.format_review_output(
+                Path("outputs/css/example-html-test/review-state.json"),
+                "The Olive render is missing the red box.",
+            ),
+            "Review JSON path: outputs/css/example-html-test/review-state.json\n\n"
+            "------REVIEW------\n\n"
+            "The Olive render is missing the red box.",
+        )
+
     def test_generate_feedback_sends_inline_prompt_and_image(self):
         with tempfile.TemporaryDirectory() as directory:
             image_path = Path(directory) / "review.png"
