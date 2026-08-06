@@ -3,6 +3,7 @@ import json
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
 import tempfile
+import time
 import unittest
 from unittest.mock import patch
 
@@ -83,6 +84,68 @@ class ReviewWptOutputTests(unittest.TestCase):
     def test_format_selection_summary(self):
         self.assertEqual(review_wpt_output.format_selection_summary(1), "Found 1 test to review.")
         self.assertEqual(review_wpt_output.format_selection_summary(12), "Found 12 tests to review.")
+
+    def test_positive_int_rejects_zero_and_negative_values(self):
+        self.assertEqual(review_wpt_output.positive_int("7"), 7)
+        with self.assertRaises(review_wpt_output.argparse.ArgumentTypeError):
+            review_wpt_output.positive_int("0")
+        with self.assertRaises(review_wpt_output.argparse.ArgumentTypeError):
+            review_wpt_output.positive_int("-1")
+
+    def test_parse_args_accepts_concurrency(self):
+        with patch.object(
+            review_wpt_output.sys,
+            "argv",
+            ["review-wpt-output", "--concurrency", "7", "css"],
+        ):
+            arguments = review_wpt_output.parse_args()
+
+        self.assertEqual(arguments.concurrency, 7)
+
+    def test_review_tests_in_parallel_updates_db_for_completed_reviews(self):
+        def fake_review_test(api_key, model, wpt_path, request_rate_limiter):
+            if wpt_path == "css/slow.html":
+                time.sleep(0.02)
+            return "PASS", Path(f"{wpt_path}.json"), f"Feedback for {wpt_path}"
+
+        paths = ("css/slow.html", "css/fast.html")
+        with (
+            patch.object(review_wpt_output, "review_test", side_effect=fake_review_test),
+            patch.object(review_wpt_output.db, "upsert_test") as upsert_test,
+        ):
+            results = list(
+                review_wpt_output.review_tests_in_parallel(
+                    "test-key", "test-model", paths, concurrency=2
+                )
+            )
+
+        self.assertEqual(
+            {
+                (result, path, review_path, feedback)
+                for result, path, review_path, feedback in results
+            },
+            {
+                (
+                    "PASS",
+                    "css/slow.html",
+                    Path("css/slow.html.json"),
+                    "Feedback for css/slow.html",
+                ),
+                (
+                    "PASS",
+                    "css/fast.html",
+                    Path("css/fast.html.json"),
+                    "Feedback for css/fast.html",
+                ),
+            },
+        )
+        self.assertEqual(
+            {call.args for call in upsert_test.call_args_list},
+            {
+                (review_wpt_output.WPT_OUTPUTS_ROOT, "css/slow.html"),
+                (review_wpt_output.WPT_OUTPUTS_ROOT, "css/fast.html"),
+            },
+        )
 
     def test_response_text_collects_candidate_parts(self):
         response = {
