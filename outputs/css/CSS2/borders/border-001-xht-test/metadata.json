@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+cdddc8c117a2dc65e5c4c15cbb30182fdb6cf21b",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/CSS2/borders/border-001.xht",
+  "wpt_local_path": "css/CSS2/borders/border-001.xht",
+  "approved_result_sha256": "b98a880be582d4ec1926522dd7277fa1cba0b4794c499b77b06562e01c5aed4a",
+  "approved_diff_percent": 0.22395833333333337,
+  "approved_different_pixels": 1075,
+  "approved_total_pixels": 480000
+}
