@@ -1,12 +1,11 @@
 <div class="test-results-review-panel">
   <div class="test-results-review-status">
-    <span class="wpt-status wpt-status-{{ result_status|lower }}">{{ result_status }}</span>
+    <span class="test-results-diff-value">{% if current_diff_percent is not none %}{{ "%.2f"|format(current_diff_percent) }}%{% else %}—{% endif %}</span>
     <span class="test-results-review-state">{% if approval_status == "approved" %}Approved{% else %}Pending approval{% endif %}</span>
     <span class="test-results-review-state">{% if review_status == "rejected" %}Rejected{% elif review_status == "review" %}Needs review{% elif review_status == "approved" %}Approved{% elif review_status in ("improved", "regressed", "changed") %}Changed{% else %}Open{% endif %}</span>
   </div>
 
   <dl class="test-results-metrics">
-    <div><dt>Current diff</dt><dd>{% if current_diff_percent is not none %}{{ "%.4f"|format(current_diff_percent) }}%{% else %}—{% endif %}</dd></div>
     <div><dt>Approved diff</dt><dd>{% if approved_diff_percent is not none %}{{ "%.4f"|format(approved_diff_percent) }}%{% else %}—{% endif %}</dd></div>
     <div><dt>Comparison</dt><dd class="comparison-{{ comparison_status|replace(' ', '-') }}">{{ comparison_status|capitalize }}</dd></div>
   </dl>

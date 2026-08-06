@@ -382,6 +382,8 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.assertIn("Result vs Ref", html)
         self.assertIn("[Image]", html)
         self.assertIn("[wpt.live]", html)
+        self.assertIn("2.00%", html)
+        self.assertNotIn("(2.00%)", html)
         self.assertIn("padding: 0.25rem 0.5rem", app.STATIC_ROOT.joinpath("css/app.css").read_text())
         self.assertIn('hx-target="closest .approval-controls"', html)
         self.assertIn("hx-vals='{\"reason\":\"Rejected from test results page\"}'", html)

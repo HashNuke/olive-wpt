@@ -399,6 +399,12 @@ body.test-results-page {
   font-size: 0.8rem;
 }
 
+.test-results-diff-value {
+  color: #1f2933;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
 .test-results-review-state + .test-results-review-state::before {
   margin-right: 0.5rem;
   color: #c8ced6;
