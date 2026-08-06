@@ -1,0 +1,6 @@
+#!/bin/sh
+
+set -eu
+
+repo_root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
+exec uv run --project "$repo_root" python "$repo_root/bin/create-wpt-review-image.py" "$@"
