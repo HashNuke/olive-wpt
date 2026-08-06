@@ -58,10 +58,11 @@ Olive result exists but has not been reviewed, and `NONE` means no Olive result
 exists. The home page provides tabs for `ALL`, `PASS`, `FAIL`, `REVW`, `UNKN`,
 and `NONE` with counts. Approval stores the approved result hash and diff baseline in
 `metadata.json`. A rejected render stores its reason and exact result/reference
-hashes in a tracked per-test `review-state.json`; the local `result.png` is
-deliberately not committed while metadata is pending. Approving the render
-updates `metadata.json`, deletes `review-state.json`, and allows the matching
-`result.png` to be committed.
+hashes in a tracked per-test `review-state.json`; an AI `PASS` render uses the
+same file with `state: "review"` and is shown as `REVW` for human review. The
+local `result.png` is deliberately not committed while metadata is pending.
+Approving the render updates `metadata.json`, deletes `review-state.json`, and
+allows the matching `result.png` to be committed.
 
 Each status write also updates ignored `current/progress.json` with the latest
 `new_passes`, `regressions`, `review_needed`, `unrendered`, and `unreviewed`

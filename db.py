@@ -137,6 +137,8 @@ def derive_status(result_path: Path, metadata, review_state, current) -> str:
     if current_hash is None:
         return "NONE"
     if review_state is not None:
+        if review_state.get("state") == "review":
+            return "REVW"
         if review_state.get("olive_result_sha256") == current_hash:
             return "FAIL"
         return "REVW" if rejected_result_improved(review_state, current) else "FAIL"

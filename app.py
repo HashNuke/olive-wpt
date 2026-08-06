@@ -329,6 +329,7 @@ def report_context(test: WptTest) -> dict[str, object]:
     elif current_diff_percent is not None:
         comparison_status = "awaiting approval"
     if review_state is not None:
+        review_label = "rejected" if review_state.get("state") == "rejected" else "review"
         review_status = review_delta_status(
             current_hash,
             current_diff_percent,
@@ -336,7 +337,7 @@ def report_context(test: WptTest) -> dict[str, object]:
             reviewed_hash if isinstance(reviewed_hash, str) else None,
             reviewed_diff_percent,
             reviewed_different_pixels,
-            "rejected",
+            review_label,
         )
     elif metadata and metadata.get("status") == "approved":
         review_status = review_delta_status(
@@ -383,6 +384,8 @@ def home_status(test: WptTest) -> str:
     context = report_context(test)
     if not context["olive_available"]:
         return "NONE"
+    if context["review_status"] == "review":
+        return "REVW"
     approved_improved = (
         context["approval_status"] == "approved"
         and not context["review_state_available"]

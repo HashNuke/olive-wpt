@@ -67,6 +67,37 @@ class ReviewWptOutputTests(unittest.TestCase):
 
         self.assertEqual(review_wpt_output.response_text(response), "Visible feedback.")
 
+    def test_build_prompt_includes_both_diff_percentages_and_json_contract(self):
+        prompt = review_wpt_output.build_prompt(1.25, 2.5)
+        self.assertIn("approved image diff percentage is: 1.2500%", prompt)
+        self.assertIn("current image diff percentage is: 2.5000%", prompt)
+        self.assertIn('"result": "PASS" or "FAIL"', prompt)
+
+    def test_parse_review_response_requires_pass_or_fail_json(self):
+        response = {
+            "candidates": [
+                {
+                    "content": {
+                        "parts": [
+                            {
+                                "text": '```json\n{"result":"PASS","feedback":"Looks correct."}\n```'
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+        self.assertEqual(
+            review_wpt_output.parse_review_response(response),
+            ("PASS", "Looks correct."),
+        )
+
+        response["candidates"][0]["content"]["parts"][0]["text"] = (
+            '{"result":"MAYBE","feedback":"Unclear."}'
+        )
+        with self.assertRaises(review_wpt_output.GeminiApiError):
+            review_wpt_output.parse_review_response(response)
+
     def test_format_review_output_includes_path_and_feedback(self):
         self.assertEqual(
             review_wpt_output.format_review_output(
@@ -83,24 +114,35 @@ class ReviewWptOutputTests(unittest.TestCase):
             image_path = Path(directory) / "review.png"
             image_path.write_bytes(b"png-bytes")
             response = {
-                "candidates": [{"content": {"parts": [{"text": "Feedback"}]}}]
+                "candidates": [
+                    {
+                        "content": {
+                            "parts": [
+                                {
+                                    "text": '{"result":"PASS","feedback":"Feedback"}'
+                                }
+                            ]
+                        }
+                    }
+                ]
             }
 
             with patch.object(review_wpt_output, "api_request", return_value=response) as request:
-                feedback = review_wpt_output.generate_feedback(
-                    "test-key", "gemini-3.5-flash-lite", image_path
+                result, feedback = review_wpt_output.generate_review(
+                    "test-key", "gemini-3.5-flash-lite", image_path, "Review prompt"
                 )
 
+            self.assertEqual(result, "PASS")
             self.assertEqual(feedback, "Feedback")
             payload = request.call_args.args[2]
             self.assertNotIn("cachedContent", payload)
-            self.assertEqual(payload["contents"][0]["parts"][0]["text"], review_wpt_output.PROMPT)
+            self.assertEqual(payload["contents"][0]["parts"][0]["text"], "Review prompt")
             self.assertEqual(
                 payload["contents"][0]["parts"][1]["inline_data"]["mime_type"],
                 "image/png",
             )
 
-    def test_write_review_state_stores_ai_feedback_and_review_model(self):
+    def test_write_review_state_uses_human_review_fields(self):
         with tempfile.TemporaryDirectory() as directory:
             output_directory = Path(directory)
             (output_directory / "result.png").write_bytes(b"result")
@@ -120,20 +162,88 @@ class ReviewWptOutputTests(unittest.TestCase):
             review_path = review_wpt_output.write_review_state(
                 "css/example.html",
                 output_directory,
+                "PASS",
                 "The Olive render is missing the red box.",
                 output_directory / "review.png",
                 "gemini-3.5-flash-lite",
+                "Review prompt",
+                1.5,
             )
             state = json.loads(review_path.read_text(encoding="utf-8"))
 
-            self.assertEqual(state["state"], "rejected")
+            self.assertEqual(state["state"], "review")
             self.assertEqual(state["reason"], "The Olive render is missing the red box.")
-            self.assertEqual(state["ai_feedback"], state["reason"])
             self.assertEqual(state["review_model"], "gemini-3.5-flash-lite")
+            self.assertEqual(state["review_result"], "PASS")
+            self.assertEqual(state["approved_diff_percent"], 1.5)
+            self.assertNotIn("ai_feedback", state)
             self.assertNotIn("gemini_feedback", state)
-            self.assertEqual(state["gemini_review"]["model"], "gemini-3.5-flash-lite")
-            self.assertNotIn("prompt_cached", state["gemini_review"])
+            self.assertNotIn("gemini_review", state)
             self.assertEqual(state["different_pixels"], 12)
+
+    def test_write_review_state_maps_fail_to_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output_directory = Path(directory)
+            (output_directory / "result.png").write_bytes(b"result")
+            (output_directory / "reference.png").write_bytes(b"reference")
+            (output_directory / "review.png").write_bytes(b"review")
+
+            review_path = review_wpt_output.write_review_state(
+                "css/example.html",
+                output_directory,
+                "FAIL",
+                "The Olive render is wrong.",
+                output_directory / "review.png",
+                "gemini-3.5-flash-lite",
+                "Review prompt",
+                None,
+            )
+
+            state = json.loads(review_path.read_text(encoding="utf-8"))
+            self.assertEqual(state["state"], "rejected")
+            self.assertEqual(state["reason"], "The Olive render is wrong.")
+
+    def test_ai_pass_fail_states_cover_approved_and_unapproved_renders(self):
+        for has_approved_render in (False, True):
+            for review_result, expected_state in (("PASS", "review"), ("FAIL", "rejected")):
+                with self.subTest(
+                    has_approved_render=has_approved_render,
+                    review_result=review_result,
+                ), tempfile.TemporaryDirectory() as directory:
+                    output_directory = Path(directory)
+                    (output_directory / "result.png").write_bytes(b"result")
+                    (output_directory / "reference.png").write_bytes(b"reference")
+                    if has_approved_render:
+                        (output_directory / "metadata.json").write_text(
+                            json.dumps(
+                                {
+                                    "status": "approved",
+                                    "approved_diff_percent": 1.0,
+                                }
+                            ),
+                            encoding="utf-8",
+                        )
+
+                    review_path = review_wpt_output.write_review_state(
+                        "css/example.html",
+                        output_directory,
+                        review_result,
+                        "Review feedback",
+                        output_directory / "review.png",
+                        "gemini-3.5-flash-lite",
+                        review_wpt_output.build_prompt(
+                            1.0 if has_approved_render else None,
+                            2.0,
+                        ),
+                        1.0 if has_approved_render else None,
+                    )
+
+                    state = json.loads(review_path.read_text(encoding="utf-8"))
+                    self.assertEqual(state["state"], expected_state)
+                    self.assertEqual(
+                        state["approved_diff_percent"],
+                        1.0 if has_approved_render else None,
+                    )
 
 
 if __name__ == "__main__":

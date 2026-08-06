@@ -202,6 +202,33 @@ class DatabaseTests(unittest.TestCase):
         finally:
             temporary.cleanup()
 
+    def test_ai_pass_review_state_is_reviewable(self):
+        temporary, root = self.make_project()
+        try:
+            result_path = root / "outputs" / "css" / "example-html-test" / "result.png"
+            review_path = result_path.parent / "review-state.json"
+            review_path.write_text(
+                json.dumps(
+                    {
+                        "state": "review",
+                        "reason": "The render looks correct.",
+                        "olive_result_sha256": db.result_hash(result_path),
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            db.rebuild_database(root)
+
+            with sqlite3.connect(root / "data.sqlite") as connection:
+                status = connection.execute(
+                    "SELECT status FROM wpt_tests WHERE path = ?",
+                    ("css/example.html",),
+                ).fetchone()[0]
+            self.assertEqual(status, "REVW")
+        finally:
+            temporary.cleanup()
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -152,6 +152,27 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.assertEqual(context["review_status"], "rejected")
         self.assertEqual(app.home_status(self.test), "FAIL")
 
+    def test_ai_pass_review_state_is_reviewable(self):
+        self.write_artifact("result.png")
+        self.write_artifact("reference.png")
+        self.write_current_comparison(5.0)
+        (self.artifact_directory / "review-state.json").write_text(
+            json.dumps(
+                {
+                    "state": "review",
+                    "reason": "The render looks correct.",
+                    "olive_result_sha256": app.result_sha256(self.test),
+                    "diff_percent": 5.0,
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        context = app.report_context(self.test)
+        self.assertEqual(context["review_status"], "review")
+        self.assertEqual(context["review_reason"], "The render looks correct.")
+        self.assertEqual(app.home_status(self.test), "REVW")
+
     def test_home_status_is_none_without_an_olive_render(self):
         self.write_artifact("reference.png")
         self.assertEqual(app.home_status(self.test), "NONE")

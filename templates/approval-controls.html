@@ -19,6 +19,8 @@
     <span class="approval-label">Review</span>
     {% if review_status == "rejected" %}
     <strong class="approval-rejected">Rejected</strong>
+    {% elif review_status == "review" %}
+    <strong class="approval-review">Needs human review</strong>
     {% elif review_status == "approved" %}
     <strong class="approval-approved">Approved</strong>
     {% elif review_status in ("improved", "regressed", "changed") %}
@@ -54,7 +56,7 @@
       <h3 id="feedback-heading">Feedback</h3>
     </div>
     {% if review_reason %}
-    <p class="review-reason"><strong>Previous rejection:</strong> {{ review_reason }}</p>
+    <p class="review-reason"><strong>{% if review_status == "rejected" %}Review reason{% else %}Review feedback{% endif %}:</strong> {{ review_reason }}</p>
     {% endif %}
     {% if olive_available %}
     <form class="rejection-form" hx-post="{{ test.rejection_url(true) }}" hx-target="#approval-controls" hx-swap="innerHTML">
