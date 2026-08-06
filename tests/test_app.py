@@ -375,10 +375,34 @@ class ReportImagePresentationTests(unittest.TestCase):
         )
 
         self.assertIn('role="group"', html)
-        self.assertIn('hx-target="#test-result-render-1"', html)
-        self.assertIn('hx-get="/test-report/render?path=css%2Fexample.html&amp;render=diff"', html)
-        self.assertIn('hx-get="/test-report/render?path=css%2Fexample.html&amp;render=reference"', html)
+        self.assertIn("<table class=\"test-results-table\">", html)
+        self.assertIn('hx-target="#test-result-comparison-1"', html)
+        self.assertIn('hx-get="/test-results/render?path=css%2Fexample.html&amp;render=diff&amp;target=test-result-comparison-1"', html)
+        self.assertIn('hx-get="/test-results/render?path=css%2Fexample.html&amp;render=reference&amp;target=test-result-comparison-1"', html)
+        self.assertIn("Result vs Ref", html)
+        self.assertIn("[Open image]", html)
+        self.assertIn("padding: 0.25rem 0.5rem", app.STATIC_ROOT.joinpath("css/app.css").read_text())
         self.assertIn('hx-target="closest .approval-controls"', html)
+        self.assertIn("hx-vals='{\"reason\":\"Rejected from test results page\"}'", html)
+        self.assertNotIn('<textarea', html)
+
+    def test_test_results_render_returns_reference_panel_for_htmx_toggle(self):
+        request = Request(
+            {
+                "type": "http",
+                "method": "GET",
+                "path": "/test-results/render",
+                "query_string": b"target=test-result-comparison-1",
+                "headers": [],
+            }
+        )
+
+        with patch.object(app, "get_wpt_test", return_value=self.test):
+            response = app.test_results_render(request, self.test.path, "reference")
+
+        self.assertIn("Reference", response.body.decode())
+        self.assertIn('aria-checked="true"', response.body.decode())
+        self.assertIn("test-result-comparison-1", response.body.decode())
 
     def test_home_tests_sort_by_current_diff_descending_with_missing_last(self):
         lower = app.WptTest(

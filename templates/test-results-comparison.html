@@ -1,0 +1,19 @@
+<div class="test-results-comparison-heading">
+  <div class="test-results-comparison-title">
+    <span>{{ render_context.render_label }}</span>
+    {% if render_context.render_available %}
+    <a class="open-image" href="{{ render_context.image_url }}" target="_blank" rel="noopener noreferrer">[Open image]</a>
+    {% endif %}
+  </div>
+  <div class="result-render-toggle" role="group" aria-label="Comparison image for {{ test.path }}">
+    <button class="render-tab{% if render_name == 'diff' %} active{% endif %}" data-result-render-tab role="radio" aria-checked="{{ 'true' if render_name == 'diff' else 'false' }}" {% if not diff_context.render_available %}disabled aria-disabled="true"{% endif %} hx-get="{{ test.results_render_url('diff', comparison_panel_id) }}" hx-target="#{{ comparison_panel_id }}" hx-swap="innerHTML">Diff</button>
+    <button class="render-tab{% if render_name == 'reference' %} active{% endif %}" data-result-render-tab role="radio" aria-checked="{{ 'true' if render_name == 'reference' else 'false' }}" {% if not reference_context.render_available %}disabled aria-disabled="true"{% endif %} hx-get="{{ test.results_render_url('reference', comparison_panel_id) }}" hx-target="#{{ comparison_panel_id }}" hx-swap="innerHTML">Reference</button>
+  </div>
+</div>
+<div class="test-result-render-target">
+  {% if render_context.render_available %}
+  <img src="{{ render_context.image_url }}" alt="{{ render_context.render_label }} of {{ test.path }}">
+  {% else %}
+  <p class="missing-render">{{ render_context.render_label }} is not available.</p>
+  {% endif %}
+</div>

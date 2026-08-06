@@ -49,6 +49,9 @@ class WptTest:
     def render_url(self, render_name: str) -> str:
         return f"/test-report/render?{urlencode({'path': self.path, 'render': render_name})}"
 
+    def results_render_url(self, render_name: str, target_id: str) -> str:
+        return f"/test-results/render?{urlencode({'path': self.path, 'render': render_name, 'target': target_id})}"
+
     def asset_url(self, render_name: str) -> str:
         return f"/test-report/image?{urlencode({'path': self.path, 'render': render_name})}"
 
@@ -699,9 +702,11 @@ def test_result_row(
         "current_diff_percent": item["current_diff_percent"],
         "row_number": row_number,
         "render_target": f"test-result-render-{row_number}",
+        "comparison_panel_id": f"test-result-comparison-{row_number}",
         "controls_id": f"test-result-controls-{row_number}",
         "feedback_id": f"test-result-feedback-{row_number}",
         "rejection_reason_id": f"test-result-rejection-reason-{row_number}",
+        "compact_review": True,
         "olive_render": render_context(test, "olive"),
         "comparison_render": render_context(test, "diff"),
         "reference_render": render_context(test, "reference"),
@@ -748,6 +753,7 @@ def test_results(request: Request) -> HTMLResponse:
         if selected_status == "ALL"
         else [item for item in all_tests if item["status"] == selected_status]
     )
+
     total = len(filtered_tests)
     page_count = max(1, (total + TEST_RESULTS_PAGE_SIZE - 1) // TEST_RESULTS_PAGE_SIZE)
     requested_page = parse_page(request)
@@ -778,6 +784,28 @@ def test_results(request: Request) -> HTMLResponse:
             "status_tabs": HOME_STATUS_TABS,
             "selected_status": selected_status,
             "pagination": pagination,
+        },
+    )
+
+
+@app.get("/test-results/render", response_class=HTMLResponse)
+def test_results_render(request: Request, path: str, render: str = "diff") -> HTMLResponse:
+    test = get_wpt_test(path)
+    if render not in {"diff", "reference"}:
+        raise HTTPException(status_code=404, detail="Unknown test result render")
+    target_id = request.query_params.get("target", "test-result-comparison")
+    if not target_id.replace("-", "").replace("_", "").isalnum():
+        raise HTTPException(status_code=400, detail="Invalid comparison target")
+    return templates.TemplateResponse(
+        request=request,
+        name="test-results-comparison.html",
+        context={
+            "test": test,
+            "render_name": render,
+            "render_context": render_context(test, render),
+            "reference_context": render_context(test, "reference"),
+            "diff_context": render_context(test, "diff"),
+            "comparison_panel_id": target_id,
         },
     )
 

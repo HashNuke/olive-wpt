@@ -27,28 +27,39 @@
 {% if not rows %}
 <p class="wpt-status-empty">No tests have this status.</p>
 {% else %}
-<section class="test-results-list" aria-label="Paginated test results">
+<div class="test-results-table-wrap">
+<table class="test-results-table">
+  <caption class="visually-hidden">Paginated WPT test results</caption>
+  <colgroup>
+    <col class="test-results-column-original">
+    <col class="test-results-column-comparison">
+    <col class="test-results-column-details">
+  </colgroup>
+  <thead>
+    <tr>
+      <th scope="col">Olive render</th>
+      <th scope="col">Comparison</th>
+      <th scope="col">Result details and review</th>
+    </tr>
+  </thead>
+  <tbody>
   {% for row in rows %}
-  <article class="test-result-row">
-    <div class="test-result-column test-result-original">
+  <tr class="test-result-row">
+    <td class="test-result-column test-result-original">
       {% with test=row.olive_render.test, render_label=row.olive_render.render_label, render_available=row.olive_render.render_available, image_url=row.olive_render.image_url %}
       {% include "render-panel.html" %}
       {% endwith %}
-    </div>
+    </td>
 
-    <div class="test-result-column test-result-comparison">
-      <div class="result-render-toggle" role="group" aria-label="Comparison image for {{ row.test.path }}">
-        <button class="render-tab{% if row.comparison_render.render_name == 'diff' %} active{% endif %}" data-result-render-tab role="radio" aria-checked="{{ 'true' if row.comparison_render.render_name == 'diff' else 'false' }}" {% if not row.comparison_render.render_available %}disabled aria-disabled="true"{% endif %} hx-on:click='this.parentElement.querySelectorAll("[data-result-render-tab]").forEach((tab) => { tab.classList.remove("active"); tab.setAttribute("aria-checked", "false"); }); this.classList.add("active"); this.setAttribute("aria-checked", "true");' hx-get="{{ row.test.render_url('diff') }}" hx-target="#{{ row.render_target }}" hx-swap="innerHTML">Diff</button>
-        <button class="render-tab" data-result-render-tab role="radio" aria-checked="false" {% if not row.reference_render.render_available %}disabled aria-disabled="true"{% endif %} hx-on:click='this.parentElement.querySelectorAll("[data-result-render-tab]").forEach((tab) => { tab.classList.remove("active"); tab.setAttribute("aria-checked", "false"); }); this.classList.add("active"); this.setAttribute("aria-checked", "true");' hx-get="{{ row.test.render_url('reference') }}" hx-target="#{{ row.render_target }}" hx-swap="innerHTML">Reference</button>
-      </div>
-      <div id="{{ row.render_target }}" class="test-result-render-target">
-        {% with test=row.comparison_render.test, render_label=row.comparison_render.render_label, render_available=row.comparison_render.render_available, image_url=row.comparison_render.image_url %}
-        {% include "render-panel.html" %}
+    <td class="test-result-column test-result-comparison">
+      <div id="{{ row.comparison_panel_id }}" class="test-result-comparison-panel">
+        {% with test=row.test, render_name='diff', render_context=row.comparison_render, reference_context=row.reference_render, diff_context=row.comparison_render, comparison_panel_id=row.comparison_panel_id %}
+        {% include "test-results-comparison.html" %}
         {% endwith %}
       </div>
-    </div>
+    </td>
 
-    <div class="test-result-column test-result-details">
+    <td class="test-result-column test-result-details">
       <div class="test-result-heading">
         <span class="wpt-status wpt-status-{{ row.status|lower }}">[{{ row.status }}]</span>
         <a class="test-result-path" href="{{ row.test.review_url }}">{{ row.test.path }}</a>
@@ -57,14 +68,16 @@
         {% endif %}
       </div>
       <section id="{{ row.controls_id }}" class="approval-controls result-row-controls" aria-label="Review {{ row.test.path }}">
-        {% with test=row.test, result_status=row.result_status, rejected=row.rejected, review_state_available=row.review_state_available, review_status=row.review_status, review_reason=row.review_reason, approval_status=row.approval_status, metadata_available=row.metadata_available, olive_available=row.olive_available, current_result_sha256=row.current_result_sha256, approved_result_sha256=row.approved_result_sha256, current_comparison_available=row.current_comparison_available, current_diff_percent=row.current_diff_percent, approved_diff_percent=row.approved_diff_percent, comparison_status=row.comparison_status, run_passed=row.run_passed, run_outcome=row.run_outcome, run_detail=row.run_detail, feedback_id=row.feedback_id, rejection_reason_id=row.rejection_reason_id, controls_id=row.controls_id %}
+        {% with test=row.test, result_status=row.result_status, rejected=row.rejected, review_state_available=row.review_state_available, review_status=row.review_status, review_reason=row.review_reason, approval_status=row.approval_status, metadata_available=row.metadata_available, olive_available=row.olive_available, current_result_sha256=row.current_result_sha256, approved_result_sha256=row.approved_result_sha256, current_comparison_available=row.current_comparison_available, current_diff_percent=row.current_diff_percent, approved_diff_percent=row.approved_diff_percent, comparison_status=row.comparison_status, run_passed=row.run_passed, run_outcome=row.run_outcome, run_detail=row.run_detail, feedback_id=row.feedback_id, rejection_reason_id=row.rejection_reason_id, controls_id=row.controls_id, compact_review=row.compact_review %}
         {% include "approval-controls.html" %}
         {% endwith %}
       </section>
-    </div>
-  </article>
+    </td>
+  </tr>
   {% endfor %}
-</section>
+  </tbody>
+</table>
+</div>
 {% endif %}
 
 {% include "pagination.html" %}
