@@ -80,6 +80,10 @@ class ReviewWptOutputTests(unittest.TestCase):
             "PASS css/example.html\nDetails: outputs/css/example-html-test/review-state.json",
         )
 
+    def test_format_selection_summary(self):
+        self.assertEqual(review_wpt_output.format_selection_summary(1), "Found 1 test to review.")
+        self.assertEqual(review_wpt_output.format_selection_summary(12), "Found 12 tests to review.")
+
     def test_response_text_collects_candidate_parts(self):
         response = {
             "candidates": [
