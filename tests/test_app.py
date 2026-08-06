@@ -274,7 +274,7 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.assertEqual(app.pagination_numbers(5, 10), [1, None, 3, 4, 5, 6, 7, None, 10])
         self.assertEqual(app.pagination_numbers(10, 10), [1, None, 8, 9, 10])
 
-    def test_test_results_page_paginates_to_25_rows(self):
+    def test_test_results_page_paginates_to_10_rows(self):
         tests = [
             app.WptTest(
                 path=f"css/example-{index}.html",
@@ -304,11 +304,11 @@ class ReportImagePresentationTests(unittest.TestCase):
         ):
             response = app.test_results(request)
 
-        self.assertEqual(len(response.context["rows"]), 25)
+        self.assertEqual(len(response.context["rows"]), 10)
         self.assertEqual(response.context["pagination"]["page"], 1)
-        self.assertEqual(response.context["pagination"]["page_count"], 2)
+        self.assertEqual(response.context["pagination"]["page_count"], 3)
         html = app.templates.get_template("test-results.html").render(**response.context)
-        self.assertEqual(html.count('class="test-result-row"'), 25)
+        self.assertEqual(html.count('class="test-result-row"'), 10)
         self.assertEqual(html.count('class="test-results-pagination"'), 2)
         self.assertIn('href="/test-results?page=2"', html)
 
@@ -343,7 +343,7 @@ class ReportImagePresentationTests(unittest.TestCase):
             response = app.test_results(request)
 
         self.assertEqual(response.context["selected_status"], "FAIL")
-        self.assertEqual(len(response.context["rows"]), 1)
+        self.assertEqual(len(response.context["rows"]), 10)
         html = app.templates.get_template("test-results.html").render(**response.context)
         self.assertIn('href="/test-results?page=1&amp;result=fail"', html)
 

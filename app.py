@@ -35,7 +35,7 @@ RENDER_LABELS = {
     "diff": "Result vs Ref",
 }
 HOME_STATUS_TABS = ("ALL", "PASS", "FAIL", "REVW", "UNKN", "NONE")
-TEST_RESULTS_PAGE_SIZE = 25
+TEST_RESULTS_PAGE_SIZE = 10
 
 templates = Jinja2Templates(directory=str(TEMPLATES_ROOT))
 
