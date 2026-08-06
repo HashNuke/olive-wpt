@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+dcc2592f8c6fa92fefb7131505634b3549f2b060",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-backgrounds/background-image-large-with-auto.html",
+  "wpt_local_path": "css/css-backgrounds/background-image-large-with-auto.html",
+  "approved_result_sha256": "76819984f0c4667e4606237777b6052be8f6a009daefde48f68aee8d37042476",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+dcc2592f8c6fa92fefb7131505634b3549f2b060",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-inline/baseline-shift/baseline-shift-length-percentage.html",
+  "wpt_local_path": "css/css-inline/baseline-shift/baseline-shift-length-percentage.html",
+  "approved_result_sha256": "bdbd04d73f4014d10554dbc6b9f90d0c1782108b41cbbe148dff684b916e4d8f",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

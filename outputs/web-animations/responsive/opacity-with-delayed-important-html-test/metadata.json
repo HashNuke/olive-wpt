@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+dcc2592f8c6fa92fefb7131505634b3549f2b060",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/web-animations/responsive/opacity-with-delayed-important.html",
+  "wpt_local_path": "web-animations/responsive/opacity-with-delayed-important.html",
+  "approved_result_sha256": "58644f2371f30dd3e2c529915597afed2f8654f95aea881081352b3f3736f032",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+dcc2592f8c6fa92fefb7131505634b3549f2b060",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/webvtt/rendering/cues-with-video/processing-model/evil/media_404_omit_subtitles.html",
+  "wpt_local_path": "webvtt/rendering/cues-with-video/processing-model/evil/media_404_omit_subtitles.html",
+  "approved_result_sha256": "8a20e4522e7523ab935e89a58ce0b971c23590922d6eec9133ef31fbbc7b1ad6",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
