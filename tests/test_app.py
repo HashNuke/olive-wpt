@@ -65,6 +65,61 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.assertNotIn("Open image", html)
         self.assertIn("is not available", html)
 
+    def test_review_image_path_is_served_when_present(self):
+        self.write_artifact("review.png")
+
+        with patch.object(app, "get_wpt_test", return_value=self.test):
+            response = app.test_review_image(self.test.path)
+
+        self.assertEqual(response.media_type, "image/png")
+        self.assertEqual(response.body, b"png")
+
+    def test_review_image_link_is_conditional_on_review_artifact(self):
+        context = {
+            "test": self.test,
+            "result_status": "NONE",
+            "render_labels": app.RENDER_LABELS,
+            "render_availability": {name: False for name in app.RENDER_LABELS},
+            "render_name": "olive",
+            "render_label": "Olive",
+            "render_available": False,
+            "image_url": "/test-report/image",
+            "review_image_available": False,
+            "rejected": False,
+            "review_state_available": False,
+            "review_status": "pending",
+            "review_reason": None,
+            "approval_status": "pending",
+            "metadata_available": False,
+            "olive_available": False,
+            "current_result_sha256": None,
+            "current_reference_sha256": None,
+            "reviewed_result_sha256": None,
+            "approved_result_sha256": None,
+            "approved_baseline_available": False,
+            "current_comparison_available": False,
+            "current_diff_percent": None,
+            "approved_diff_percent": None,
+            "comparison_status": "unavailable",
+            "comparison_passed": None,
+            "comparison_outcome": "pending",
+        }
+        template = app.templates.get_template("test-review.html")
+
+        without_review_image = template.render(**context)
+        self.assertNotIn(">Review</a>", without_review_image)
+
+        context["review_image_available"] = True
+        with_review_image = template.render(**context)
+        self.assertIn(f'href="{self.test.review_image_url()}"', with_review_image)
+
+    def test_review_image_endpoint_returns_not_found_when_missing(self):
+        with patch.object(app, "get_wpt_test", return_value=self.test):
+            with self.assertRaises(app.HTTPException) as error:
+                app.test_review_image(self.test.path)
+
+        self.assertEqual(error.exception.status_code, 404)
+
     def test_review_state_records_reason_and_marks_improved_result_for_review(self):
         self.write_artifact("result.png")
         self.write_artifact("reference.png")

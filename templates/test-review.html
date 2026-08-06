@@ -8,6 +8,9 @@
   <a href="/">&laquo; test index</a>
   <button class="copy-path" type="button" data-copy-path="{{ test.path }}">Copy path</button>
   <a class="open-wpt" href="{{ test.url }}" target="_blank" rel="noopener noreferrer">wpt.live</a>
+  {% if review_image_available %}
+  <a class="open-wpt" href="{{ test.review_image_url() }}" target="_blank" rel="noopener noreferrer">Review</a>
+  {% endif %}
 </p>
 <h1 class="test-path-title">{{ test.path }}</h1>
 <p class="test-result">Test result: <span class="wpt-status wpt-status-{{ result_status|lower }}">{{ result_status }}</span></p>

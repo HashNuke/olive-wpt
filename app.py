@@ -25,6 +25,7 @@ OUTPUTS_ROOT = PROJECT_ROOT / "outputs"
 WPT_PATHS_FILE = PROJECT_ROOT / "wpt_paths.txt"
 WPT_LIVE_ROOT = "https://wpt.live"
 CURRENT_COMPARISON_FILENAME = "current.json"
+REVIEW_IMAGE_FILENAME = "review.png"
 WPT_DATABASE_FILE = PROJECT_ROOT / "data.sqlite"
 REVIEW_STATE_FILENAME = "review-state.json"
 RENDER_LABELS = {
@@ -49,6 +50,9 @@ class WptTest:
 
     def asset_url(self, render_name: str) -> str:
         return f"/test-report/image?{urlencode({'path': self.path, 'render': render_name})}"
+
+    def review_image_url(self) -> str:
+        return f"/test-report/review-image?{urlencode({'path': self.path})}"
 
     def approval_url(self, approved: bool) -> str:
         endpoint = "approve" if approved else "unapprove"
@@ -116,6 +120,10 @@ def metadata_path_for_wpt_path(wpt_path: str) -> Path:
 
 def review_state_path_for_wpt_path(wpt_path: str) -> Path:
     return output_directory_for_wpt_path(wpt_path) / REVIEW_STATE_FILENAME
+
+
+def review_image_path_for_wpt_path(wpt_path: str) -> Path:
+    return output_directory_for_wpt_path(wpt_path) / REVIEW_IMAGE_FILENAME
 
 
 def current_comparison_path_for_wpt_path(wpt_path: str) -> Path:
@@ -663,6 +671,7 @@ def test_review(request: Request, path: str) -> HTMLResponse:
             "result_status": result_status(test),
             "render_labels": RENDER_LABELS,
             "render_availability": render_availability(test),
+            "review_image_available": review_image_path_for_wpt_path(test.path).is_file(),
             **report_context(test),
             **render_context(test, "olive"),
         },
@@ -687,6 +696,15 @@ def test_image(path: str, render: str = "olive") -> Response:
     if image is None:
         raise HTTPException(status_code=404, detail="Test asset not found")
     return Response(content=image, media_type="image/png")
+
+
+@app.get("/test-report/review-image")
+def test_review_image(path: str) -> Response:
+    test = get_wpt_test(path)
+    review_image = review_image_path_for_wpt_path(test.path)
+    if not review_image.is_file():
+        raise HTTPException(status_code=404, detail="Review image not found")
+    return Response(content=review_image.read_bytes(), media_type="image/png")
 
 
 def approval_response(request: Request, path: str) -> HTMLResponse:
