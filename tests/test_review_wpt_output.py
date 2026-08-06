@@ -100,7 +100,7 @@ class ReviewWptOutputTests(unittest.TestCase):
                 "image/png",
             )
 
-    def test_write_review_state_stores_gemini_feedback(self):
+    def test_write_review_state_stores_ai_feedback_and_review_model(self):
         with tempfile.TemporaryDirectory() as directory:
             output_directory = Path(directory)
             (output_directory / "result.png").write_bytes(b"result")
@@ -128,7 +128,9 @@ class ReviewWptOutputTests(unittest.TestCase):
 
             self.assertEqual(state["state"], "rejected")
             self.assertEqual(state["reason"], "The Olive render is missing the red box.")
-            self.assertEqual(state["gemini_feedback"], state["reason"])
+            self.assertEqual(state["ai_feedback"], state["reason"])
+            self.assertEqual(state["review_model"], "gemini-3.5-flash-lite")
+            self.assertNotIn("gemini_feedback", state)
             self.assertEqual(state["gemini_review"]["model"], "gemini-3.5-flash-lite")
             self.assertNotIn("prompt_cached", state["gemini_review"])
             self.assertEqual(state["different_pixels"], 12)
