@@ -1,0 +1,27 @@
+<nav class="test-results-pagination" aria-label="Test result pages">
+  <div class="test-results-pagination-summary">
+    Page {{ pagination.page }} of {{ pagination.page_count }}
+    <span>({{ pagination.total }} test{% if pagination.total != 1 %}s{% endif %})</span>
+  </div>
+  <div class="test-results-pagination-links">
+    {% if pagination.previous_url %}
+    <a class="pagination-link" href="{{ pagination.previous_url }}">Previous</a>
+    {% else %}
+    <span class="pagination-link disabled" aria-disabled="true">Previous</span>
+    {% endif %}
+    {% for page_number in pagination.numbers %}
+      {% if page_number is none %}
+      <span class="pagination-ellipsis" aria-hidden="true">…</span>
+      {% elif page_number == pagination.page %}
+      <span class="pagination-link active" aria-current="page">{{ page_number }}</span>
+      {% else %}
+      <a class="pagination-link" href="{{ pagination.url(page_number) }}">{{ page_number }}</a>
+      {% endif %}
+    {% endfor %}
+    {% if pagination.next_url %}
+    <a class="pagination-link" href="{{ pagination.next_url }}">Next</a>
+    {% else %}
+    <span class="pagination-link disabled" aria-disabled="true">Next</span>
+    {% endif %}
+  </div>
+</nav>

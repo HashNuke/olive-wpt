@@ -85,14 +85,14 @@ document.body.addEventListener("click", async (event) => {
 
 document.body.addEventListener("htmx:beforeRequest", (event) => {
   const element = actionElement(event);
-  if (!element || !element.closest("#approval-controls")) return;
+  if (!element || !element.closest(".approval-controls")) return;
   setActionBusy(element, true);
   showToast("Saving…", false, 0);
 });
 
 document.body.addEventListener("htmx:afterRequest", (event) => {
   const element = actionElement(event);
-  if (!element || !element.closest("#approval-controls")) return;
+  if (!element || !element.closest(".approval-controls")) return;
   const successful = event.detail.xhr && event.detail.xhr.status >= 200 && event.detail.xhr.status < 300;
   setActionBusy(element, false);
   showToast(
@@ -107,7 +107,7 @@ document.body.addEventListener("htmx:afterRequest", (event) => {
 
 document.body.addEventListener("htmx:sendError", (event) => {
   const element = actionElement(event);
-  if (!element || !element.closest("#approval-controls")) return;
+  if (!element || !element.closest(".approval-controls")) return;
   setActionBusy(element, false);
   showToast("Could not reach review server", true);
 });

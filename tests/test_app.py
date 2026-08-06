@@ -4,6 +4,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from starlette.requests import Request
+
 import app
 
 
@@ -261,9 +263,122 @@ class ReportImagePresentationTests(unittest.TestCase):
         )
         self.assertIn('href="/"', html)
         self.assertIn('href="/?result=none"', html)
+        self.assertIn('href="/test-results"', html)
         self.assertNotIn("No tests have this status.", html)
         self.assertIn("Rebuild database", html)
         self.assertIn("(1.23%)", html)
+
+    def test_pagination_numbers_use_ellipsis_for_large_page_counts(self):
+        self.assertEqual(app.pagination_numbers(1, 3), [1, 2, 3])
+        self.assertEqual(app.pagination_numbers(1, 10), [1, 2, 3, None, 10])
+        self.assertEqual(app.pagination_numbers(5, 10), [1, None, 3, 4, 5, 6, 7, None, 10])
+        self.assertEqual(app.pagination_numbers(10, 10), [1, None, 8, 9, 10])
+
+    def test_test_results_page_paginates_to_25_rows(self):
+        tests = [
+            app.WptTest(
+                path=f"css/example-{index}.html",
+                url=f"https://wpt.live/css/example-{index}.html",
+                review_url=f"/test-report/view?path=css%2Fexample-{index}.html",
+            )
+            for index in range(26)
+        ]
+        items = [
+            {"test": test, "status": "FAIL", "current_diff_percent": float(index)}
+            for index, test in enumerate(tests)
+        ]
+        request = Request(
+            {
+                "type": "http",
+                "method": "GET",
+                "path": "/test-results",
+                "query_string": b"",
+                "headers": [],
+            }
+        )
+
+        with patch.object(
+            app,
+            "load_status_test_items",
+            return_value=(items, {"ALL": 26, "PASS": 0, "FAIL": 26, "REVW": 0, "UNKN": 0, "NONE": 0}),
+        ):
+            response = app.test_results(request)
+
+        self.assertEqual(len(response.context["rows"]), 25)
+        self.assertEqual(response.context["pagination"]["page"], 1)
+        self.assertEqual(response.context["pagination"]["page_count"], 2)
+        html = app.templates.get_template("test-results.html").render(**response.context)
+        self.assertEqual(html.count('class="test-result-row"'), 25)
+        self.assertEqual(html.count('class="test-results-pagination"'), 2)
+        self.assertIn('href="/test-results?page=2"', html)
+
+    def test_test_results_page_preserves_result_filter_in_pagination(self):
+        tests = [
+            app.WptTest(
+                path=f"css/fail-{index}.html",
+                url=f"https://wpt.live/css/fail-{index}.html",
+                review_url=f"/test-report/view?path=css%2Ffail-{index}.html",
+            )
+            for index in range(26)
+        ]
+        items = [
+            {"test": test, "status": "FAIL", "current_diff_percent": None}
+            for test in tests
+        ]
+        request = Request(
+            {
+                "type": "http",
+                "method": "GET",
+                "path": "/test-results",
+                "query_string": b"result=fail&page=2",
+                "headers": [],
+            }
+        )
+
+        with patch.object(
+            app,
+            "load_status_test_items",
+            return_value=(items, {"ALL": 26, "PASS": 0, "FAIL": 26, "REVW": 0, "UNKN": 0, "NONE": 0}),
+        ):
+            response = app.test_results(request)
+
+        self.assertEqual(response.context["selected_status"], "FAIL")
+        self.assertEqual(len(response.context["rows"]), 1)
+        html = app.templates.get_template("test-results.html").render(**response.context)
+        self.assertIn('href="/test-results?page=1&amp;result=fail"', html)
+
+    def test_test_results_template_has_htmx_image_toggle_and_row_actions(self):
+        test = self.test
+        self.write_artifact("result.png")
+        self.write_artifact("reference.png")
+        self.write_current_comparison(2.0)
+        row = app.test_result_row(
+            {"test": test, "status": "FAIL", "current_diff_percent": 2.0},
+            1,
+        )
+        pagination = {
+            "page": 1,
+            "page_count": 1,
+            "total": 1,
+            "numbers": [1],
+            "previous_url": None,
+            "next_url": None,
+            "url": lambda page: f"/test-results?page={page}",
+        }
+        html = app.templates.get_template("test-results.html").render(
+            request=None,
+            rows=[row],
+            status_counts={"ALL": 1, "PASS": 0, "FAIL": 1, "REVW": 0, "UNKN": 0, "NONE": 0},
+            status_tabs=app.HOME_STATUS_TABS,
+            selected_status="ALL",
+            pagination=pagination,
+        )
+
+        self.assertIn('role="group"', html)
+        self.assertIn('hx-target="#test-result-render-1"', html)
+        self.assertIn('hx-get="/test-report/render?path=css%2Fexample.html&amp;render=diff"', html)
+        self.assertIn('hx-get="/test-report/render?path=css%2Fexample.html&amp;render=reference"', html)
+        self.assertIn('hx-target="closest .approval-controls"', html)
 
     def test_home_tests_sort_by_current_diff_descending_with_missing_last(self):
         lower = app.WptTest(

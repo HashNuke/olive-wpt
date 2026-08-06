@@ -18,11 +18,14 @@ body.wpt-index {
 
 .wpt-home-actions {
   display: flex;
+  align-items: center;
+  gap: 0.5rem;
   justify-content: flex-end;
   margin-top: 1rem;
 }
 
-.wpt-home-actions button {
+.wpt-home-actions button,
+.wpt-home-action {
   padding: 0.4rem 0.65rem;
   border: 1px solid #c8ced6;
   border-radius: 0.25rem;
@@ -31,9 +34,11 @@ body.wpt-index {
   font: inherit;
   font-size: 0.875rem;
   cursor: pointer;
+  text-decoration: none;
 }
 
-.wpt-home-actions button:hover {
+.wpt-home-actions button:hover,
+.wpt-home-action:hover {
   background: #e8edf2;
 }
 
@@ -127,6 +132,182 @@ body.wpt-index {
 
 body.test-review {
   margin: 2rem;
+}
+
+body.test-results-page {
+  margin: 2rem;
+}
+
+.test-results-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.test-results-header h1 {
+  margin: 0.75rem 0 0.25rem;
+}
+
+.test-results-description {
+  margin: 0;
+  color: #586574;
+}
+
+.test-results-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  color: #586574;
+  font-size: 0.875rem;
+}
+
+.test-results-pagination-summary {
+  white-space: nowrap;
+}
+
+.test-results-pagination-summary span {
+  color: #8993a0;
+}
+
+.test-results-pagination-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pagination-link {
+  display: inline-block;
+  min-width: 1.75rem;
+  box-sizing: border-box;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c8ced6;
+  border-radius: 0.25rem;
+  background: #ffffff;
+  color: #1f2933;
+  text-align: center;
+  text-decoration: none;
+}
+
+.pagination-link:hover,
+.pagination-link.active {
+  border-color: #315b8a;
+  background: #e8edf2;
+}
+
+.pagination-link.disabled {
+  color: #a7afb9;
+}
+
+.pagination-ellipsis {
+  padding: 0 0.15rem;
+}
+
+.test-results-list {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.test-result-row {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) minmax(12rem, 1fr) minmax(22rem, 1.5fr);
+  gap: 1rem;
+  align-items: start;
+  padding: 1rem;
+  border: 1px solid #dce1e7;
+  border-radius: 0.35rem;
+  background: #ffffff;
+}
+
+.test-result-column {
+  min-width: 0;
+}
+
+.test-result-column .render-panel {
+  margin: 0;
+}
+
+.test-result-column .render-panel figcaption {
+  font-size: 0.95rem;
+}
+
+.test-result-column .render-panel img {
+  width: 100%;
+  max-height: 22rem;
+  object-fit: contain;
+  object-position: top left;
+}
+
+.test-result-comparison {
+  min-width: 0;
+}
+
+.result-render-toggle {
+  display: inline-flex;
+  margin-bottom: 0.55rem;
+}
+
+.result-render-toggle .render-tab {
+  margin: 0;
+  border-radius: 0;
+}
+
+.result-render-toggle .render-tab:first-child {
+  border-radius: 0.25rem 0 0 0.25rem;
+}
+
+.result-render-toggle .render-tab:last-child {
+  border-radius: 0 0.25rem 0.25rem 0;
+}
+
+.result-render-toggle .render-tab + .render-tab {
+  margin-left: -1px;
+}
+
+.test-result-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: baseline;
+  margin-bottom: 0.65rem;
+}
+
+.test-result-heading .wpt-status {
+  flex: 0 0 auto;
+}
+
+.test-result-path {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.test-result-details .approval-controls {
+  margin: 0;
+}
+
+.test-result-details .approval-summary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.test-result-details .approval-item {
+  display: block;
+  white-space: normal;
+}
+
+.test-result-details .approval-label,
+.test-result-details .approval-item strong {
+  display: block;
+}
+
+.test-result-details .approval-body {
+  margin-top: 0.55rem;
+}
+
+.test-result-details .approval-panel {
+  padding: 0.6rem;
 }
 
 .test-path-title {
@@ -425,6 +606,37 @@ body.test-review {
 
 .approval-controls .approval-secondary {
   background: #ffffff;
+}
+
+@media (max-width: 1100px) {
+  .test-result-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .test-result-details {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 700px) {
+  body.test-results-page,
+  body.test-review,
+  body.wpt-index {
+    margin: 1rem;
+  }
+
+  .test-result-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .test-result-details {
+    grid-column: auto;
+  }
+
+  .test-results-pagination {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 .comparison-improved {

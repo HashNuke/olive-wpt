@@ -35,6 +35,7 @@ RENDER_LABELS = {
     "diff": "Result vs Ref",
 }
 HOME_STATUS_TABS = ("ALL", "PASS", "FAIL", "REVW", "UNKN", "NONE")
+TEST_RESULTS_PAGE_SIZE = 25
 
 templates = Jinja2Templates(directory=str(TEMPLATES_ROOT))
 
@@ -54,13 +55,19 @@ class WptTest:
     def review_image_url(self) -> str:
         return f"/test-report/review-image?{urlencode({'path': self.path})}"
 
-    def approval_url(self, approved: bool) -> str:
+    def approval_url(self, approved: bool, controls_id: str | None = None) -> str:
         endpoint = "approve" if approved else "unapprove"
-        return f"/test-report/{endpoint}?{urlencode({'path': self.path})}"
+        query = {"path": self.path}
+        if controls_id:
+            query["controls_id"] = controls_id
+        return f"/test-report/{endpoint}?{urlencode(query)}"
 
-    def rejection_url(self, rejected: bool) -> str:
+    def rejection_url(self, rejected: bool, controls_id: str | None = None) -> str:
         endpoint = "reject" if rejected else "unreject"
-        return f"/test-report/{endpoint}?{urlencode({'path': self.path})}"
+        query = {"path": self.path}
+        if controls_id:
+            query["controls_id"] = controls_id
+        return f"/test-report/{endpoint}?{urlencode(query)}"
 
 
 def load_wpt_paths(path: Path = WPT_PATHS_FILE) -> tuple[str, ...]:
@@ -358,6 +365,8 @@ def report_context(test: WptTest) -> dict[str, object]:
         "review_state_available": review_state is not None,
         "review_status": review_status,
         "review_reason": review_state.get("reason") if review_state else None,
+        "review_model": review_state.get("review_model") if review_state else None,
+        "review_result": review_state.get("review_result") if review_state else None,
         "approval_status": "approved" if metadata and metadata.get("status") == "approved" else "pending",
         "metadata_available": metadata is not None,
         "olive_available": (output_directory / "result.png").is_file(),
@@ -609,6 +618,97 @@ def sort_home_tests(tests: list[dict[str, object]]) -> list[dict[str, object]]:
     )
 
 
+def selected_status_from_request(request: Request) -> str:
+    selected_result = request.query_params.get("result")
+    if selected_result is None or not selected_result.strip():
+        return "ALL"
+    selected_status = selected_result.strip().upper()
+    if selected_status not in HOME_STATUS_TABS[1:]:
+        raise HTTPException(
+            status_code=400,
+            detail="result must be one of unkn, fail, pass, revw, or none",
+        )
+    return selected_status
+
+
+def load_status_test_items() -> tuple[list[dict[str, object]], dict[str, int]]:
+    wpt_tests = load_wpt_tests()
+    test_index = load_database_test_index()
+    all_tests = sort_home_tests(
+        [
+            {
+                "test": test,
+                "status": test_index.get(test.path, {}).get("status", "NONE"),
+                "current_diff_percent": test_index.get(test.path, {}).get(
+                    "current_diff_percent"
+                ),
+            }
+            for test in wpt_tests
+        ]
+    )
+    status_counts = {status: 0 for status in HOME_STATUS_TABS}
+    status_counts["ALL"] = len(all_tests)
+    for item in all_tests:
+        status_counts[item["status"]] = status_counts.get(item["status"], 0) + 1
+    return all_tests, status_counts
+
+
+def parse_page(request: Request) -> int:
+    raw_page = request.query_params.get("page", "1")
+    try:
+        page = int(raw_page)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail="page must be a positive integer") from error
+    if page < 1:
+        raise HTTPException(status_code=400, detail="page must be a positive integer")
+    return page
+
+
+def pagination_numbers(current_page: int, page_count: int) -> list[int | None]:
+    if page_count <= 7:
+        return list(range(1, page_count + 1))
+    pages: list[int | None] = [1]
+    start = max(2, current_page - 2)
+    end = min(page_count - 1, current_page + 2)
+    if start > 2:
+        pages.append(None)
+    pages.extend(range(start, end + 1))
+    if end < page_count - 1:
+        pages.append(None)
+    pages.append(page_count)
+    return pages
+
+
+def test_results_page_url(page: int, selected_status: str) -> str:
+    query = {"page": page}
+    if selected_status != "ALL":
+        query["result"] = selected_status.lower()
+    return f"/test-results?{urlencode(query)}"
+
+
+def test_result_row(
+    item: dict[str, object],
+    row_number: int,
+) -> dict[str, object]:
+    test = item["test"]
+    assert isinstance(test, WptTest)
+    return {
+        "test": test,
+        "status": item["status"],
+        "result_status": item["status"],
+        "current_diff_percent": item["current_diff_percent"],
+        "row_number": row_number,
+        "render_target": f"test-result-render-{row_number}",
+        "controls_id": f"test-result-controls-{row_number}",
+        "feedback_id": f"test-result-feedback-{row_number}",
+        "rejection_reason_id": f"test-result-rejection-reason-{row_number}",
+        "olive_render": render_context(test, "olive"),
+        "comparison_render": render_context(test, "diff"),
+        "reference_render": render_context(test, "reference"),
+        **report_context(test),
+    }
+
+
 app = FastAPI(
     title="Olive WPT Output Review",
     version="0.1.0",
@@ -620,37 +720,13 @@ app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request) -> HTMLResponse:
-    wpt_tests = load_wpt_tests()
-    test_index = load_database_test_index()
-    all_tests = sort_home_tests(
-        [
-            {
-                "test": test,
-                "status": test_index.get(test.path, {}).get("status", "NONE"),
-                "current_diff_percent": test_index.get(test.path, {}).get("current_diff_percent"),
-            }
-            for test in wpt_tests
-        ]
-    )
-    selected_result = request.query_params.get("result")
-    if selected_result is None or not selected_result.strip():
-        selected_status = "ALL"
-    else:
-        selected_status = selected_result.strip().upper()
-        if selected_status not in HOME_STATUS_TABS[1:]:
-            raise HTTPException(
-                status_code=400,
-                detail="result must be one of unkn, fail, pass, revw, or none",
-            )
+    all_tests, status_counts = load_status_test_items()
+    selected_status = selected_status_from_request(request)
     tests = (
         all_tests
         if selected_status == "ALL"
         else [item for item in all_tests if item["status"] == selected_status]
     )
-    status_counts = {status: 0 for status in HOME_STATUS_TABS}
-    status_counts["ALL"] = len(all_tests)
-    for item in all_tests:
-        status_counts[item["status"]] = status_counts.get(item["status"], 0) + 1
     return templates.TemplateResponse(
         request=request,
         name="home.html",
@@ -659,6 +735,49 @@ def home(request: Request) -> HTMLResponse:
             "status_counts": status_counts,
             "status_tabs": HOME_STATUS_TABS,
             "selected_status": selected_status,
+        },
+    )
+
+
+@app.get("/test-results", response_class=HTMLResponse)
+def test_results(request: Request) -> HTMLResponse:
+    all_tests, status_counts = load_status_test_items()
+    selected_status = selected_status_from_request(request)
+    filtered_tests = (
+        all_tests
+        if selected_status == "ALL"
+        else [item for item in all_tests if item["status"] == selected_status]
+    )
+    total = len(filtered_tests)
+    page_count = max(1, (total + TEST_RESULTS_PAGE_SIZE - 1) // TEST_RESULTS_PAGE_SIZE)
+    requested_page = parse_page(request)
+    page = min(requested_page, page_count)
+    offset = (page - 1) * TEST_RESULTS_PAGE_SIZE
+    page_items = filtered_tests[offset : offset + TEST_RESULTS_PAGE_SIZE]
+    rows = [
+        test_result_row(item, offset + index + 1)
+        for index, item in enumerate(page_items)
+    ]
+    pagination = {
+        "page": page,
+        "page_count": page_count,
+        "total": total,
+        "numbers": pagination_numbers(page, page_count),
+        "previous_url": test_results_page_url(page - 1, selected_status) if page > 1 else None,
+        "next_url": test_results_page_url(page + 1, selected_status)
+        if page < page_count
+        else None,
+        "url": lambda page_number: test_results_page_url(page_number, selected_status),
+    }
+    return templates.TemplateResponse(
+        request=request,
+        name="test-results.html",
+        context={
+            "rows": rows,
+            "status_counts": status_counts,
+            "status_tabs": HOME_STATUS_TABS,
+            "selected_status": selected_status,
+            "pagination": pagination,
         },
     )
 
@@ -712,10 +831,20 @@ def test_review_image(path: str) -> Response:
 
 def approval_response(request: Request, path: str) -> HTMLResponse:
     test = get_wpt_test(path)
+    controls_id = request.query_params.get("controls_id")
+    feedback_id = f"{controls_id}-feedback" if controls_id else None
+    rejection_reason_id = f"{controls_id}-rejection-reason" if controls_id else None
     return templates.TemplateResponse(
         request=request,
         name="approval-controls.html",
-        context={"test": test, "result_status": result_status(test), **report_context(test)},
+        context={
+            "test": test,
+            "result_status": result_status(test),
+            "feedback_id": feedback_id,
+            "rejection_reason_id": rejection_reason_id,
+            "controls_id": controls_id,
+            **report_context(test),
+        },
     )
 
 

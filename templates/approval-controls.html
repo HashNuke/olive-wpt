@@ -51,29 +51,29 @@
 {% endif %}
 
 <div class="approval-body">
-  <section class="approval-panel" aria-labelledby="feedback-heading">
+  <section class="approval-panel" aria-labelledby="{{ feedback_id|default('feedback-heading', true) }}">
     <div class="approval-panel-heading">
-      <h3 id="feedback-heading">Feedback</h3>
+      <h3 id="{{ feedback_id|default('feedback-heading', true) }}">Feedback</h3>
     </div>
     {% if review_reason %}
     <p class="review-reason"><strong>{% if review_status == "rejected" %}Review reason{% else %}Review feedback{% endif %}:</strong> {{ review_reason }}</p>
     {% endif %}
     {% if olive_available %}
-    <form class="rejection-form" hx-post="{{ test.rejection_url(true) }}" hx-target="#approval-controls" hx-swap="innerHTML">
-      <label for="rejection-reason">Reason for rejection</label>
-      <textarea id="rejection-reason" name="reason" rows="3" required placeholder="What should be fixed before approval?">{% if rejected %}{{ review_reason }}{% endif %}</textarea>
+    <form class="rejection-form" hx-post="{{ test.rejection_url(true, controls_id|default(None, true)) }}" hx-target="closest .approval-controls" hx-swap="innerHTML">
+      <label for="{{ rejection_reason_id|default('rejection-reason', true) }}">Reason for rejection</label>
+      <textarea id="{{ rejection_reason_id|default('rejection-reason', true) }}" name="reason" rows="3" required placeholder="What should be fixed before approval?">{% if rejected %}{{ review_reason }}{% endif %}</textarea>
       <div class="review-action-buttons">
         <div class="rejection-actions">
           <button type="submit" class="approval-reject">Reject</button>
           {% if rejected %}
-          <button type="button" class="approval-reject approval-secondary" hx-post="{{ test.rejection_url(false) }}" hx-target="#approval-controls" hx-swap="innerHTML">Clear rejection</button>
+          <button type="button" class="approval-reject approval-secondary" hx-post="{{ test.rejection_url(false, controls_id|default(None, true)) }}" hx-target="closest .approval-controls" hx-swap="innerHTML">Clear rejection</button>
           {% endif %}
         </div>
         <div class="approval-actions">
         {% if olive_available and current_comparison_available and approval_status == "approved" and current_result_sha256 == approved_result_sha256 %}
-        <button type="button" hx-post="{{ test.approval_url(false) }}" hx-target="#approval-controls" hx-swap="innerHTML">Unapprove</button>
+        <button type="button" hx-post="{{ test.approval_url(false, controls_id|default(None, true)) }}" hx-target="closest .approval-controls" hx-swap="innerHTML">Unapprove</button>
         {% elif olive_available and current_comparison_available %}
-        <button type="button" class="approval-approve" hx-post="{{ test.approval_url(true) }}" hx-target="#approval-controls" hx-swap="innerHTML">Approve</button>
+        <button type="button" class="approval-approve" hx-post="{{ test.approval_url(true, controls_id|default(None, true)) }}" hx-target="closest .approval-controls" hx-swap="innerHTML">Approve</button>
         {% endif %}
         {% if not olive_available %}
         <span class="approval-help">Olive render missing.</span>
