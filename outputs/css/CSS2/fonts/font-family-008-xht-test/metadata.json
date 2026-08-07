@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+a9920cb52af97e3b893d4d35dd610416b1fd18fd",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/CSS2/fonts/font-family-008.xht",
+  "wpt_local_path": "css/CSS2/fonts/font-family-008.xht",
+  "approved_result_sha256": "b91df39cad0faaa68ef5776a99f5d80d84284e76cc85266a07afb1d03cb3aebd",
+  "approved_diff_percent": 0.5772916666666666,
+  "approved_different_pixels": 2771,
+  "approved_total_pixels": 480000
+}

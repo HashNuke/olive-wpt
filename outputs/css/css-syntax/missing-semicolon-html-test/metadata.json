@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+a9920cb52af97e3b893d4d35dd610416b1fd18fd",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-syntax/missing-semicolon.html",
+  "wpt_local_path": "css/css-syntax/missing-semicolon.html",
+  "approved_result_sha256": "b18db7ca9a2e3b6f1dc328b1995db4f7bbf247ed8475ab115623f60b67acf69d",
+  "approved_diff_percent": 0.19833333333333333,
+  "approved_different_pixels": 952,
+  "approved_total_pixels": 480000
+}

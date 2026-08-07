@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+a9920cb52af97e3b893d4d35dd610416b1fd18fd",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-fonts/font-palette-21.html",
+  "wpt_local_path": "css/css-fonts/font-palette-21.html",
+  "approved_result_sha256": "bef7cd5bed9a86cbf7eb720ed16bff9cfe3a046eb800894a115c119f57c78160",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
