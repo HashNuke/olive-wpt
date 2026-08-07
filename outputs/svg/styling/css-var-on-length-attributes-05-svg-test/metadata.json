@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+1ded643b1d9010964e634426046f2bf89a682237",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/svg/styling/css-var-on-length-attributes-05.svg",
+  "wpt_local_path": "svg/styling/css-var-on-length-attributes-05.svg",
+  "approved_result_sha256": "8a20e4522e7523ab935e89a58ce0b971c23590922d6eec9133ef31fbbc7b1ad6",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

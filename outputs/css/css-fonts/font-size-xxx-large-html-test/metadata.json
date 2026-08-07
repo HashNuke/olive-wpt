@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+1ded643b1d9010964e634426046f2bf89a682237",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-fonts/font-size-xxx-large.html",
+  "wpt_local_path": "css/css-fonts/font-size-xxx-large.html",
+  "approved_result_sha256": "916ad4b6426d4659719c0cfdf8ba3c0874226e3f5b97ca96f6b08d93a4723774",
+  "approved_diff_percent": 0.391875,
+  "approved_different_pixels": 1881,
+  "approved_total_pixels": 480000
+}

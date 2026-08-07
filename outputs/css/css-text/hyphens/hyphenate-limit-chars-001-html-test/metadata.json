@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+1ded643b1d9010964e634426046f2bf89a682237",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-text/hyphens/hyphenate-limit-chars-001.html",
+  "wpt_local_path": "css/css-text/hyphens/hyphenate-limit-chars-001.html",
+  "approved_result_sha256": "24bc56b080da7fba989936ec50291909fbf390bbd87faab89633543aa9279650",
+  "approved_diff_percent": 1.3025,
+  "approved_different_pixels": 6252,
+  "approved_total_pixels": 480000
+}
