@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+1ecbda1e8abb32f4a6d2acf95bf81e8aa81b9b8d",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-borders/subpixel-borders-with-child.html",
+  "wpt_local_path": "css/css-borders/subpixel-borders-with-child.html",
+  "approved_result_sha256": "9e0559936b24e3e08c299d87b1a45f83810d8b987a30e1b8c7f52e50e9bcd5da",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
