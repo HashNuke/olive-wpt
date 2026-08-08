@@ -6,8 +6,8 @@
   "reference_browser_version": "150.0.7871.128",
   "wpt_url": "https://wpt.live/css/CSS2/borders/border-applies-to-001.xht",
   "wpt_local_path": "css/CSS2/borders/border-applies-to-001.xht",
-  "approved_result_sha256": "d4b16076caa27b45a45ed7fe3cfbe51b504ea2499ae9460fe061b7a2691792b9",
-  "approved_diff_percent": 0.23166666666666663,
-  "approved_different_pixels": 1112,
+  "approved_result_sha256": "b3279a256630da06d2dca4d08ca82fd988204e7d2072aaadd0a63bc99a6749ce",
+  "approved_diff_percent": 0.23291666666666663,
+  "approved_different_pixels": 1118,
   "approved_total_pixels": 480000
 }
