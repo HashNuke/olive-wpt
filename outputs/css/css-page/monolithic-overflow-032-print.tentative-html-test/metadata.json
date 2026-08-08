@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+150c6ad46e2d385fc126ede3b56dbdf17113c24f",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-page/monolithic-overflow-032-print.tentative.html",
+  "wpt_local_path": "css/css-page/monolithic-overflow-032-print.tentative.html",
+  "approved_result_sha256": "be1cae936828e05b70e8f49966a70a8dd477ba234156d86c0c7e80158447787c",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

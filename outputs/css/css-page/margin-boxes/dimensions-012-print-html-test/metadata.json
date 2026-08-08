@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+150c6ad46e2d385fc126ede3b56dbdf17113c24f",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-page/margin-boxes/dimensions-012-print.html",
+  "wpt_local_path": "css/css-page/margin-boxes/dimensions-012-print.html",
+  "approved_result_sha256": "949b376352ee5b2244cf973ce895aa3e69425c5f0ff4c5768d517f4c12056b8e",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
