@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+d92e7bb881412677deee27c38455a52bbf25f803",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-overflow/overflow-body-propagation-008.html",
+  "wpt_local_path": "css/css-overflow/overflow-body-propagation-008.html",
+  "approved_result_sha256": "8c4779effac9d58d7627164b466eec22c8ad53d0031e18a5901cba9edbeb0b7d",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
