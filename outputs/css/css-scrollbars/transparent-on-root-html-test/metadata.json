@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+504471f4f438756331087477b5792d6d96c389ea",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-scrollbars/transparent-on-root.html",
+  "wpt_local_path": "css/css-scrollbars/transparent-on-root.html",
+  "approved_result_sha256": "bd5970d91acacd7986f92910031ef1c5603a3f9c1bbe76dc6ae8c8a58412ad86",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
