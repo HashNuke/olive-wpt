@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+e8c363fdc9833241f52b39af345b081b9e19438c",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/CSS2/backgrounds/background-applies-to-005.xht",
+  "wpt_local_path": "css/CSS2/backgrounds/background-applies-to-005.xht",
+  "approved_result_sha256": "ad4427cef3c2a645dbc30f597f6b6402a4269efbfa889a5cb5d3ffc0d0ae5fde",
+  "approved_diff_percent": 0.223125,
+  "approved_different_pixels": 1071,
+  "approved_total_pixels": 480000
+}

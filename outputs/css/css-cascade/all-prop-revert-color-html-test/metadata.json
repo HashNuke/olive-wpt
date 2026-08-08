@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+e8c363fdc9833241f52b39af345b081b9e19438c",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-cascade/all-prop-revert-color.html",
+  "wpt_local_path": "css/css-cascade/all-prop-revert-color.html",
+  "approved_result_sha256": "4e5e988de4c660d649397297fcfae889e2aa149a093f9dcc18cf6eddf96b3e9c",
+  "approved_diff_percent": 0.159375,
+  "approved_different_pixels": 765,
+  "approved_total_pixels": 480000
+}
