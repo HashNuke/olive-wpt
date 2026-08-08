@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+d2358c0473a346e9a92df8242932cbe40b52b3b7",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-images/image-set/image-set-negative-resolution-rendering.html",
+  "wpt_local_path": "css/css-images/image-set/image-set-negative-resolution-rendering.html",
+  "approved_result_sha256": "b95e59461148b9f564ea35add53df5612bcab8646b326735d6b95cfd34f5b4c1",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

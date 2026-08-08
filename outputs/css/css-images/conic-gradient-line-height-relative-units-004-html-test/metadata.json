@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+d2358c0473a346e9a92df8242932cbe40b52b3b7",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-images/conic-gradient-line-height-relative-units-004.html",
+  "wpt_local_path": "css/css-images/conic-gradient-line-height-relative-units-004.html",
+  "approved_result_sha256": "202b09fdc9159bc3cbf4ba93aa9c9babe22afba9d00fd6c826e19ee41f170310",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
