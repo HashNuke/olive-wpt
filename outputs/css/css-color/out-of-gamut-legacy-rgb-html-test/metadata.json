@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+b6a8b0422a8bfba031ea33ca3dab9a2e572e3ba0",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-color/out-of-gamut-legacy-rgb.html",
+  "wpt_local_path": "css/css-color/out-of-gamut-legacy-rgb.html",
+  "approved_result_sha256": "f72fe4801ff348e3701b7f27284b823e32ef09ced9170c44a975cb450d83cfdb",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
