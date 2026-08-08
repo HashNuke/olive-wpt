@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+edacf2a9974c463f4c9c21c647f9d941fc6a9c62",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-position/position-change.html",
+  "wpt_local_path": "css/css-position/position-change.html",
+  "approved_result_sha256": "ed702e55def0cb8a51e5eb6a66815fbc8e19e499ce3fb11beeb447a29b3a78e3",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
