@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+5c33fb04eee14f19d355b26009f3b986679d0c3d",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-will-change/will-change-fixpos-cb-offset-path-1.html",
+  "wpt_local_path": "css/css-will-change/will-change-fixpos-cb-offset-path-1.html",
+  "approved_result_sha256": "34e8f28edeb65b397f21fa6d7d09c2e2e35c60bea83f61c47a594cbc6e7431c6",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

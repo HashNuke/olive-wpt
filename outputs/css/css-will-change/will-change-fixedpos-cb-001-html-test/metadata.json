@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+5c33fb04eee14f19d355b26009f3b986679d0c3d",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-will-change/will-change-fixedpos-cb-001.html",
+  "wpt_local_path": "css/css-will-change/will-change-fixedpos-cb-001.html",
+  "approved_result_sha256": "73909c4d512138c02ea4c37ae7b5cea63b238c596962962bc9160d1dfd2e075b",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
