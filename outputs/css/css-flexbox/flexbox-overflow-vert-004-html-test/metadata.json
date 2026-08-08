@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+c85b94d5eb1e7e609e7ce708b052d59b4b5260dd",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-flexbox/flexbox-overflow-vert-004.html",
+  "wpt_local_path": "css/css-flexbox/flexbox-overflow-vert-004.html",
+  "approved_result_sha256": "f18ed1c7d16215c6d1d68784203cdc596506d80a3a5c0f3352a0dbb788487302",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

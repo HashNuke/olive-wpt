@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+c85b94d5eb1e7e609e7ce708b052d59b4b5260dd",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-flexbox/flexbox-single-line-clamp-2.html",
+  "wpt_local_path": "css/css-flexbox/flexbox-single-line-clamp-2.html",
+  "approved_result_sha256": "d232bd5e4b9308cf84f93e2a895d97803eaa949accd9e398c397e9ba5b5d679f",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

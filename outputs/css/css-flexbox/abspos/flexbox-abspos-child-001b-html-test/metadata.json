@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+c85b94d5eb1e7e609e7ce708b052d59b4b5260dd",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-flexbox/abspos/flexbox-abspos-child-001b.html",
+  "wpt_local_path": "css/css-flexbox/abspos/flexbox-abspos-child-001b.html",
+  "approved_result_sha256": "f3d59a3cd5614a274907dce3cff83180c2fd25521e60d3bcdf5b9082fc625070",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
