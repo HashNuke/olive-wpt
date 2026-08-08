@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+383c2fc76862f5f63d79dd3241672c8e90491087",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-backgrounds/background-size/vector/background-size-vector-020.html",
+  "wpt_local_path": "css/css-backgrounds/background-size/vector/background-size-vector-020.html",
+  "approved_result_sha256": "c2c60f901b26cb98df89473da1fe10d5a03bfeec33465ae7dd0a2eb2dbfd8619",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

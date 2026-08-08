@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+383c2fc76862f5f63d79dd3241672c8e90491087",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-backgrounds/background-size/vector/tall--cover--width.html",
+  "wpt_local_path": "css/css-backgrounds/background-size/vector/tall--cover--width.html",
+  "approved_result_sha256": "ee1059ac5f2c4daef7cb149eaa863b6d7135691d335e4fc9b55245bf7163e092",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
