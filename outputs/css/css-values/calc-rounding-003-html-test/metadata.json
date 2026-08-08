@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+2d161e493d0d6d29885fc0355a76a486ca89fa01",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-values/calc-rounding-003.html",
+  "wpt_local_path": "css/css-values/calc-rounding-003.html",
+  "approved_result_sha256": "5a0bf28ad80f4d9bd78d617dcb8ad1c991e47599017606ba26fca7c21e7cba2a",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

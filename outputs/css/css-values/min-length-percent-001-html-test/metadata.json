@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+2d161e493d0d6d29885fc0355a76a486ca89fa01",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-values/min-length-percent-001.html",
+  "wpt_local_path": "css/css-values/min-length-percent-001.html",
+  "approved_result_sha256": "e84c63b786b78c17672f74654dfacd88306f8d8c17e1862655bd5be9b4bee203",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
