@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+dbe345665055b0975b1fbb4f5e0e7aec4a511b15",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-scrollbars/scrollbar-color-dynamic-5.html",
+  "wpt_local_path": "css/css-scrollbars/scrollbar-color-dynamic-5.html",
+  "approved_result_sha256": "492d09d1cc609a2eb0afcdef1dc37481f2976cbd1a6c8df212a8c3e10d0d0257",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
