@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+7892d8e7ab4f55f4583ba09f9a2a0df79e388296",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-transforms/composited-under-rotateY-180deg-preserve-3d.html",
+  "wpt_local_path": "css/css-transforms/composited-under-rotateY-180deg-preserve-3d.html",
+  "approved_result_sha256": "ed702e55def0cb8a51e5eb6a66815fbc8e19e499ce3fb11beeb447a29b3a78e3",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

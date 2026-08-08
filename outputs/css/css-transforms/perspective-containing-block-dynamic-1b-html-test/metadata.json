@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+7892d8e7ab4f55f4583ba09f9a2a0df79e388296",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-transforms/perspective-containing-block-dynamic-1b.html",
+  "wpt_local_path": "css/css-transforms/perspective-containing-block-dynamic-1b.html",
+  "approved_result_sha256": "bc13c1b6d6ffe8cd07c94d5e05f241c9a7f7a7f3d24e254306c70621ac568f02",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

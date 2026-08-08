@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+7892d8e7ab4f55f4583ba09f9a2a0df79e388296",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-transforms/change-scale-wide-range.html",
+  "wpt_local_path": "css/css-transforms/change-scale-wide-range.html",
+  "approved_result_sha256": "28b0c4d588718820cdd2936c6602d4a6407fc3cdbb344411ac0d968497523b07",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

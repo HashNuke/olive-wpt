@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+7892d8e7ab4f55f4583ba09f9a2a0df79e388296",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-transforms/3d-rendering-context-and-z-ordering-002.html",
+  "wpt_local_path": "css/css-transforms/3d-rendering-context-and-z-ordering-002.html",
+  "approved_result_sha256": "b95e59461148b9f564ea35add53df5612bcab8646b326735d6b95cfd34f5b4c1",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
