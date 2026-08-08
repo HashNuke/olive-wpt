@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+6a1ccbea2b99d014dc6c9479becaaddcb6c7c1f7",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-overflow/button-with-scrollable-descendant.html",
+  "wpt_local_path": "css/css-overflow/button-with-scrollable-descendant.html",
+  "approved_result_sha256": "713621fcdc3eb9a6fcec3bfb882057e0458136472377c57a7bcf68b64131e1d8",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

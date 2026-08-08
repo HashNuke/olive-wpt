@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+6a1ccbea2b99d014dc6c9479becaaddcb6c7c1f7",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-multicol/nested-oofs-in-relative-multicol.html",
+  "wpt_local_path": "css/css-multicol/nested-oofs-in-relative-multicol.html",
+  "approved_result_sha256": "6afee9c46e3527aaafea35c6927f0852ceb841e600368552ebea67f4e4528408",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

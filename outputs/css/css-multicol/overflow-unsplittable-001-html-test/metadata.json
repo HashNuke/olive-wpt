@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+6a1ccbea2b99d014dc6c9479becaaddcb6c7c1f7",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-multicol/overflow-unsplittable-001.html",
+  "wpt_local_path": "css/css-multicol/overflow-unsplittable-001.html",
+  "approved_result_sha256": "52a5fd23363b431c0ad1392f0c435f9edf909a9b6d9336d973bc906a09a3c312",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
