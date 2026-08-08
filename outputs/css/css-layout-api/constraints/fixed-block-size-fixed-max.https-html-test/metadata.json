@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+2ab23eedc1b32d5d1617e4652b4175071bfcf793",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-layout-api/constraints/fixed-block-size-fixed-max.https.html",
+  "wpt_local_path": "css/css-layout-api/constraints/fixed-block-size-fixed-max.https.html",
+  "approved_result_sha256": "8b03410de053c31f96dd7ea1d252a79350e8d9f33985c21dea1e0c2fe037f8c7",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
