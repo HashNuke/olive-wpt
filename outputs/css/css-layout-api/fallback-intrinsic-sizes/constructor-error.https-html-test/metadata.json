@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+fbbd56f2dbbd8d7c7dc2405663b1690b9d41d08f",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-layout-api/fallback-intrinsic-sizes/constructor-error.https.html",
+  "wpt_local_path": "css/css-layout-api/fallback-intrinsic-sizes/constructor-error.https.html",
+  "approved_result_sha256": "4e343dcd5730044ddf2ced7d15a09c383b7d11a868e62131275ba89e27088b73",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

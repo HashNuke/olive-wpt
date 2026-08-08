@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+fbbd56f2dbbd8d7c7dc2405663b1690b9d41d08f",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-layout-api/edges/border-vrl-rtl.https.html",
+  "wpt_local_path": "css/css-layout-api/edges/border-vrl-rtl.https.html",
+  "approved_result_sha256": "5aa77508a1a7c70d38aef35d3424a2d7538b75160c962382b7a74a2d68b7c833",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
