@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+04481dd2a601d811f6b8ef406190ecf90adc1cb9",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-images/svg-images-are-ignored.html",
+  "wpt_local_path": "css/css-images/svg-images-are-ignored.html",
+  "approved_result_sha256": "1afa515f059d45aa8007f5baea078a9ad87787a88c8d2b07d1e45327df268755",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

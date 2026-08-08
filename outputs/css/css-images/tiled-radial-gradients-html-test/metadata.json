@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+04481dd2a601d811f6b8ef406190ecf90adc1cb9",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-images/tiled-radial-gradients.html",
+  "wpt_local_path": "css/css-images/tiled-radial-gradients.html",
+  "approved_result_sha256": "f056064bb3fa5196a1f5c33da2e074ea785fd3deb31ffd07a739f7e86f54f7e8",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

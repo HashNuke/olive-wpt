@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+04481dd2a601d811f6b8ef406190ecf90adc1cb9",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-images/normalization-conic.html",
+  "wpt_local_path": "css/css-images/normalization-conic.html",
+  "approved_result_sha256": "8b8e65304f9fc0863c52d9206d13b2df9ed3bace782be77d39aeae2b33d7532c",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
