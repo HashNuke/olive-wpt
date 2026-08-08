@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+0d0a17e32b2e5099f25d94e62af8ff566961c0b9",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/filter-effects/backdrop-filter-backdrop-root-mix-blend-mode.html",
+  "wpt_local_path": "css/filter-effects/backdrop-filter-backdrop-root-mix-blend-mode.html",
+  "approved_result_sha256": "d882a5dabbb06aae3e4767d4290498f2615ccc31773a9ba6375e2d1ec64792e7",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
