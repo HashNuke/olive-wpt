@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+e4e6a0941db71a4aec5ff346c4a3b88f097abe84",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-scrollbars/scrollbar-color-006.html",
+  "wpt_local_path": "css/css-scrollbars/scrollbar-color-006.html",
+  "approved_result_sha256": "1d082303dd2062515c00574b1d74c3698879d022c5cecae6c975e7a583e60c35",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
