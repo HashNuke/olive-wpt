@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+e877f2dbe3d2e1b4f71d84da7a1541d7ce646450",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-layout-api/child-constraints/available-inline-size-invalid.https.html",
+  "wpt_local_path": "css/css-layout-api/child-constraints/available-inline-size-invalid.https.html",
+  "approved_result_sha256": "80a4c4ed71533ee9551a99606370714f55827fa24a3c30590e84a881ea1f62e2",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
