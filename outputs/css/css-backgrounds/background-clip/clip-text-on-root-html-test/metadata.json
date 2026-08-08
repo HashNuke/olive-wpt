@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+d0fdb2575fd5df62ce1d83df2318a0674e460ca1",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-backgrounds/background-clip/clip-text-on-root.html",
+  "wpt_local_path": "css/css-backgrounds/background-clip/clip-text-on-root.html",
+  "approved_result_sha256": "b116eaa31545caa83ab8f667202acb14b74540a5b7f6f6c8464db545a4be00cd",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+d0fdb2575fd5df62ce1d83df2318a0674e460ca1",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/CSS2/abspos/abspos-containing-block-initial-009f.xht",
+  "wpt_local_path": "css/CSS2/abspos/abspos-containing-block-initial-009f.xht",
+  "approved_result_sha256": "9ce16f1d27eaddfbc5f3460790633459dc217698e78d3593f28b8afb6e7feb7a",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

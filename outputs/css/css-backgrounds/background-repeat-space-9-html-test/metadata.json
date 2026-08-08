@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+d0fdb2575fd5df62ce1d83df2318a0674e460ca1",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-backgrounds/background-repeat-space-9.html",
+  "wpt_local_path": "css/css-backgrounds/background-repeat-space-9.html",
+  "approved_result_sha256": "5e1346a6d09fbc5d6d8b07a67757ed033826be440dc73e1f9bfb9c7b664e80d0",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
