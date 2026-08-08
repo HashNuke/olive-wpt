@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+7dd7238b60592715f2b6bf8823bb3f87d6672847",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-flexbox/flexbox-writing-mode-007.html",
+  "wpt_local_path": "css/css-flexbox/flexbox-writing-mode-007.html",
+  "approved_result_sha256": "99ea58948f7722c7eaf6cad31347cf4774ac220125abc348c4b406b081bc3f4c",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

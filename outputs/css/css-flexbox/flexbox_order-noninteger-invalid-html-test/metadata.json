@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+7dd7238b60592715f2b6bf8823bb3f87d6672847",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-flexbox/flexbox_order-noninteger-invalid.html",
+  "wpt_local_path": "css/css-flexbox/flexbox_order-noninteger-invalid.html",
+  "approved_result_sha256": "8a20e4522e7523ab935e89a58ce0b971c23590922d6eec9133ef31fbbc7b1ad6",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

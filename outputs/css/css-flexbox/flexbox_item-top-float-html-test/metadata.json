@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+7dd7238b60592715f2b6bf8823bb3f87d6672847",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-flexbox/flexbox_item-top-float.html",
+  "wpt_local_path": "css/css-flexbox/flexbox_item-top-float.html",
+  "approved_result_sha256": "bd8781e743feaa58187b32028cd9a38e4ed65562d77d3630b87fcd867030d705",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
