@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+6ea3875a3015382780b56d56fc0942149b86b9ce",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-overflow/overflow-clip-margin-008.html",
+  "wpt_local_path": "css/css-overflow/overflow-clip-margin-008.html",
+  "approved_result_sha256": "056c2fd44bced179a474b66ae79ff37f8e54d9f67ed812a1b2bc22cbef0c0dca",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

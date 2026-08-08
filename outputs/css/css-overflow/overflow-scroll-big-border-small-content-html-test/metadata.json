@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+6ea3875a3015382780b56d56fc0942149b86b9ce",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-overflow/overflow-scroll-big-border-small-content.html",
+  "wpt_local_path": "css/css-overflow/overflow-scroll-big-border-small-content.html",
+  "approved_result_sha256": "84254cd178c926823690288f4af7db4eb8e0d2837a378c73b0e47d7801e230b4",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
