@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+0db8f848c04145e4639ae3298c868911366e1438",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-will-change/will-change-stacking-context-offset-path-1.html",
+  "wpt_local_path": "css/css-will-change/will-change-stacking-context-offset-path-1.html",
+  "approved_result_sha256": "de77a146f66ab953ad0d400706c8ebcd64186a44094e58310ce3a228e4de9a9e",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
