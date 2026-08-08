@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+9c080d2897af6b6a7b33ec6b3898e3430b17b8e6",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-animations/animation-duration-infinite.html",
+  "wpt_local_path": "css/css-animations/animation-duration-infinite.html",
+  "approved_result_sha256": "0d8541cfbcaf180a91097a475b963f09ab6acdd8c7561e3dddeae2f8fca1d227",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

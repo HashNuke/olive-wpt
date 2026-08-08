@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+9c080d2897af6b6a7b33ec6b3898e3430b17b8e6",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-backgrounds/animations/background-color-animation-single-keyframe.html",
+  "wpt_local_path": "css/css-backgrounds/animations/background-color-animation-single-keyframe.html",
+  "approved_result_sha256": "bdd7a651d21d28bf88846883790c83176e8f801b494453272346814fce6aec9d",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+9c080d2897af6b6a7b33ec6b3898e3430b17b8e6",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/css-values/q-unit-case-insensitivity-001.html",
+  "wpt_local_path": "css/css-values/q-unit-case-insensitivity-001.html",
+  "approved_result_sha256": "ab4777237e1d75eff65f6004beb92efcae7242a58f4d874ce550745d754f7495",
+  "approved_diff_percent": 0.27666666666666667,
+  "approved_different_pixels": 1328,
+  "approved_total_pixels": 480000
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "olive_version": "0.1.0+9c080d2897af6b6a7b33ec6b3898e3430b17b8e6",
+  "reference_browser": "chromium",
+  "reference_browser_version": "150.0.7871.128",
+  "wpt_url": "https://wpt.live/css/CSS2/normal-flow/video-paint-order.html",
+  "wpt_local_path": "css/CSS2/normal-flow/video-paint-order.html",
+  "approved_result_sha256": "d61861a2b985cc997f68a7889f6413173d35df3dd63d38f7bbb974a6e790f619",
+  "approved_diff_percent": 0.0,
+  "approved_different_pixels": 0,
+  "approved_total_pixels": 480000
+}
