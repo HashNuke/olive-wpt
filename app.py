@@ -658,6 +658,27 @@ def selected_status_from_request(request: Request) -> str:
     return selected_status
 
 
+def selected_prefix_from_request(request: Request) -> str:
+    selected_prefix = request.query_params.get("prefix")
+    return selected_prefix.strip() if selected_prefix else ""
+
+
+def filter_test_items(
+    tests: list[dict[str, object]], prefix: str
+) -> list[dict[str, object]]:
+    if not prefix:
+        return tests
+    return [item for item in tests if item["test"].path.startswith(prefix)]
+
+
+def status_counts_for_items(tests: list[dict[str, object]]) -> dict[str, int]:
+    status_counts = {status: 0 for status in HOME_STATUS_TABS}
+    status_counts["ALL"] = len(tests)
+    for item in tests:
+        status_counts[item["status"]] = status_counts.get(item["status"], 0) + 1
+    return status_counts
+
+
 def load_status_test_items() -> tuple[list[dict[str, object]], dict[str, int]]:
     wpt_tests = load_wpt_tests()
     test_index = load_database_test_index()
@@ -673,11 +694,7 @@ def load_status_test_items() -> tuple[list[dict[str, object]], dict[str, int]]:
             for test in wpt_tests
         ]
     )
-    status_counts = {status: 0 for status in HOME_STATUS_TABS}
-    status_counts["ALL"] = len(all_tests)
-    for item in all_tests:
-        status_counts[item["status"]] = status_counts.get(item["status"], 0) + 1
-    return all_tests, status_counts
+    return all_tests, status_counts_for_items(all_tests)
 
 
 def parse_page(request: Request) -> int:
@@ -706,10 +723,21 @@ def pagination_numbers(current_page: int, page_count: int) -> list[int | None]:
     return pages
 
 
-def test_results_page_url(page: int, selected_status: str) -> str:
+def status_page_url(path: str, selected_status: str, prefix: str = "") -> str:
+    query = {}
+    if selected_status != "ALL":
+        query["result"] = selected_status.lower()
+    if prefix:
+        query["prefix"] = prefix
+    return f"{path}?{urlencode(query)}" if query else path
+
+
+def test_results_page_url(page: int, selected_status: str, prefix: str = "") -> str:
     query = {"page": page}
     if selected_status != "ALL":
         query["result"] = selected_status.lower()
+    if prefix:
+        query["prefix"] = prefix
     return f"/test-results?{urlencode(query)}"
 
 
@@ -750,7 +778,10 @@ app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request) -> HTMLResponse:
-    all_tests, status_counts = load_status_test_items()
+    all_tests, _ = load_status_test_items()
+    selected_prefix = selected_prefix_from_request(request)
+    all_tests = filter_test_items(all_tests, selected_prefix)
+    status_counts = status_counts_for_items(all_tests)
     selected_status = selected_status_from_request(request)
     tests = (
         all_tests
@@ -765,13 +796,23 @@ def home(request: Request) -> HTMLResponse:
             "status_counts": status_counts,
             "status_tabs": HOME_STATUS_TABS,
             "selected_status": selected_status,
+            "prefix": selected_prefix,
+            "prefix_query": (
+                urlencode({"prefix": selected_prefix}) if selected_prefix else ""
+            ),
+            "test_results_url": status_page_url(
+                "/test-results", selected_status, selected_prefix
+            ),
         },
     )
 
 
 @app.get("/test-results", response_class=HTMLResponse)
 def test_results(request: Request) -> HTMLResponse:
-    all_tests, status_counts = load_status_test_items()
+    all_tests, _ = load_status_test_items()
+    selected_prefix = selected_prefix_from_request(request)
+    all_tests = filter_test_items(all_tests, selected_prefix)
+    status_counts = status_counts_for_items(all_tests)
     selected_status = selected_status_from_request(request)
     filtered_tests = (
         all_tests
@@ -794,11 +835,17 @@ def test_results(request: Request) -> HTMLResponse:
         "page_count": page_count,
         "total": total,
         "numbers": pagination_numbers(page, page_count),
-        "previous_url": test_results_page_url(page - 1, selected_status) if page > 1 else None,
-        "next_url": test_results_page_url(page + 1, selected_status)
+        "previous_url": (
+            test_results_page_url(page - 1, selected_status, selected_prefix)
+            if page > 1
+            else None
+        ),
+        "next_url": test_results_page_url(page + 1, selected_status, selected_prefix)
         if page < page_count
         else None,
-        "url": lambda page_number: test_results_page_url(page_number, selected_status),
+        "url": lambda page_number: test_results_page_url(
+            page_number, selected_status, selected_prefix
+        ),
     }
     return templates.TemplateResponse(
         request=request,
@@ -808,6 +855,11 @@ def test_results(request: Request) -> HTMLResponse:
             "status_counts": status_counts,
             "status_tabs": HOME_STATUS_TABS,
             "selected_status": selected_status,
+            "prefix": selected_prefix,
+            "prefix_query": (
+                urlencode({"prefix": selected_prefix}) if selected_prefix else ""
+            ),
+            "home_url": status_page_url("/", selected_status, selected_prefix),
             "pagination": pagination,
         },
     )

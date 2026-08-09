@@ -6,7 +6,7 @@
 {% block content %}
 <h1>Olive WPT Outputs</h1>
 <div class="wpt-home-actions">
-  <a class="wpt-home-action" href="/test-results">Review test results</a>
+  <a class="wpt-home-action" href="{{ test_results_url or '/test-results' }}">Review test results</a>
   <form hx-post="/test-report/reconcile" hx-swap="none">
     <button type="submit">Rebuild database</button>
   </form>
@@ -14,6 +14,7 @@
 <nav class="wpt-status-tabs" aria-label="Filter WPT tests" role="tablist">
   {% for status in status_tabs %}
   {% set href = "/" if status == "ALL" else "/?result=" ~ status|lower %}
+  {% if prefix_query %}{% set href = href ~ ("&" if "?" in href else "?") ~ prefix_query %}{% endif %}
   <a class="wpt-status-tab{% if selected_status == status %} active{% endif %}" role="tab" aria-selected="{{ 'true' if selected_status == status else 'false' }}" href="{{ href }}">
     {{ 'All' if status == 'ALL' else status }} <span class="wpt-status-tab-count">{{ status_counts[status] }}</span>
   </a>

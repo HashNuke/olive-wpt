@@ -6,7 +6,7 @@
 {% block content %}
 <header class="test-results-header">
   <div>
-    <p class="review-nav"><a href="/">&laquo; test index</a></p>
+    <p class="review-nav"><a href="{{ home_url or '/' }}">&laquo; test index</a></p>
     <h1>Test Results</h1>
     <p class="test-results-description">Review Olive renders against their Chromium references.</p>
   </div>
@@ -15,6 +15,7 @@
 <nav class="wpt-status-tabs" aria-label="Filter test results" role="tablist">
   {% for status in status_tabs %}
   {% set href = "/test-results" if status == "ALL" else "/test-results?result=" ~ status|lower %}
+  {% if prefix_query %}{% set href = href ~ ("&" if "?" in href else "?") ~ prefix_query %}{% endif %}
   <a class="wpt-status-tab{% if selected_status == status %} active{% endif %}" role="tab" aria-selected="{{ 'true' if selected_status == status else 'false' }}" href="{{ href }}">
     {{ 'All' if status == 'ALL' else status }} <span class="wpt-status-tab-count">{{ status_counts[status] }}</span>
   </a>

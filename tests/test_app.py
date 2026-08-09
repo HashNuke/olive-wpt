@@ -296,6 +296,57 @@ class ReportImagePresentationTests(unittest.TestCase):
         self.assertIn("Rebuild database", html)
         self.assertIn("(1.23%)", html)
 
+    def test_home_filters_by_prefix_and_result(self):
+        css_pass = app.WptTest(
+            path="css/pass.html",
+            url="https://wpt.live/css/pass.html",
+            review_url="/test-report/view?path=css%2Fpass.html",
+        )
+        js_fail = app.WptTest(
+            path="js/fail.html",
+            url="https://wpt.live/js/fail.html",
+            review_url="/test-report/view?path=js%2Ffail.html",
+        )
+        items = [
+            {"test": self.test, "status": "FAIL", "current_diff_percent": 1.0},
+            {"test": css_pass, "status": "PASS", "current_diff_percent": 2.0},
+            {"test": js_fail, "status": "FAIL", "current_diff_percent": 3.0},
+        ]
+        request = Request(
+            {
+                "type": "http",
+                "method": "GET",
+                "path": "/",
+                "query_string": b"prefix=css%2F&result=fail",
+                "headers": [],
+            }
+        )
+
+        with patch.object(
+            app,
+            "load_status_test_items",
+            return_value=(
+                items,
+                {"ALL": 3, "PASS": 1, "FAIL": 2, "REVW": 0, "UNKN": 0, "NONE": 0},
+            ),
+        ):
+            response = app.home(request)
+
+        self.assertEqual(response.context["prefix"], "css/")
+        self.assertEqual(response.context["selected_status"], "FAIL")
+        self.assertEqual(
+            [item["test"].path for item in response.context["tests"]],
+            ["css/example.html"],
+        )
+        self.assertEqual(
+            response.context["status_counts"],
+            {"ALL": 2, "PASS": 1, "FAIL": 1, "REVW": 0, "UNKN": 0, "NONE": 0},
+        )
+        self.assertEqual(
+            response.context["test_results_url"],
+            "/test-results?result=fail&prefix=css%2F",
+        )
+
     def test_pagination_numbers_use_ellipsis_for_large_page_counts(self):
         self.assertEqual(app.pagination_numbers(1, 3), [1, 2, 3])
         self.assertEqual(app.pagination_numbers(1, 10), [1, 2, 3, None, 10])
@@ -349,6 +400,13 @@ class ReportImagePresentationTests(unittest.TestCase):
             )
             for index in range(26)
         ]
+        tests.append(
+            app.WptTest(
+                path="js/fail.html",
+                url="https://wpt.live/js/fail.html",
+                review_url="/test-report/view?path=js%2Ffail.html",
+            )
+        )
         items = [
             {"test": test, "status": "FAIL", "current_diff_percent": None}
             for test in tests
@@ -358,7 +416,7 @@ class ReportImagePresentationTests(unittest.TestCase):
                 "type": "http",
                 "method": "GET",
                 "path": "/test-results",
-                "query_string": b"result=fail&page=2",
+                "query_string": b"result=fail&page=2&prefix=css%2F",
                 "headers": [],
             }
         )
@@ -371,9 +429,15 @@ class ReportImagePresentationTests(unittest.TestCase):
             response = app.test_results(request)
 
         self.assertEqual(response.context["selected_status"], "FAIL")
+        self.assertEqual(response.context["prefix"], "css/")
+        self.assertEqual(response.context["status_counts"]["ALL"], 26)
         self.assertEqual(len(response.context["rows"]), 10)
         html = app.templates.get_template("test-results.html").render(**response.context)
-        self.assertIn('href="/test-results?page=1&amp;result=fail"', html)
+        self.assertIn(
+            'href="/test-results?page=1&amp;result=fail&amp;prefix=css%2F"',
+            html,
+        )
+        self.assertIn('href="/?result=fail&amp;prefix=css%2F"', html)
 
     def test_test_results_template_has_htmx_image_toggle_and_row_actions(self):
         test = self.test
